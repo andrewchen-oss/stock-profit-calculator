@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/api/stock", "destination": "/api/stock" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ]
+}

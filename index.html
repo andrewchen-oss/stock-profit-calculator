@@ -948,9 +948,9 @@ function fC(a,c){const ab=Math.abs(a);let f;if(ab>=1e8)f=(ab/1e8).toFixed(2)+'�
 async function fetchStockData(sym,mkt) {
   const cfg=MARKET_CONFIG[mkt]; const ys=sym+cfg.suffix;
   const yu=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ys)}?range=max&interval=1d`;
-  const px=[`https://api.allorigins.win/raw?url=${encodeURIComponent(yu)}`,`https://corsproxy.io/?${encodeURIComponent(yu)}`,yu];
+  const px=[`/api/stock?symbol=${encodeURIComponent(ys)}`,`https://api.allorigins.win/raw?url=${encodeURIComponent(yu)}`,`https://corsproxy.io/?${encodeURIComponent(yu)}`,yu];
   let data=null;
-  for(const url of px){try{const r=await fetch(url,{signal:AbortSignal.timeout(12000)});if(!r.ok)continue;data=await r.json();if(data.chart?.result?.[0])break;data=null}catch(e){continue}}
+  for(const url of px){try{const r=await fetch(url,{signal:AbortSignal.timeout(15000)});if(!r.ok)continue;data=await r.json();if(data.chart?.result?.[0])break;data=null}catch(e){continue}}
   if(!data?.chart?.result?.[0])throw new Error('查不到数据，代码打错了？');
   const res=data.chart.result[0];const ts=res.timestamp,q=res.indicators.quote[0],dd=[];
   for(let i=0;i<ts.length;i++){if(q.close[i]!=null&&q.high[i]!=null)dd.push({date:new Date(ts[i]*1000),high:q.high[i],close:q.close[i]})}
