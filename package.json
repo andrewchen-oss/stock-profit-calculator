@@ -1,0 +1,9 @@
+{
+  "name": "stock-profit-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "yahoo-finance2": "^2.14.0"
+  }
+}
