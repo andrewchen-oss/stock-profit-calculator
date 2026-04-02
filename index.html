@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #1a1c2e;
-    --card: #262840;
-    --card-border: #3a3d5c;
+    --bg: #0f1019;
+    --card: #1a1d2e;
+    --card-border: #2d3154;
     --accent: #7c5cfc;
     --accent-light: #a78bfa;
     --green: #4ade80;
@@ -21,633 +21,578 @@
     --text: #e8e8f0;
     --text-dim: #9ca3af;
     --text-muted: #6b7280;
-    --pixel-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+    --pixel-shadow: 3px 3px 0px rgba(0,0,0,0.4);
   }
 
   body {
-    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-family: 'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+  /* === ANIMATED BACKGROUND: falling leeks + money === */
+  .bg-falling {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: -1; overflow: hidden;
+  }
+
+  .bg-falling .particle {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0.12;
+    animation: fall linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(calc(100vh + 40px)) rotate(360deg); opacity: 0; }
+  }
+
+  /* Grid overlay */
+  .bg-grid {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background-image:
-      linear-gradient(rgba(122,100,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(122,100,255,0.03) 1px, transparent 1px);
-    background-size: 24px 24px;
-    z-index: -2;
-  }
-
-  body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-      radial-gradient(2px 2px at 10% 20%, var(--gold) 50%, transparent 50%),
-      radial-gradient(2px 2px at 30% 60%, var(--green) 50%, transparent 50%),
-      radial-gradient(2px 2px at 70% 30%, var(--red) 50%, transparent 50%),
-      radial-gradient(2px 2px at 90% 70%, var(--accent-light) 50%, transparent 50%),
-      radial-gradient(2px 2px at 50% 90%, var(--gold) 50%, transparent 50%);
-    animation: sparkle 4s ease-in-out infinite alternate;
+      linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
     z-index: -1;
-    opacity: 0.5;
   }
-
-  @keyframes sparkle { from { opacity: 0.3; } to { opacity: 0.6; } }
 
   .pixel-font { font-family: 'Press Start 2P', monospace; }
 
-  /* === LAYOUT: horizontal two-column === */
-  .page-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
+  /* === PAGE LAYOUT === */
+  .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px 24px 40px; }
+
+  .header { text-align: center; padding: 16px 0 20px; position: relative; }
+
+  .header .banner {
+    font-size: 40px; margin-bottom: 8px; display: inline-block;
+    animation: bounce 2s ease infinite;
   }
 
-  .header {
-    text-align: center;
-    padding: 20px 0 24px;
-  }
-
-  .header .banner { font-size: 36px; margin-bottom: 10px; animation: bounce 2s ease infinite; display: inline-block; }
-  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
   .header h1 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
-    line-height: 2;
+    font-family: 'Press Start 2P',monospace;
+    font-size: 15px; line-height: 2;
     color: var(--gold);
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.5), 0 0 10px rgba(251,191,36,0.3);
-    margin-bottom: 8px;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.6), 0 0 20px rgba(251,191,36,0.2);
+    margin-bottom: 6px;
   }
 
-  .header .subtitle { color: var(--text-dim); font-size: 14px; }
+  .header .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.6; }
   .header .subtitle .hl { color: var(--gold); font-weight: 700; }
 
+  /* Marquee ticker */
+  .marquee-bar {
+    overflow: hidden; margin: 12px 0;
+    padding: 6px 0;
+    border-top: 1px solid rgba(124,92,252,0.15);
+    border-bottom: 1px solid rgba(124,92,252,0.15);
+  }
+
+  .marquee-inner {
+    display: flex; gap: 40px;
+    animation: marquee 30s linear infinite;
+    white-space: nowrap;
+    font-family: 'Press Start 2P',monospace; font-size: 7px; color: var(--text-muted);
+  }
+
+  @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  .marquee-inner .ticker-item { display: flex; align-items: center; gap: 6px; }
+  .marquee-inner .up { color: var(--green); }
+  .marquee-inner .down { color: var(--red); }
+
+  /* HP bar */
   .hp-bar-deco {
     display: flex; align-items: center; gap: 8px;
-    margin: 10px auto; max-width: 300px;
-    font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--red);
+    margin: 8px auto; max-width: 300px;
+    font-family: 'Press Start 2P',monospace; font-size: 8px; color: var(--red);
   }
-  .hp-bar-deco .bar-bg { flex:1; height:12px; background:#333; border:2px solid #555; overflow:hidden; }
-  .hp-bar-deco .bar-fill { height:100%; background: linear-gradient(180deg,#f87171,#dc2626); width:23%; transition: width 1s; }
+  .hp-bar-deco .bar-bg { flex:1; height:12px; background:#222; border:2px solid #444; overflow:hidden; }
+  .hp-bar-deco .bar-fill { height:100%; background:linear-gradient(180deg,#f87171,#dc2626); width:23%; transition:width 1s; }
 
-  /* Main content area */
-  .main-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    align-items: start;
-  }
+  /* Main 2-col grid */
+  .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
 
-  /* Card base */
+  /* === CARD === */
   .card {
-    background: var(--card);
-    border: 2px solid var(--card-border);
-    border-radius: 4px;
-    padding: 20px;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    background: var(--card); border: 2px solid var(--card-border);
+    border-radius: 4px; padding: 18px; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
     position: relative;
   }
 
   .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--gold), var(--green), var(--red), var(--accent));
-    background-size: 200% 100%;
-    animation: rainbow 3s linear infinite;
+    content:''; position:absolute; top:0; left:0; width:100%; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--gold),var(--green),var(--red),var(--accent));
+    background-size:200% 100%; animation:rainbow 3s linear infinite;
   }
 
-  @keyframes rainbow { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+  @keyframes rainbow { 0%{background-position:0% 0} 100%{background-position:200% 0} }
 
   .card-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px; color: var(--gold);
-    margin-bottom: 12px;
-    display: flex; align-items: center; gap: 8px;
-    line-height: 1.6;
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+    font-family:'Press Start 2P',monospace; font-size:9px; color:var(--gold);
+    margin-bottom:12px; display:flex; align-items:center; gap:8px;
+    line-height:1.6; text-shadow:1px 1px 0px rgba(0,0,0,0.5);
   }
 
   /* Market tabs */
-  .market-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .market-tabs { display:flex; gap:4px; margin-bottom:12px; }
 
   .market-tab {
-    flex: 1; padding: 8px 4px;
-    border: 2px solid var(--card-border); border-radius: 2px;
-    background: rgba(0,0,0,0.2);
-    color: var(--text-dim); font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.15s; text-align: center;
+    flex:1; padding:8px 4px; border:2px solid var(--card-border); border-radius:2px;
+    background:rgba(0,0,0,0.2); color:var(--text-dim); font-size:13px; font-weight:700;
+    cursor:pointer; transition:all 0.15s; text-align:center;
   }
-
-  .market-tab:hover { border-color: var(--accent); color: var(--text); }
-  .market-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--pixel-shadow); }
-  .market-tab .flag { font-size: 16px; display: block; margin-bottom: 2px; }
+  .market-tab:hover { border-color:var(--accent); color:var(--text); }
+  .market-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:var(--pixel-shadow); }
+  .market-tab .flag { font-size:16px; display:block; margin-bottom:2px; }
 
   /* Stock grid */
   .stock-search {
-    width: 100%; padding: 8px 12px;
-    background: rgba(0,0,0,0.3); border: 2px solid var(--card-border); border-radius: 2px;
-    color: var(--text); font-size: 13px; outline: none; margin-bottom: 6px;
+    width:100%; padding:8px 12px; background:rgba(0,0,0,0.3);
+    border:2px solid var(--card-border); border-radius:2px;
+    color:var(--text); font-size:13px; outline:none; margin-bottom:6px;
   }
-  .stock-search:focus { border-color: var(--accent); }
-  .stock-search::placeholder { color: var(--text-muted); }
+  .stock-search:focus { border-color:var(--accent); }
+  .stock-search::placeholder { color:var(--text-muted); }
 
   .stock-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
-    margin-bottom: 10px; max-height: 160px; overflow-y: auto;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:4px;
+    margin-bottom:10px; max-height:150px; overflow-y:auto;
   }
-  .stock-grid::-webkit-scrollbar { width: 4px; }
-  .stock-grid::-webkit-scrollbar-thumb { background: var(--card-border); }
+  .stock-grid::-webkit-scrollbar { width:4px; }
+  .stock-grid::-webkit-scrollbar-thumb { background:var(--card-border); }
 
   .stock-chip {
-    padding: 6px 4px;
-    background: rgba(0,0,0,0.2); border: 2px solid var(--card-border); border-radius: 2px;
-    color: var(--text-dim); font-size: 10px; cursor: pointer;
-    transition: all 0.15s; text-align: center; line-height: 1.3; user-select: none;
+    padding:5px 4px; background:rgba(0,0,0,0.2); border:2px solid var(--card-border);
+    border-radius:2px; color:var(--text-dim); font-size:10px; cursor:pointer;
+    transition:all 0.15s; text-align:center; line-height:1.3; user-select:none;
   }
-  .stock-chip:hover { border-color: var(--accent); color: var(--text); }
-  .stock-chip.selected { background: rgba(124,92,252,0.2); border-color: var(--gold); color: var(--gold); box-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
-  .stock-chip .code { font-weight: 800; font-size: 11px; display: block; color: var(--text); }
-  .stock-chip.selected .code { color: var(--gold); }
+  .stock-chip:hover { border-color:var(--accent); color:var(--text); }
+  .stock-chip.selected { background:rgba(124,92,252,0.2); border-color:var(--gold); color:var(--gold); }
+  .stock-chip .code { font-weight:800; font-size:11px; display:block; color:var(--text); }
+  .stock-chip.selected .code { color:var(--gold); }
 
-  .or-divider {
-    text-align: center; color: var(--text-muted);
-    font-family: 'Press Start 2P', monospace; font-size: 7px; margin: 6px 0;
-  }
+  .or-divider { text-align:center; color:var(--text-muted); font-family:'Press Start 2P',monospace; font-size:7px; margin:6px 0; }
 
-  .custom-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .custom-input-row input { flex: 1; }
+  .custom-input-row { display:flex; gap:8px; margin-bottom:10px; }
+  .custom-input-row input { flex:1; }
 
-  .form-group { margin-bottom: 10px; }
-  .form-label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; font-weight: 600; }
+  .form-group { margin-bottom:10px; }
+  .form-label { display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px; font-weight:600; }
 
   .form-input {
-    width: 100%; padding: 9px 12px;
-    background: rgba(0,0,0,0.3); border: 2px solid var(--card-border); border-radius: 2px;
-    color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s;
+    width:100%; padding:9px 12px; background:rgba(0,0,0,0.3);
+    border:2px solid var(--card-border); border-radius:2px;
+    color:var(--text); font-size:14px; outline:none;
   }
-  .form-input:focus { border-color: var(--accent); }
-  .form-input::placeholder { color: var(--text-muted); }
+  .form-input:focus { border-color:var(--accent); }
+  .form-input::placeholder { color:var(--text-muted); }
 
-  .form-row { display: flex; gap: 8px; }
-  .form-row .form-group { flex: 1; }
+  .form-row { display:flex; gap:8px; }
+  .form-row .form-group { flex:1; }
 
   .buy-mode-toggle {
-    display: flex; background: rgba(0,0,0,0.3);
-    border: 2px solid var(--card-border); border-radius: 2px; padding: 2px; margin-bottom: 8px;
+    display:flex; background:rgba(0,0,0,0.3);
+    border:2px solid var(--card-border); padding:2px; margin-bottom:8px;
   }
   .buy-mode-btn {
-    flex: 1; padding: 7px; border: none; border-radius: 2px;
-    background: transparent; color: var(--text-dim); font-size: 12px; font-weight: 700; cursor: pointer;
+    flex:1; padding:7px; border:none; border-radius:2px;
+    background:transparent; color:var(--text-dim); font-size:12px; font-weight:700; cursor:pointer;
   }
-  .buy-mode-btn.active { background: var(--accent); color: #fff; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
+  .buy-mode-btn.active { background:var(--accent); color:#fff; }
 
   .sell-toggle {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; user-select: none;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:8px; font-size:13px; color:var(--text-dim); cursor:pointer; user-select:none;
   }
-  .sell-toggle input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .sell-toggle input[type="checkbox"] { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
 
-  .sell-date-row { display: none; margin-bottom: 10px; }
-  .sell-date-row.show { display: block; }
+  .sell-date-row { display:none; margin-bottom:10px; }
+  .sell-date-row.show { display:block; }
 
   .btn-calculate {
-    width: 100%; padding: 14px;
-    background: var(--accent); border: 2px solid #5b3fd4; border-radius: 2px;
-    color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.3); text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
-    transition: all 0.15s;
+    width:100%; padding:14px; background:var(--accent);
+    border:2px solid #5b3fd4; border-radius:2px;
+    color:#fff; font-size:14px; font-weight:800; cursor:pointer;
+    box-shadow:4px 4px 0px rgba(0,0,0,0.3);
+    transition:all 0.15s;
   }
-  .btn-calculate:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0px rgba(0,0,0,0.3); }
-  .btn-calculate:active { transform: translate(2px,2px); box-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
-  .btn-calculate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-calculate:hover { transform:translate(-1px,-1px); box-shadow:5px 5px 0px rgba(0,0,0,0.3); }
+  .btn-calculate:active { transform:translate(2px,2px); box-shadow:2px 2px 0px rgba(0,0,0,0.3); }
+  .btn-calculate:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
   .error-msg {
-    padding: 10px 14px; background: rgba(248,113,113,0.1);
-    border: 2px solid var(--red); border-radius: 2px; color: var(--red);
-    font-size: 12px; margin-top: 8px; display: none; box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    padding:10px 14px; background:rgba(248,113,113,0.1);
+    border:2px solid var(--red); color:var(--red);
+    font-size:12px; margin-top:8px; display:none;
   }
-  .error-msg.show { display: block; }
+  .error-msg.show { display:block; }
 
-  /* === RIGHT PANEL: Results === */
-  .right-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+  /* === RIGHT PANEL === */
+  .right-panel { display:flex; flex-direction:column; gap:16px; }
 
   .placeholder-panel {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-    font-size: 14px;
+    text-align:center; padding:60px 20px; color:var(--text-muted); font-size:14px;
   }
-
-  .placeholder-panel .big-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+  .placeholder-panel .big-emoji { font-size:64px; margin-bottom:16px; display:block; }
   .placeholder-panel .pixel-hint {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px; color: var(--text-muted); margin-top: 12px; line-height: 2;
+    font-family:'Press Start 2P',monospace; font-size:8px; color:var(--text-muted);
+    margin-top:12px; line-height:2;
   }
 
-  .result-section { display: none; animation: slideUp 0.4s ease; }
-  .result-section.show { display: block; }
+  .result-section { display:none; animation:slideUp 0.4s ease; }
+  .result-section.show { display:block; }
 
-  @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes pixelPop { 0% { transform:scale(0); opacity:0; } 60% { transform:scale(1.15); } 100% { transform:scale(1); opacity:1; } }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pixelPop { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
   @keyframes shake { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg)} 40%{transform:rotate(8deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(4deg)} }
 
-  /* Quick result summary card */
   .result-summary {
-    background: var(--card);
-    border: 2px solid var(--card-border);
-    border-radius: 4px;
-    padding: 20px;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
-    position: relative;
+    background:var(--card); border:2px solid var(--card-border);
+    border-radius:4px; padding:18px; box-shadow:4px 4px 0px rgba(0,0,0,0.3); position:relative;
   }
-
   .result-summary::before {
-    content: '';
-    position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, var(--gold), var(--green), var(--accent), var(--red), var(--gold));
-    background-size: 200% 100%; animation: rainbow 2s linear infinite;
+    content:''; position:absolute; top:0; left:0; width:100%; height:2px;
+    background:linear-gradient(90deg,var(--gold),var(--green),var(--accent),var(--red),var(--gold));
+    background-size:200% 100%; animation:rainbow 2s linear infinite;
   }
 
-  .result-header {
-    display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
-  }
+  .result-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .result-header .emoji { font-size:44px; animation:pixelPop 0.5s ease, shake 0.6s ease 0.5s; }
+  .result-header .info { flex:1; }
+  .result-header h2 { font-family:'Press Start 2P',monospace; font-size:10px; line-height:1.8; color:var(--gold); text-shadow:2px 2px 0px rgba(0,0,0,0.5); }
+  .result-header .roast { font-size:13px; color:var(--text-dim); margin-top:4px; font-style:italic; }
+  .result-header .stock-badge { font-size:14px; font-weight:800; padding:3px 10px; background:rgba(0,0,0,0.3); border:2px solid var(--card-border); border-radius:2px; margin-top:4px; display:inline-block; }
+  .result-header .market-badge { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--text-muted); margin-left:8px; }
 
-  .result-header .emoji { font-size: 48px; animation: pixelPop 0.5s ease, shake 0.6s ease 0.5s; }
-  .result-header .info { flex: 1; }
-  .result-header h2 { font-family: 'Press Start 2P', monospace; font-size: 11px; line-height: 1.8; color: var(--gold); text-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
-  .result-header .roast { font-size: 13px; color: var(--text-dim); margin-top: 4px; font-style: italic; }
-  .result-header .stock-badge {
-    font-family: 'Press Start 2P', monospace; font-size: 7px;
-    padding: 4px 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 2px; color: var(--text-dim);
-  }
-
-  .result-data-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px;
-  }
-
-  .result-data-grid .item {
-    padding: 8px 10px; background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.05); border-radius: 2px;
-  }
-  .result-data-grid .item .label { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
-  .result-data-grid .item .val { font-size: 14px; font-weight: 700; }
-  .result-data-grid .item.sell-item { border-color: rgba(248,113,113,0.3); }
+  .result-data-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
+  .result-data-grid .item { padding:8px 10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:2px; }
+  .result-data-grid .item .label { font-size:10px; color:var(--text-muted); margin-bottom:2px; }
+  .result-data-grid .item .val { font-size:13px; font-weight:700; }
 
   .profit-box {
-    text-align: center; padding: 14px; border: 3px solid; border-radius: 2px;
-    margin-bottom: 12px; box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    text-align:center; padding:12px; border:3px solid; border-radius:2px;
+    margin-bottom:10px; box-shadow:3px 3px 0px rgba(0,0,0,0.2);
   }
-  .profit-box.gain { background: rgba(74,222,128,0.06); border-color: var(--green); }
-  .profit-box.loss { background: rgba(248,113,113,0.06); border-color: var(--red); }
-  .profit-box .profit-label { font-size: 12px; color: var(--text-dim); margin-bottom: 2px; }
-  .profit-box .profit-amount { font-family: 'Press Start 2P', monospace; font-size: 18px; line-height: 1.4; animation: pixelPop 0.6s ease; }
-  .profit-box.gain .profit-amount { color: var(--green); }
-  .profit-box.loss .profit-amount { color: var(--red); }
-  .profit-box .profit-percent { font-size: 14px; font-weight: 700; margin-top: 2px; }
-  .profit-box.gain .profit-percent { color: var(--green); }
-  .profit-box.loss .profit-percent { color: var(--red); }
+  .profit-box.gain { background:rgba(74,222,128,0.06); border-color:var(--green); }
+  .profit-box.loss { background:rgba(248,113,113,0.06); border-color:var(--red); }
+  .profit-box .profit-label { font-size:11px; color:var(--text-dim); margin-bottom:2px; }
+  .profit-box .profit-amount { font-family:'Press Start 2P',monospace; font-size:16px; line-height:1.4; animation:pixelPop 0.6s ease; }
+  .profit-box.gain .profit-amount { color:var(--green); }
+  .profit-box.loss .profit-amount { color:var(--red); }
+  .profit-box .profit-percent { font-size:13px; font-weight:700; margin-top:2px; }
+  .profit-box.gain .profit-percent { color:var(--green); }
+  .profit-box.loss .profit-percent { color:var(--red); }
 
-  /* Comparison */
   .comparison-box {
-    display: none; border: 2px solid var(--gold); border-radius: 2px;
-    padding: 12px; margin-bottom: 12px; background: rgba(251,191,36,0.05);
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    display:none; border:2px solid var(--gold); padding:10px 14px;
+    margin-bottom:10px; background:rgba(251,191,36,0.05); box-shadow:3px 3px 0px rgba(0,0,0,0.2);
   }
-  .comparison-box.show { display: block; }
-  .comparison-box .comp-title { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--gold); margin-bottom: 8px; line-height: 1.6; }
-  .comp-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
-  .comp-row:last-child { border-bottom: none; }
-  .comp-row .comp-label { color: var(--text-dim); }
-  .comp-row .comp-val { font-weight: 700; }
-  .comp-row .comp-val.green { color: var(--green); }
-  .comp-row .comp-val.red { color: var(--red); }
-  .comp-row .comp-val.gold { color: var(--gold); }
+  .comparison-box.show { display:block; }
+  .comparison-box .comp-title { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--gold); margin-bottom:6px; line-height:1.6; }
+  .comp-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px; }
+  .comp-row:last-child { border-bottom:none; }
+  .comp-row .cl { color:var(--text-dim); }
+  .comp-row .cv { font-weight:700; }
+  .comp-row .cv.green { color:var(--green); }
+  .comp-row .cv.red { color:var(--red); }
+  .comp-row .cv.gold { color:var(--gold); }
 
-  /* Pain */
-  .pain-index { padding: 10px 12px; background: rgba(0,0,0,0.2); border: 2px solid var(--card-border); border-radius: 2px; margin-bottom: 12px; }
-  .pain-index .pain-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-  .pain-index .pain-title { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--text-dim); }
-  .pain-index .pain-level { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--red); }
-  .pain-bar-bg { height: 10px; background: #222; border: 2px solid #444; overflow: hidden; }
-  .pain-bar { height: 100%; transition: width 1s; background: repeating-linear-gradient(90deg,#4ade80 0%,#4ade80 20%,#fbbf24 20%,#fbbf24 40%,#fb923c 40%,#fb923c 60%,#f87171 60%,#f87171 80%,#dc2626 80%,#dc2626 100%); }
-  .pain-bar-labels { display: flex; justify-content: space-between; margin-top: 3px; font-size: 9px; color: var(--text-muted); }
+  .pain-index { padding:8px 10px; background:rgba(0,0,0,0.2); border:2px solid var(--card-border); margin-bottom:10px; }
+  .pain-index .pain-label { display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; }
+  .pain-index .pain-title { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--text-dim); }
+  .pain-index .pain-level { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--red); }
+  .pain-bar-bg { height:8px; background:#222; border:2px solid #444; overflow:hidden; }
+  .pain-bar { height:100%; transition:width 1s; background:repeating-linear-gradient(90deg,#4ade80 0%,#4ade80 20%,#fbbf24 20%,#fbbf24 40%,#fb923c 40%,#fb923c 60%,#f87171 60%,#f87171 80%,#dc2626 80%,#dc2626 100%); }
+  .pain-bar-labels { display:flex; justify-content:space-between; margin-top:2px; font-size:8px; color:var(--text-muted); }
 
-  /* Roast cards row */
-  .roast-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .roast-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .roast-card { padding:10px; border-radius:2px; border:2px solid; box-shadow:3px 3px 0px rgba(0,0,0,0.2); }
+  .roast-card .roast-title { font-family:'Press Start 2P',monospace; font-size:7px; margin-bottom:5px; line-height:1.6; }
+  .roast-card .roast-content { font-size:12px; color:var(--text-dim); line-height:1.6; }
 
-  .roast-card {
-    padding: 12px; border-radius: 2px; border: 2px solid;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
-  }
-  .roast-card .roast-title { font-family: 'Press Start 2P', monospace; font-size: 7px; margin-bottom: 6px; line-height: 1.6; }
-  .roast-card .roast-content { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .roast-equivalents { background:rgba(251,191,36,0.04); border-color:var(--gold); }
+  .roast-equivalents .roast-title { color:var(--gold); }
+  .equiv-list { list-style:none; }
+  .equiv-list li { padding:2px 0; border-bottom:1px dashed rgba(255,255,255,0.06); font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:5px; }
+  .equiv-list li:last-child { border-bottom:none; }
+  .equiv-list .equiv-num { font-weight:700; color:var(--gold); }
 
-  .roast-equivalents { background: rgba(251,191,36,0.04); border-color: var(--gold); }
-  .roast-equivalents .roast-title { color: var(--gold); }
+  .roast-alt { background:rgba(124,92,252,0.04); border-color:var(--accent); }
+  .roast-alt .roast-title { color:var(--accent-light); }
+  .roast-verdict { background:rgba(248,113,113,0.04); border-color:var(--red); grid-column:1/-1; }
+  .roast-verdict .roast-title { color:var(--red); }
 
-  .equiv-list { list-style: none; padding: 0; }
-  .equiv-list li { padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
-  .equiv-list li:last-child { border-bottom: none; }
-  .equiv-list .equiv-num { font-weight: 700; color: var(--gold); }
-
-  .roast-alt-universe { background: rgba(124,92,252,0.04); border-color: var(--accent); }
-  .roast-alt-universe .roast-title { color: var(--accent-light); }
-
-  .roast-verdict { background: rgba(248,113,113,0.04); border-color: var(--red); grid-column: 1 / -1; }
-  .roast-verdict .roast-title { color: var(--red); }
-
-  /* Action buttons */
-  .action-buttons { display: flex; gap: 8px; }
-
+  .action-buttons { display:flex; gap:8px; }
   .btn-share {
-    flex: 1; padding: 12px; border-radius: 2px; font-size: 13px; font-weight: 700;
-    cursor: pointer; border: 2px solid; display: flex; align-items: center; justify-content: center; gap: 6px;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.3); transition: all 0.15s;
+    flex:1; padding:11px; border-radius:2px; font-size:13px; font-weight:700;
+    cursor:pointer; border:2px solid; display:flex; align-items:center; justify-content:center; gap:6px;
+    box-shadow:3px 3px 0px rgba(0,0,0,0.3); transition:all 0.15s;
   }
-  .btn-share:hover { transform: translate(-1px,-1px); }
-  .btn-share:active { transform: translate(2px,2px); box-shadow: 1px 1px 0px rgba(0,0,0,0.3); }
-  .btn-share.primary { background: var(--green-dark); border-color: #16a34a; color: #000; }
-  .btn-share.secondary { background: var(--card); border-color: var(--card-border); color: var(--text); }
-  .btn-share.accent { background: var(--accent); border-color: #5b3fd4; color: #fff; }
-
-  .btn-reset {
-    width: 100%; padding: 11px; background: transparent;
-    border: 2px dashed var(--card-border); border-radius: 2px;
-    color: var(--text-dim); font-size: 13px; cursor: pointer; margin-top: 8px;
-  }
-  .btn-reset:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-share:hover { transform:translate(-1px,-1px); }
+  .btn-share:active { transform:translate(2px,2px); box-shadow:1px 1px 0px rgba(0,0,0,0.3); }
+  .btn-share.primary { background:var(--green-dark); border-color:#16a34a; color:#000; }
+  .btn-share.secondary { background:var(--card); border-color:var(--card-border); color:var(--text); }
+  .btn-share.accent { background:var(--accent); border-color:#5b3fd4; color:#fff; }
 
   /* History */
-  .history-section { margin-top: 16px; grid-column: 1 / -1; }
-  .history-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-
+  .history-section { margin-top:16px; grid-column:1/-1; }
+  .history-list { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
   .history-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 12px; background: var(--card); border: 2px solid var(--card-border);
-    border-radius: 2px; cursor: pointer; box-shadow: 2px 2px 0px rgba(0,0,0,0.2); transition: all 0.15s;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 12px; background:var(--card); border:2px solid var(--card-border);
+    border-radius:2px; cursor:pointer; box-shadow:2px 2px 0px rgba(0,0,0,0.2); transition:all 0.15s;
   }
-  .history-item:hover { border-color: var(--accent); }
-  .history-item .info { display: flex; flex-direction: column; gap: 1px; }
-  .history-item .stock-name { font-size: 12px; font-weight: 700; }
-  .history-item .stock-detail { font-size: 10px; color: var(--text-dim); }
-  .history-item .profit { font-size: 14px; font-weight: 800; color: var(--green); }
-  .history-item .profit.loss { color: var(--red); }
+  .history-item:hover { border-color:var(--accent); }
+  .history-item .info { display:flex; flex-direction:column; gap:1px; }
+  .history-item .stock-name { font-size:12px; font-weight:700; }
+  .history-item .stock-detail { font-size:10px; color:var(--text-dim); }
+  .history-item .profit { font-size:14px; font-weight:800; color:var(--green); }
+  .history-item .profit.loss { color:var(--red); }
 
-  /* Toast */
   .toast {
-    position: fixed; bottom: 30px; left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--card); border: 2px solid var(--card-border);
-    padding: 10px 20px; border-radius: 2px; font-size: 13px; color: var(--text);
-    z-index: 200; transition: transform 0.3s; white-space: nowrap;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+    position:fixed; bottom:30px; left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:var(--card); border:2px solid var(--card-border);
+    padding:10px 20px; border-radius:2px; font-size:13px; color:var(--text);
+    z-index:200; transition:transform 0.3s; white-space:nowrap;
+    box-shadow:3px 3px 0px rgba(0,0,0,0.3);
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
 
   .disclaimer {
-    text-align: center; font-family: 'Press Start 2P', monospace;
-    font-size: 6px; color: var(--text-muted); margin-top: 20px; line-height: 2;
-    grid-column: 1 / -1;
+    text-align:center; font-family:'Press Start 2P',monospace;
+    font-size:6px; color:var(--text-muted); margin-top:20px; line-height:2;
+    grid-column:1/-1;
   }
 
   .game-over-flash {
-    position: fixed; top:0; left:0; right:0; bottom:0;
-    background: rgba(220,38,38,0.15); z-index: 50; pointer-events: none;
-    animation: gameOverFlash 0.8s ease-out forwards;
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(220,38,38,0.15); z-index:50; pointer-events:none;
+    animation:gameOverFlash 0.8s ease-out forwards;
   }
-  @keyframes gameOverFlash { 0% { opacity:1; } 100% { opacity:0; } }
+  @keyframes gameOverFlash { 0%{opacity:1} 100%{opacity:0} }
 
   /* ========================================
-     SHARE CARD - 独立的分享图片模板
+     SHARE CARD OVERLAY - MEME STYLE
      ======================================== */
   .share-overlay {
-    display: none;
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8); z-index: 100;
-    justify-content: center; align-items: center;
-    padding: 20px;
+    display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.85); z-index:100;
+    justify-content:center; align-items:center; padding:20px;
   }
-  .share-overlay.show { display: flex; }
+  .share-overlay.show { display:flex; }
 
-  .share-overlay-inner {
-    max-width: 800px; width: 100%;
-    max-height: 90vh; overflow-y: auto;
-    position: relative;
-  }
+  .share-overlay-inner { max-width:900px; width:100%; max-height:90vh; overflow-y:auto; position:relative; }
 
-  .share-close {
-    position: sticky; top: 0; text-align: right; z-index: 5; padding-bottom: 8px;
-  }
+  .share-close { position:sticky; top:0; text-align:right; z-index:5; padding-bottom:8px; }
   .share-close button {
-    background: rgba(0,0,0,0.6); border: 2px solid var(--card-border);
-    color: var(--text); font-size: 14px; padding: 6px 16px; cursor: pointer; border-radius: 2px;
+    background:rgba(0,0,0,0.7); border:2px solid var(--card-border);
+    color:var(--text); font-size:14px; padding:6px 16px; cursor:pointer; border-radius:2px;
   }
 
-  .share-card-wrap {
-    background: #0d0f1a;
-    border: 3px solid var(--card-border);
-    border-radius: 4px;
-    overflow: hidden;
+  /* The actual share card (screenshot target) */
+  .sc-card {
+    border:3px solid var(--card-border);
+    border-radius:6px;
+    overflow:hidden;
+    position:relative;
   }
 
-  /* Share card inner */
-  .sc {
-    padding: 28px 32px;
-    position: relative;
-    background: linear-gradient(160deg, #12142a 0%, #1a1d3a 40%, #0f1128 100%);
+  /* Meme background layer */
+  .sc-bg {
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    background-size:cover; background-position:center;
+    z-index:0;
   }
 
-  .sc::before {
-    content: '';
-    position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-    background: linear-gradient(90deg, var(--gold), var(--green), var(--accent), var(--red), var(--gold));
-    background-size: 200% 100%; animation: rainbow 2s linear infinite;
+  .sc-bg::after {
+    content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+    background: linear-gradient(135deg, rgba(15,16,25,0.88) 0%, rgba(26,29,46,0.82) 50%, rgba(15,16,25,0.90) 100%);
+    z-index:1;
   }
 
-  /* Row 1: Title + emoji */
-  .sc-top {
-    display: flex; align-items: center; gap: 20px;
-    margin-bottom: 20px; padding-bottom: 16px;
-    border-bottom: 2px dashed rgba(255,255,255,0.08);
+  /* Content on top of meme bg */
+  .sc-content {
+    position:relative; z-index:2;
+    padding:24px 28px;
   }
 
-  .sc-top .sc-emoji { font-size: 64px; animation: shake 0.6s ease; flex-shrink: 0; }
-
-  .sc-top .sc-title-area { flex: 1; }
-  .sc-top .sc-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px; line-height: 1.8; color: var(--gold);
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-    margin-bottom: 6px;
-  }
-  .sc-top .sc-roast-text {
-    font-size: 15px; color: var(--text-dim); font-style: italic; line-height: 1.5;
-  }
-  .sc-top .sc-stock-tag {
-    display: inline-block; margin-top: 8px;
-    font-size: 14px; font-weight: 800;
-    padding: 4px 12px; background: rgba(0,0,0,0.3);
-    border: 2px solid var(--card-border); border-radius: 2px;
-  }
-  .sc-top .sc-market-tag {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px; color: var(--text-muted);
-    margin-left: 8px;
+  /* Top row: emoji + title + stock info */
+  .sc-top-row {
+    display:flex; align-items:center; gap:16px;
+    margin-bottom:16px; padding-bottom:14px;
+    border-bottom:2px dashed rgba(255,255,255,0.1);
   }
 
-  /* Row 2: Data + Profit side by side */
-  .sc-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
+  .sc-top-row .sc-emoji { font-size:56px; flex-shrink:0; animation:shake 0.6s ease; }
+  .sc-top-row .sc-info { flex:1; }
+  .sc-top-row .sc-title {
+    font-family:'Press Start 2P',monospace; font-size:13px; line-height:1.8;
+    color:var(--gold); text-shadow:2px 2px 0px rgba(0,0,0,0.6);
+  }
+  .sc-top-row .sc-roast { font-size:14px; color:var(--text-dim); font-style:italic; margin-top:4px; }
+  .sc-top-row .sc-stock-info {
+    margin-top:6px; display:inline-block;
+    font-size:15px; font-weight:800;
+    padding:4px 12px; background:rgba(0,0,0,0.4);
+    border:2px solid var(--card-border); border-radius:2px;
+  }
+  .sc-top-row .sc-market-label { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--text-muted); margin-left:8px; }
+
+  /* Middle: 2 columns - left data, right chart */
+  .sc-mid {
+    display:grid; grid-template-columns:1fr 1.2fr;
+    gap:16px; margin-bottom:16px;
   }
 
+  /* Left: data + profit */
   .sc-data-col {}
 
   .sc-data-row {
-    display: flex; justify-content: space-between;
-    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 13px;
+    display:flex; justify-content:space-between; padding:5px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px;
   }
-  .sc-data-row:last-child { border-bottom: none; }
-  .sc-data-row .dl { color: var(--text-muted); }
-  .sc-data-row .dv { font-weight: 700; }
-  .sc-data-row .dv.gold { color: var(--gold); }
-  .sc-data-row .dv.green { color: var(--green); }
-  .sc-data-row .dv.red { color: var(--red); }
+  .sc-data-row:last-child { border-bottom:none; }
+  .sc-data-row .dl { color:var(--text-muted); }
+  .sc-data-row .dv { font-weight:700; }
+  .sc-data-row .dv.gold { color:var(--gold); }
+  .sc-data-row .dv.green { color:var(--green); }
+  .sc-data-row .dv.red { color:var(--red); }
 
-  .sc-profit-col {
-    display: flex; flex-direction: column; justify-content: center;
-    align-items: center; text-align: center;
-    padding: 16px; border: 3px solid; border-radius: 2px;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+  .sc-profit-box {
+    text-align:center; padding:14px; margin-top:10px;
+    border:3px solid; border-radius:2px;
+    box-shadow:3px 3px 0px rgba(0,0,0,0.3);
   }
-  .sc-profit-col.gain { border-color: var(--green); background: rgba(74,222,128,0.06); }
-  .sc-profit-col.loss { border-color: var(--red); background: rgba(248,113,113,0.06); }
-  .sc-profit-col .sp-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
-  .sc-profit-col .sp-amount {
-    font-family: 'Press Start 2P', monospace; font-size: 20px; line-height: 1.3;
-  }
-  .sc-profit-col.gain .sp-amount { color: var(--green); }
-  .sc-profit-col.loss .sp-amount { color: var(--red); }
-  .sc-profit-col .sp-pct { font-size: 16px; font-weight: 700; margin-top: 4px; }
-  .sc-profit-col.gain .sp-pct { color: var(--green); }
-  .sc-profit-col.loss .sp-pct { color: var(--red); }
+  .sc-profit-box.gain { border-color:var(--green); background:rgba(74,222,128,0.08); }
+  .sc-profit-box.loss { border-color:var(--red); background:rgba(248,113,113,0.08); }
+  .sc-profit-box .sp-label { font-size:11px; color:var(--text-dim); margin-bottom:4px; }
+  .sc-profit-box .sp-amount { font-family:'Press Start 2P',monospace; font-size:18px; line-height:1.3; }
+  .sc-profit-box.gain .sp-amount { color:var(--green); }
+  .sc-profit-box.loss .sp-amount { color:var(--red); }
+  .sc-profit-box .sp-pct { font-size:14px; font-weight:700; margin-top:3px; }
+  .sc-profit-box.gain .sp-pct { color:var(--green); }
+  .sc-profit-box.loss .sp-pct { color:var(--red); }
 
-  /* Row 2b: sell comparison */
+  /* Right: chart */
+  .sc-chart-col {
+    background:rgba(0,0,0,0.3); border:2px solid var(--card-border);
+    border-radius:2px; padding:12px; position:relative;
+  }
+  .sc-chart-col .chart-title {
+    font-family:'Press Start 2P',monospace; font-size:7px;
+    color:var(--text-muted); margin-bottom:8px;
+  }
+  .sc-chart-col canvas { width:100%; height:auto; display:block; }
+
+  /* Sell comparison in share card */
   .sc-comp {
-    display: none; margin-bottom: 16px;
-    border: 2px solid var(--gold); border-radius: 2px;
-    padding: 12px 16px; background: rgba(251,191,36,0.05);
+    display:none; margin-bottom:14px;
+    border:2px solid var(--gold); padding:10px 14px;
+    background:rgba(251,191,36,0.05);
   }
-  .sc-comp.show { display: block; }
-  .sc-comp .sc-comp-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px; color: var(--gold); margin-bottom: 8px; line-height: 1.6;
-  }
+  .sc-comp.show { display:block; }
+  .sc-comp .sc-comp-title { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--gold); margin-bottom:6px; line-height:1.6; }
 
-  /* Row 3: Meme section */
-  .sc-meme-section {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    margin-bottom: 16px; padding-top: 16px;
-    border-top: 2px dashed rgba(255,255,255,0.08);
+  /* Bottom meme section: equivalents + quote side by side */
+  .sc-bottom {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:12px; margin-bottom:14px;
+    padding-top:14px; border-top:2px dashed rgba(255,255,255,0.08);
   }
 
-  .sc-meme-box {
-    padding: 12px; border-radius: 2px; border: 2px solid;
+  .sc-meme-box { padding:10px; border-radius:2px; border:2px solid; }
+  .sc-meme-box .mb-title { font-family:'Press Start 2P',monospace; font-size:7px; margin-bottom:5px; line-height:1.6; }
+  .sc-meme-box .mb-content { font-size:12px; color:var(--text-dim); line-height:1.6; }
+
+  .sc-meme-box.equivs { background:rgba(251,191,36,0.04); border-color:var(--gold); }
+  .sc-meme-box.equivs .mb-title { color:var(--gold); }
+  .sc-meme-box.equivs .eq-item { padding:2px 0; display:flex; gap:5px; font-size:12px; color:var(--text-dim); }
+  .sc-meme-box.equivs .eq-num { font-weight:700; color:var(--gold); }
+
+  .sc-meme-box.quote { background:rgba(124,92,252,0.04); border-color:var(--accent); display:flex; flex-direction:column; justify-content:center; }
+  .sc-meme-box.quote .mb-title { color:var(--accent-light); }
+  .sc-meme-box.quote .quote-text { font-size:15px; font-weight:700; color:var(--gold); line-height:1.5; margin-bottom:6px; }
+  .sc-meme-box.quote .quote-sub { font-size:11px; color:var(--text-muted); }
+
+  /* Pain bar + verdict row */
+  .sc-verdict-row {
+    display:flex; gap:12px; margin-bottom:14px; align-items:stretch;
   }
 
-  .sc-meme-box .mb-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px; margin-bottom: 6px; line-height: 1.6;
+  .sc-pain-wrap {
+    flex:1; padding:10px; background:rgba(0,0,0,0.2);
+    border:2px solid var(--card-border); border-radius:2px;
+    display:flex; flex-direction:column; justify-content:center;
   }
+  .sc-pain-wrap .sp-label-row { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .sc-pain-wrap .sp-title { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--text-dim); }
+  .sc-pain-wrap .sp-level { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--red); }
+  .sp-bar-bg { height:8px; background:#222; border:2px solid #444; overflow:hidden; }
+  .sp-bar { height:100%; background:repeating-linear-gradient(90deg,#4ade80 0%,#4ade80 20%,#fbbf24 20%,#fbbf24 40%,#fb923c 40%,#fb923c 60%,#f87171 60%,#f87171 80%,#dc2626 80%,#dc2626 100%); }
 
-  .sc-meme-box .mb-content { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-
-  .sc-meme-box.equivs { background: rgba(251,191,36,0.04); border-color: var(--gold); }
-  .sc-meme-box.equivs .mb-title { color: var(--gold); }
-  .sc-meme-box.equivs .eq-item { padding: 3px 0; display: flex; gap: 6px; font-size: 12px; color: var(--text-dim); }
-  .sc-meme-box.equivs .eq-num { font-weight: 700; color: var(--gold); }
-
-  .sc-meme-box.verdict { background: rgba(248,113,113,0.04); border-color: var(--red); }
-  .sc-meme-box.verdict .mb-title { color: var(--red); }
-
-  /* Row 4: Big meme quote */
-  .sc-big-quote {
-    text-align: center; padding: 16px 20px;
-    background: rgba(0,0,0,0.3); border: 2px solid var(--card-border); border-radius: 2px;
-    margin-bottom: 16px;
+  .sc-verdict-wrap {
+    flex:1; padding:10px; background:rgba(248,113,113,0.04);
+    border:2px solid var(--red); border-radius:2px;
   }
-  .sc-big-quote .quote-text {
-    font-size: 16px; font-weight: 700; color: var(--gold);
-    line-height: 1.6; margin-bottom: 6px;
-  }
-  .sc-big-quote .quote-sub { font-size: 12px; color: var(--text-muted); }
-
-  /* Pain bar in share card */
-  .sc-pain {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px; background: rgba(0,0,0,0.2);
-    border: 2px solid var(--card-border); border-radius: 2px;
-    margin-bottom: 16px;
-  }
-  .sc-pain .sp-label-left { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--text-dim); white-space: nowrap; }
-  .sc-pain .sp-bar-bg { flex: 1; height: 10px; background: #222; border: 2px solid #444; overflow: hidden; }
-  .sc-pain .sp-bar { height: 100%; background: repeating-linear-gradient(90deg,#4ade80 0%,#4ade80 20%,#fbbf24 20%,#fbbf24 40%,#fb923c 40%,#fb923c 60%,#f87171 60%,#f87171 80%,#dc2626 80%,#dc2626 100%); }
-  .sc-pain .sp-level { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--red); white-space: nowrap; }
+  .sc-verdict-wrap .vd-title { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--red); margin-bottom:5px; line-height:1.6; }
+  .sc-verdict-wrap .vd-content { font-size:12px; color:var(--text-dim); line-height:1.5; }
 
   /* Footer */
   .sc-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-top: 12px; border-top: 2px solid rgba(255,255,255,0.06);
+    display:flex; justify-content:space-between; align-items:center;
+    padding-top:10px; border-top:2px solid rgba(255,255,255,0.06);
   }
-  .sc-footer .sf-left { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--text-muted); line-height: 2; }
-  .sc-footer .sf-right { font-size: 11px; color: var(--text-muted); text-align: right; line-height: 1.6; }
+  .sc-footer .sf-left { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--text-muted); line-height:2; }
+  .sc-footer .sf-right { font-size:11px; color:var(--text-muted); text-align:right; line-height:1.6; }
 
-  /* Download buttons under share card */
-  .share-actions {
-    display: flex; gap: 8px; margin-top: 12px;
-  }
-
+  /* Download bar */
+  .share-actions { display:flex; gap:8px; margin-top:12px; }
   .share-actions button {
-    flex: 1; padding: 12px; border: 2px solid; border-radius: 2px;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.3); transition: all 0.15s;
+    flex:1; padding:12px; border:2px solid; border-radius:2px;
+    font-size:13px; font-weight:700; cursor:pointer;
+    box-shadow:3px 3px 0px rgba(0,0,0,0.3); transition:all 0.15s;
   }
-  .share-actions button:hover { transform: translate(-1px,-1px); }
-  .share-actions .dl-btn { background: var(--green-dark); border-color: #16a34a; color: #000; }
-  .share-actions .copy-btn { background: var(--card); border-color: var(--card-border); color: var(--text); }
+  .share-actions button:hover { transform:translate(-1px,-1px); }
+  .share-actions .dl-btn { background:var(--green-dark); border-color:#16a34a; color:#000; }
+  .share-actions .copy-btn { background:var(--card); border-color:var(--card-border); color:var(--text); }
 
-  /* Responsive: stack on narrow screens */
   @media (max-width: 768px) {
-    .main-content { grid-template-columns: 1fr; }
-    .roast-row { grid-template-columns: 1fr; }
-    .history-list { grid-template-columns: 1fr; }
-    .sc-body { grid-template-columns: 1fr; }
-    .sc-meme-section { grid-template-columns: 1fr; }
+    .main-content { grid-template-columns:1fr; }
+    .roast-row { grid-template-columns:1fr; }
+    .history-list { grid-template-columns:1fr; }
+    .sc-mid { grid-template-columns:1fr; }
+    .sc-bottom { grid-template-columns:1fr; }
+    .sc-verdict-row { flex-direction:column; }
   }
 </style>
 </head>
 <body>
 
+<!-- Falling particles background -->
+<div class="bg-falling" id="bg-falling"></div>
+<div class="bg-grid"></div>
+
 <div class="page-wrapper">
   <div class="header">
     <span class="banner">🕹️📉💸</span>
     <h1>要是当初卖了就好了...</h1>
-    <p class="subtitle">输入你的买入记录，看看如果在<span class="hl">历史最高点</span>完美逃顶，你现在应该在马尔代夫而不是在工位</p>
+    <p class="subtitle">看看如果在<span class="hl">历史最高点</span>完美逃顶，你现在应该在马尔代夫而不是在工位</p>
+
+    <!-- Fake stock ticker marquee -->
+    <div class="marquee-bar">
+      <div class="marquee-inner" id="marquee-inner"></div>
+    </div>
+
     <div class="hp-bar-deco">
       <span>钱包HP</span>
       <div class="bar-bg"><div class="bar-fill" id="wallet-hp"></div></div>
@@ -664,74 +609,48 @@
         <button class="market-tab" data-market="sh" onclick="selectMarket('sh')"><span class="flag">🇨🇳</span>沪A</button>
         <button class="market-tab" data-market="sz" onclick="selectMarket('sz')"><span class="flag">🇨🇳</span>深A</button>
       </div>
-
       <div class="card-title">STAGE 2: 选一只心痛的票</div>
       <input type="text" class="stock-search" id="stock-search" placeholder="搜索代码或名称..." oninput="filterStocks()">
       <div class="stock-grid" id="stock-grid"></div>
       <div class="or-divider">- OR -</div>
-      <div class="custom-input-row">
-        <input type="text" class="form-input" id="stock-code" placeholder="手动输入代码" autocomplete="off" autocapitalize="characters">
-      </div>
+      <div class="custom-input-row"><input type="text" class="form-input" id="stock-code" placeholder="手动输入代码" autocomplete="off" autocapitalize="characters"></div>
 
       <div class="card-title">STAGE 3: 你的操作</div>
       <div class="form-group">
         <label class="form-label">什么时候上的车？</label>
         <input type="date" class="form-input" id="buy-date">
       </div>
-
       <div class="buy-mode-toggle">
         <button class="buy-mode-btn active" data-mode="shares" onclick="setBuyMode('shares')">按股数</button>
         <button class="buy-mode-btn" data-mode="amount" onclick="setBuyMode('amount')">按金额</button>
       </div>
-
       <div id="buy-shares-input">
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">数量（股）</label>
-            <input type="number" class="form-input" id="buy-quantity" placeholder="100" min="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">买入价（选填）</label>
-            <input type="number" class="form-input" id="buy-price" placeholder="自动" step="0.01" min="0">
-          </div>
+          <div class="form-group"><label class="form-label">数量（股）</label><input type="number" class="form-input" id="buy-quantity" placeholder="100" min="1"></div>
+          <div class="form-group"><label class="form-label">买入价（选填）</label><input type="number" class="form-input" id="buy-price" placeholder="自动" step="0.01" min="0"></div>
         </div>
       </div>
-      <div id="buy-amount-input" style="display:none;">
-        <div class="form-group">
-          <label class="form-label">买入总金额</label>
-          <input type="number" class="form-input" id="buy-amount" placeholder="10000" min="1">
-        </div>
+      <div id="buy-amount-input" style="display:none">
+        <div class="form-group"><label class="form-label">买入总金额</label><input type="number" class="form-input" id="buy-amount" placeholder="10000" min="1"></div>
       </div>
-
-      <label class="sell-toggle">
-        <input type="checkbox" id="sell-check" onchange="toggleSellDate()">
-        已经卖出了？填写卖出信息
-      </label>
+      <label class="sell-toggle"><input type="checkbox" id="sell-check" onchange="toggleSellDate()">已经卖出了？</label>
       <div class="sell-date-row" id="sell-date-row">
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">卖出日期</label>
-            <input type="date" class="form-input" id="sell-date">
-          </div>
-          <div class="form-group">
-            <label class="form-label">卖出价（选填）</label>
-            <input type="number" class="form-input" id="sell-price" placeholder="自动" step="0.01" min="0">
-          </div>
+          <div class="form-group"><label class="form-label">卖出日期</label><input type="date" class="form-input" id="sell-date"></div>
+          <div class="form-group"><label class="form-label">卖出价（选填）</label><input type="number" class="form-input" id="sell-price" placeholder="自动" step="0.01" min="0"></div>
         </div>
       </div>
-
       <button class="btn-calculate" id="btn-calc" onclick="calculate()">PRESS START >>> 开算！🕹️</button>
       <div class="error-msg" id="error-msg"></div>
     </div>
 
-    <!-- RIGHT: Results -->
+    <!-- RIGHT -->
     <div class="right-panel">
       <div class="placeholder-panel" id="placeholder-panel">
         <span class="big-emoji">🎰</span>
-        <div>在左边选一只股票<br>然后点击开算</div>
+        <div>在左边选一只股票然后点击开算</div>
         <div class="pixel-hint">INSERT COIN TO<br>START REGRETTING</div>
       </div>
-
       <div class="result-section" id="result-section">
         <div class="result-summary">
           <div class="result-header">
@@ -739,13 +658,9 @@
             <div class="info">
               <h2 id="r-title">GAME OVER</h2>
               <div class="roast" id="r-roast">...</div>
-              <div>
-                <span class="sc-stock-tag" id="r-stock-tag">-</span>
-                <span class="sc-market-tag" id="r-market-tag">-</span>
-              </div>
+              <div><span class="stock-badge" id="r-stock-tag">-</span><span class="market-badge" id="r-market-tag">-</span></div>
             </div>
           </div>
-
           <div class="result-data-grid">
             <div class="item"><div class="label">买入价</div><div class="val" id="r-buy-price">-</div></div>
             <div class="item"><div class="label">历史最高</div><div class="val" style="color:var(--gold)" id="r-high-price">-</div></div>
@@ -754,49 +669,29 @@
             <div class="item"><div class="label">数量</div><div class="val" id="r-qty">-</div></div>
             <div class="item"><div class="label">等巅峰</div><div class="val" id="r-hold">-</div></div>
           </div>
-
           <div class="comparison-box" id="comp-box">
             <div class="comp-title">⚔️ 你的操作 VS 完美操作</div>
-            <div class="comp-row"><span class="comp-label">卖出日</span><span class="comp-val" id="c-sell-date">-</span></div>
-            <div class="comp-row"><span class="comp-label">卖出价</span><span class="comp-val" id="c-sell-price">-</span></div>
-            <div class="comp-row"><span class="comp-label">你赚了</span><span class="comp-val" id="c-actual">-</span></div>
-            <div class="comp-row"><span class="comp-label">最高能赚</span><span class="comp-val gold" id="c-peak">-</span></div>
-            <div class="comp-row" style="border-top:2px dashed rgba(251,191,36,0.2);padding-top:6px">
-              <span class="comp-label" style="font-weight:700">你少赚了</span>
-              <span class="comp-val red" id="c-missed" style="font-size:15px">-</span>
-            </div>
+            <div class="comp-row"><span class="cl">卖出日</span><span class="cv" id="c-sell-date">-</span></div>
+            <div class="comp-row"><span class="cl">卖出价</span><span class="cv" id="c-sell-price">-</span></div>
+            <div class="comp-row"><span class="cl">你赚了</span><span class="cv" id="c-actual">-</span></div>
+            <div class="comp-row"><span class="cl">最高能赚</span><span class="cv gold" id="c-peak">-</span></div>
+            <div class="comp-row" style="border-top:2px dashed rgba(251,191,36,0.2);padding-top:5px"><span class="cl" style="font-weight:700">少赚了</span><span class="cv red" id="c-missed" style="font-size:14px">-</span></div>
           </div>
-
           <div class="profit-box gain" id="profit-box">
-            <div class="profit-label">如果在最高点完美逃顶</div>
+            <div class="profit-label">最高点完美逃顶</div>
             <div class="profit-amount" id="r-profit">+$0</div>
             <div class="profit-percent" id="r-pct">+0%</div>
           </div>
-
           <div class="pain-index">
-            <div class="pain-label">
-              <span class="pain-title">REGRET LV</span>
-              <span class="pain-level" id="pain-text">-</span>
-            </div>
+            <div class="pain-label"><span class="pain-title">REGRET LV</span><span class="pain-level" id="pain-text">-</span></div>
             <div class="pain-bar-bg"><div class="pain-bar" id="pain-bar" style="width:0%"></div></div>
             <div class="pain-bar-labels"><span>还好</span><span>心痛</span><span>捶腿</span><span>删APP</span><span>出家</span></div>
           </div>
-
           <div class="roast-row">
-            <div class="roast-card roast-equivalents">
-              <div class="roast-title">💰 LOOT DROP</div>
-              <ul class="equiv-list" id="equiv-list"></ul>
-            </div>
-            <div class="roast-card roast-alt-universe">
-              <div class="roast-title">🌀 PARALLEL WORLD</div>
-              <div class="roast-content" id="alt-content"></div>
-            </div>
-            <div class="roast-card roast-verdict">
-              <div class="roast-title">📋 FINAL VERDICT</div>
-              <div class="roast-content" id="verdict-content"></div>
-            </div>
+            <div class="roast-card roast-equivalents"><div class="roast-title">💰 LOOT DROP</div><ul class="equiv-list" id="equiv-list"></ul></div>
+            <div class="roast-card roast-alt"><div class="roast-title">🌀 PARALLEL WORLD</div><div class="roast-content" id="alt-content"></div></div>
+            <div class="roast-card roast-verdict"><div class="roast-title">📋 FINAL VERDICT</div><div class="roast-content" id="verdict-content"></div></div>
           </div>
-
           <div class="action-buttons">
             <button class="btn-share primary" onclick="openShareCard()">📸 生成分享图</button>
             <button class="btn-share secondary" onclick="copyShareText()">📋 复制文案</button>
@@ -806,37 +701,32 @@
       </div>
     </div>
 
-    <!-- History -->
     <div class="history-section" id="history-section" style="display:none">
       <div class="card-title" style="padding:0 4px;margin-bottom:8px">📝 SAVE FILE: 后悔清单</div>
       <div class="history-list" id="history-list"></div>
     </div>
-
     <div class="disclaimer">DISCLAIMER: 纯属整活 · 数据来自公开接口 · 不构成投资建议 · 股市有风险 · 韭菜需自知</div>
   </div>
 </div>
 
-<!-- ========= SHARE CARD OVERLAY ========= -->
+<!-- ===== SHARE CARD OVERLAY ===== -->
 <div class="share-overlay" id="share-overlay" onclick="if(event.target===this)closeShareCard()">
   <div class="share-overlay-inner">
     <div class="share-close"><button onclick="closeShareCard()">✕ 关闭</button></div>
-    <div class="share-card-wrap" id="share-card">
-      <div class="sc">
-        <!-- Top: emoji + title -->
-        <div class="sc-top">
+    <div class="sc-card" id="share-card">
+      <div class="sc-bg" id="sc-bg"></div>
+      <div class="sc-content">
+        <!-- Top row -->
+        <div class="sc-top-row">
           <span class="sc-emoji" id="sc-emoji">🤡</span>
-          <div class="sc-title-area">
+          <div class="sc-info">
             <div class="sc-title" id="sc-title">GAME OVER</div>
-            <div class="sc-roast-text" id="sc-roast">...</div>
-            <div>
-              <span class="sc-stock-tag" id="sc-stock">-</span>
-              <span class="sc-market-tag" id="sc-market">-</span>
-            </div>
+            <div class="sc-roast" id="sc-roast">...</div>
+            <div><span class="sc-stock-info" id="sc-stock">-</span><span class="sc-market-label" id="sc-market">-</span></div>
           </div>
         </div>
-
-        <!-- Body: data + profit -->
-        <div class="sc-body">
+        <!-- Mid: data + chart -->
+        <div class="sc-mid">
           <div class="sc-data-col">
             <div class="sc-data-row"><span class="dl">买入价</span><span class="dv" id="sc-buy-price">-</span></div>
             <div class="sc-data-row"><span class="dl">历史最高</span><span class="dv gold" id="sc-high-price">-</span></div>
@@ -844,14 +734,17 @@
             <div class="sc-data-row"><span class="dl">巅峰日期</span><span class="dv" id="sc-high-date">-</span></div>
             <div class="sc-data-row"><span class="dl">买入数量</span><span class="dv" id="sc-qty">-</span></div>
             <div class="sc-data-row"><span class="dl">等到巅峰</span><span class="dv" id="sc-hold">-</span></div>
+            <div class="sc-profit-box gain" id="sc-profit-box">
+              <div class="sp-label">最高点逃顶可赚</div>
+              <div class="sp-amount" id="sc-profit">+$0</div>
+              <div class="sp-pct" id="sc-pct">+0%</div>
+            </div>
           </div>
-          <div class="sc-profit-col gain" id="sc-profit-col">
-            <div class="sp-label">最高点逃顶可赚</div>
-            <div class="sp-amount" id="sc-profit">+$0</div>
-            <div class="sp-pct" id="sc-pct">+0%</div>
+          <div class="sc-chart-col">
+            <div class="chart-title">📈 PRICE CHART</div>
+            <canvas id="sc-chart" width="400" height="260"></canvas>
           </div>
         </div>
-
         <!-- Sell comparison -->
         <div class="sc-comp" id="sc-comp">
           <div class="sc-comp-title">⚔️ 你的操作 VS 完美操作</div>
@@ -859,37 +752,34 @@
           <div class="sc-data-row"><span class="dl">你的卖出价</span><span class="dv" id="sc-c-price">-</span></div>
           <div class="sc-data-row"><span class="dl">你实际赚了</span><span class="dv" id="sc-c-actual">-</span></div>
           <div class="sc-data-row"><span class="dl">最高点能赚</span><span class="dv gold" id="sc-c-peak">-</span></div>
-          <div class="sc-data-row" style="border-top:2px dashed rgba(251,191,36,0.15);padding-top:6px;margin-top:4px">
+          <div class="sc-data-row" style="border-top:2px dashed rgba(251,191,36,0.15);padding-top:5px;margin-top:3px">
             <span class="dl" style="font-weight:700;color:var(--text)">你少赚了</span>
-            <span class="dv red" style="font-size:16px" id="sc-c-missed">-</span>
+            <span class="dv red" style="font-size:15px" id="sc-c-missed">-</span>
           </div>
         </div>
-
-        <!-- Meme section -->
-        <div class="sc-meme-section">
+        <!-- Bottom: equivs + quote -->
+        <div class="sc-bottom">
           <div class="sc-meme-box equivs">
             <div class="mb-title">💰 这笔钱等于...</div>
             <div id="sc-equivs"></div>
           </div>
-          <div class="sc-meme-box verdict">
-            <div class="mb-title">📋 韭菜鉴定报告</div>
-            <div class="mb-content" id="sc-verdict"></div>
+          <div class="sc-meme-box quote">
+            <div class="mb-title">💬 韭菜语录</div>
+            <div class="quote-text" id="sc-quote">"..."</div>
+            <div class="quote-sub" id="sc-quote-sub">——</div>
           </div>
         </div>
-
-        <!-- Big meme quote -->
-        <div class="sc-big-quote">
-          <div class="quote-text" id="sc-quote">"如果股市有后悔药，我能吃一整瓶"</div>
-          <div class="quote-sub" id="sc-quote-sub">—— 一个普通韭菜的自白</div>
+        <!-- Pain + verdict -->
+        <div class="sc-verdict-row">
+          <div class="sc-pain-wrap">
+            <div class="sp-label-row"><span class="sp-title">REGRET LV</span><span class="sp-level" id="sc-pain-text">-</span></div>
+            <div class="sp-bar-bg"><div class="sp-bar" id="sc-pain-bar" style="width:0%"></div></div>
+          </div>
+          <div class="sc-verdict-wrap">
+            <div class="vd-title">📋 韭菜鉴定</div>
+            <div class="vd-content" id="sc-verdict"></div>
+          </div>
         </div>
-
-        <!-- Pain bar -->
-        <div class="sc-pain">
-          <span class="sp-label-left">REGRET LV</span>
-          <div class="sp-bar-bg"><div class="sp-bar" id="sc-pain-bar" style="width:0%"></div></div>
-          <span class="sp-level" id="sc-pain-text">-</span>
-        </div>
-
         <!-- Footer -->
         <div class="sc-footer">
           <div class="sf-left">GAME OVER<br>韭菜后悔计算器</div>
@@ -897,7 +787,6 @@
         </div>
       </div>
     </div>
-
     <div class="share-actions">
       <button class="dl-btn" onclick="downloadShareImage()">📥 下载图片</button>
       <button class="copy-btn" onclick="copyShareText()">📋 复制文案</button>
@@ -909,547 +798,505 @@
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
-let currentMarket = 'us';
-let buyMode = 'shares';
-let selectedStock = '';
-let lastResult = null;
-let calculationHistory = JSON.parse(localStorage.getItem('stock-calc-history-v4') || '[]');
+let currentMarket='us', buyMode='shares', selectedStock='', lastResult=null;
+let calculationHistory = JSON.parse(localStorage.getItem('stock-calc-history-v5')||'[]');
+
+// Meme background images
+const MEME_BG_URLS = [
+  'https://media.giphy.com/media/YnkMcHgNIMW4Ifi4i4/giphy.gif', // wolf of wall street
+  'https://media.giphy.com/media/67ThRZlYBvibtdF9JH/giphy.gif', // stonks
+  'https://media.giphy.com/media/ND6xkVPaj8tHO/giphy.gif', // money rain
+  'https://i.imgflip.com/9mpfqs.jpg', // stonks meme
+  'https://i.imgflip.com/4acd7j.png', // always has been
+];
 
 const MARKET_CONFIG = {
-  us: {
-    name: '美股', currency: '$', suffix: '',
-    stocks: [
-      {code:'AAPL',name:'苹果'},{code:'TSLA',name:'特斯拉'},{code:'NVDA',name:'英伟达'},
-      {code:'AMZN',name:'亚马逊'},{code:'GOOG',name:'谷歌'},{code:'MSFT',name:'微软'},
-      {code:'META',name:'Meta'},{code:'NFLX',name:'奈飞'},{code:'AMD',name:'AMD'},
-      {code:'INTC',name:'英特尔'},{code:'DIS',name:'迪士尼'},{code:'BA',name:'波音'},
-      {code:'NIO',name:'蔚来'},{code:'BABA',name:'阿里(美)'},{code:'JD',name:'京东(美)'},
-      {code:'PDD',name:'拼多多'},{code:'COIN',name:'Coinbase'},{code:'PLTR',name:'Palantir'},
-      {code:'RIVN',name:'Rivian'},{code:'GME',name:'游戏驿站'},{code:'AMC',name:'AMC院线'},
-      {code:'SOFI',name:'SoFi'},{code:'SNOW',name:'Snowflake'},{code:'CRM',name:'Salesforce'},
-    ]
-  },
-  hk: {
-    name: '港股', currency: 'HK$', suffix: '.HK',
-    stocks: [
-      {code:'0700',name:'腾讯'},{code:'9988',name:'阿里巴巴'},{code:'3690',name:'美团'},
-      {code:'1810',name:'小米'},{code:'9618',name:'京东'},{code:'9888',name:'百度'},
-      {code:'0005',name:'汇丰'},{code:'0941',name:'中移动'},{code:'2318',name:'中国平安'},
-      {code:'1299',name:'友邦保险'},{code:'0388',name:'港交所'},{code:'2020',name:'安踏体育'},
-      {code:'1024',name:'快手'},{code:'9999',name:'网易'},{code:'0175',name:'吉利汽车'},
-      {code:'2269',name:'药明生物'},{code:'9626',name:'哔哩哔哩'},{code:'0981',name:'中芯国际'},
-      {code:'2015',name:'理想汽车'},{code:'9868',name:'小鹏汽车'},{code:'0883',name:'中海油'},
-      {code:'1211',name:'比亚迪'},
-    ]
-  },
-  sh: {
-    name: '沪A', currency: '¥', suffix: '.SS',
-    stocks: [
-      {code:'600519',name:'贵州茅台'},{code:'601318',name:'中国平安'},{code:'600036',name:'招商银行'},
-      {code:'601012',name:'隆基绿能'},{code:'600900',name:'长江电力'},{code:'600276',name:'恒瑞医药'},
-      {code:'601899',name:'紫金矿业'},{code:'600809',name:'山西汾酒'},{code:'601088',name:'中国神华'},
-      {code:'600030',name:'中信证券'},{code:'600887',name:'伊利股份'},{code:'601888',name:'中国中免'},
-      {code:'600050',name:'中国联通'},{code:'603259',name:'药明康德'},{code:'600585',name:'海螺水泥'},
-      {code:'601398',name:'工商银行'},{code:'600104',name:'上汽集团'},{code:'603501',name:'韦尔股份'},
-      {code:'688981',name:'中芯国际'},{code:'688041',name:'海光信息'},
-    ]
-  },
-  sz: {
-    name: '深A', currency: '¥', suffix: '.SZ',
-    stocks: [
-      {code:'000001',name:'平安银行'},{code:'000858',name:'五粮液'},{code:'002594',name:'比亚迪'},
-      {code:'300750',name:'宁德时代'},{code:'000333',name:'美的集团'},{code:'002415',name:'海康威视'},
-      {code:'000651',name:'格力电器'},{code:'002475',name:'立讯精密'},{code:'000002',name:'万科A'},
-      {code:'002304',name:'洋河股份'},{code:'300059',name:'东方财富'},{code:'300760',name:'迈瑞医疗'},
-      {code:'002714',name:'牧原股份'},{code:'000568',name:'泸州老窖'},{code:'300124',name:'汇川技术'},
-      {code:'002352',name:'顺丰控股'},{code:'300274',name:'阳光电源'},{code:'002459',name:'晶澳科技'},
-      {code:'300661',name:'圣邦股份'},{code:'300033',name:'同花顺'},
-    ]
-  }
+  us:{name:'美股',currency:'$',suffix:'',stocks:[
+    {code:'AAPL',name:'苹果'},{code:'TSLA',name:'特斯拉'},{code:'NVDA',name:'英伟达'},
+    {code:'AMZN',name:'亚马逊'},{code:'GOOG',name:'谷歌'},{code:'MSFT',name:'微软'},
+    {code:'META',name:'Meta'},{code:'NFLX',name:'奈飞'},{code:'AMD',name:'AMD'},
+    {code:'INTC',name:'英特尔'},{code:'DIS',name:'迪士尼'},{code:'BA',name:'波音'},
+    {code:'NIO',name:'蔚来'},{code:'BABA',name:'阿里(美)'},{code:'JD',name:'京东(美)'},
+    {code:'PDD',name:'拼多多'},{code:'COIN',name:'Coinbase'},{code:'PLTR',name:'Palantir'},
+    {code:'RIVN',name:'Rivian'},{code:'GME',name:'游戏驿站'},{code:'AMC',name:'AMC院线'},
+    {code:'SOFI',name:'SoFi'},{code:'SNOW',name:'Snowflake'},{code:'CRM',name:'Salesforce'},
+  ]},
+  hk:{name:'港股',currency:'HK$',suffix:'.HK',stocks:[
+    {code:'0700',name:'腾讯'},{code:'9988',name:'阿里巴巴'},{code:'3690',name:'美团'},
+    {code:'1810',name:'小米'},{code:'9618',name:'京东'},{code:'9888',name:'百度'},
+    {code:'0005',name:'汇丰'},{code:'0941',name:'中移动'},{code:'2318',name:'中国平安'},
+    {code:'1299',name:'友邦保险'},{code:'0388',name:'港交所'},{code:'2020',name:'安踏体育'},
+    {code:'1024',name:'快手'},{code:'9999',name:'网易'},{code:'0175',name:'吉利汽车'},
+    {code:'2269',name:'药明生物'},{code:'9626',name:'哔哩哔哩'},{code:'0981',name:'中芯国际'},
+    {code:'2015',name:'理想汽车'},{code:'9868',name:'小鹏汽车'},{code:'0883',name:'中海油'},
+    {code:'1211',name:'比亚迪'},
+  ]},
+  sh:{name:'沪A',currency:'¥',suffix:'.SS',stocks:[
+    {code:'600519',name:'贵州茅台'},{code:'601318',name:'中国平安'},{code:'600036',name:'招商银行'},
+    {code:'601012',name:'隆基绿能'},{code:'600900',name:'长江电力'},{code:'600276',name:'恒瑞医药'},
+    {code:'601899',name:'紫金矿业'},{code:'600809',name:'山西汾酒'},{code:'601088',name:'中国神华'},
+    {code:'600030',name:'中信证券'},{code:'600887',name:'伊利股份'},{code:'601888',name:'中国中免'},
+    {code:'600050',name:'中国联通'},{code:'603259',name:'药明康德'},{code:'600585',name:'海螺水泥'},
+    {code:'601398',name:'工商银行'},{code:'600104',name:'上汽集团'},{code:'603501',name:'韦尔股份'},
+    {code:'688981',name:'中芯国际'},{code:'688041',name:'海光信息'},
+  ]},
+  sz:{name:'深A',currency:'¥',suffix:'.SZ',stocks:[
+    {code:'000001',name:'平安银行'},{code:'000858',name:'五粮液'},{code:'002594',name:'比亚迪'},
+    {code:'300750',name:'宁德时代'},{code:'000333',name:'美的集团'},{code:'002415',name:'海康威视'},
+    {code:'000651',name:'格力电器'},{code:'002475',name:'立讯精密'},{code:'000002',name:'万科A'},
+    {code:'002304',name:'洋河股份'},{code:'300059',name:'东方财富'},{code:'300760',name:'迈瑞医疗'},
+    {code:'002714',name:'牧原股份'},{code:'000568',name:'泸州老窖'},{code:'300124',name:'汇川技术'},
+    {code:'002352',name:'顺丰控股'},{code:'300274',name:'阳光电源'},{code:'002459',name:'晶澳科技'},
+    {code:'300661',name:'圣邦股份'},{code:'300033',name:'同花顺'},
+  ]}
 };
 
-// === MEME QUOTES based on profit level ===
 const MEME_QUOTES = {
-  legendary: [
-    { q: '"我不是不想卖，我是想给别人一个机会"', s: '—— 终极韭菜语录' },
-    { q: '"如果后悔有用的话，还要股市干嘛"', s: '—— 被套的第3650天' },
-    { q: '"别人恐惧我贪婪，别人贪婪我更贪婪"', s: '—— 巴菲特看了直摇头' },
+  legendary:[
+    {q:'"我不是不想卖，我是想给别人一个机会"',s:'—— 终极韭菜语录'},
+    {q:'"如果后悔有用的话，还要股市干嘛"',s:'—— 被套的第3650天'},
+    {q:'"别人恐惧我贪婪，别人贪婪我更贪婪"',s:'—— 巴菲特看了直摇头'},
   ],
-  epic: [
-    { q: '"我不是亏了，我只是换了一种方式存钱"', s: '—— 精神胜利法大师' },
-    { q: '"拿住！钻石手！"（然后就没有然后了）', s: '—— 最后的倔强' },
-    { q: '"我买的不是股票，是青春和遗憾"', s: '—— 一个文艺韭菜' },
+  epic:[
+    {q:'"我不是亏了，我只是换了一种方式存钱"',s:'—— 精神胜利法大师'},
+    {q:'"拿住！钻石手！"（然后就没有然后了）',s:'—— 最后的倔强'},
+    {q:'"我买的不是股票，是青春和遗憾"',s:'—— 一个文艺韭菜'},
   ],
-  good: [
-    { q: '"赚了但没完全赚，亏了但没完全亏"', s: '—— 薛定谔的收益' },
-    { q: '"这波不亏，下次一定"', s: '—— 永远的下次' },
-    { q: '"格局！我们看的是长线！"（已经5年了）', s: '—— 自我安慰冠军' },
+  good:[
+    {q:'"赚了但没完全赚，亏了但没完全亏"',s:'—— 薛定谔的收益'},
+    {q:'"这波不亏，下次一定"',s:'—— 永远的下次'},
+    {q:'"格局！我们看的是长线！"（已经5年了）',s:'—— 自我安慰冠军'},
   ],
-  meh: [
-    { q: '"炒股不如摆摊，至少摆摊稳赚不赔"', s: '—— 来自一个过来人的忠告' },
-    { q: '"这收益率还不如支付宝的余额宝"', s: '—— 残酷的真相' },
-    { q: '"买了个寂寞"', s: '—— 本韭菜的真实感受' },
+  meh:[
+    {q:'"炒股不如摆摊，至少摆摊稳赚不赔"',s:'—— 来自过来人的忠告'},
+    {q:'"这收益率还不如余额宝"',s:'—— 残酷的真相'},
+    {q:'"买了个寂寞"',s:'—— 本韭菜的真实感受'},
   ],
-  loss: [
-    { q: '"我不是韭菜，我是韭菜王"', s: '—— 加冕仪式' },
-    { q: '"欢迎来到山顶，这里风景独好"', s: '—— 精准抄顶协会' },
-    { q: '"如果亏钱是一种能力，我已经满级了"', s: '—— 天赋异禀' },
+  loss:[
+    {q:'"我不是韭菜，我是韭菜王"',s:'—— 加冕仪式'},
+    {q:'"欢迎来到山顶，这里风景独好"',s:'—— 精准抄顶协会'},
+    {q:'"如果亏钱是一种能力，我已经满级了"',s:'—— 天赋异禀'},
   ],
 };
 
-// ===== UI =====
+// ===== Background particles =====
+function initParticles() {
+  const c = document.getElementById('bg-falling');
+  const emojis = ['🌿','💸','📉','📈','🤡','💰','🥬','💎','🚀','☠️','🎰','🪙'];
+  let html = '';
+  for (let i=0; i<35; i++) {
+    const e = emojis[Math.floor(Math.random()*emojis.length)];
+    const left = Math.random()*100;
+    const dur = 8+Math.random()*12;
+    const delay = Math.random()*15;
+    const size = 14+Math.random()*14;
+    html += `<span class="particle" style="left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s;font-size:${size}px">${e}</span>`;
+  }
+  c.innerHTML = html;
+}
+
+// ===== Marquee ticker =====
+function initMarquee() {
+  const tickers = [
+    {s:'AAPL',p:'+2.3%',up:true},{s:'TSLA',p:'-4.1%',up:false},{s:'NVDA',p:'+1.8%',up:true},
+    {s:'茅台',p:'-0.5%',up:false},{s:'腾讯',p:'+3.2%',up:true},{s:'比亚迪',p:'+1.1%',up:true},
+    {s:'META',p:'-2.7%',up:false},{s:'阿里',p:'+0.9%',up:true},{s:'GME',p:'+42.0%',up:true},
+    {s:'你的钱包',p:'-99.9%',up:false},{s:'后悔指数',p:'+∞',up:true},{s:'韭菜信心',p:'-100%',up:false},
+  ];
+  const items = [...tickers,...tickers].map(t=>
+    `<span class="ticker-item">${t.s} <span class="${t.up?'up':'down'}">${t.p}</span></span>`
+  ).join('');
+  document.getElementById('marquee-inner').innerHTML = items;
+}
+
+// ===== UI helpers =====
 function selectMarket(m) {
-  currentMarket = m; selectedStock = '';
-  document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
+  currentMarket=m; selectedStock='';
+  document.querySelectorAll('.market-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector(`[data-market="${m}"]`).classList.add('active');
-  document.getElementById('stock-code').value = '';
-  document.getElementById('stock-search').value = '';
+  document.getElementById('stock-code').value='';
+  document.getElementById('stock-search').value='';
   renderStockGrid();
 }
 
-function renderStockGrid(filter = '') {
-  const grid = document.getElementById('stock-grid');
-  const stocks = MARKET_CONFIG[currentMarket].stocks;
-  const f = filter.toLowerCase();
-  const list = f ? stocks.filter(s => s.code.toLowerCase().includes(f) || s.name.toLowerCase().includes(f)) : stocks;
-  grid.innerHTML = list.map(s => `
-    <div class="stock-chip ${selectedStock===s.code?'selected':''}" onclick="pickStock('${s.code}')">
-      <span class="code">${s.code}</span>${s.name}
-    </div>
-  `).join('');
+function renderStockGrid(f='') {
+  const g=document.getElementById('stock-grid');
+  const stocks=MARKET_CONFIG[currentMarket].stocks;
+  const fl=f.toLowerCase();
+  const list=fl?stocks.filter(s=>s.code.toLowerCase().includes(fl)||s.name.toLowerCase().includes(fl)):stocks;
+  g.innerHTML=list.map(s=>`<div class="stock-chip ${selectedStock===s.code?'selected':''}" onclick="pickStock('${s.code}')"><span class="code">${s.code}</span>${s.name}</div>`).join('');
 }
 
-function filterStocks() { renderStockGrid(document.getElementById('stock-search').value); }
-function pickStock(c) { selectedStock = c; document.getElementById('stock-code').value = c; renderStockGrid(document.getElementById('stock-search').value); }
+function filterStocks(){renderStockGrid(document.getElementById('stock-search').value)}
+function pickStock(c){selectedStock=c;document.getElementById('stock-code').value=c;renderStockGrid(document.getElementById('stock-search').value)}
 
 function setBuyMode(m) {
-  buyMode = m;
-  document.querySelectorAll('.buy-mode-btn').forEach(b => b.classList.remove('active'));
+  buyMode=m;
+  document.querySelectorAll('.buy-mode-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`[data-mode="${m}"]`).classList.add('active');
-  document.getElementById('buy-shares-input').style.display = m === 'shares' ? 'block' : 'none';
-  document.getElementById('buy-amount-input').style.display = m === 'amount' ? 'block' : 'none';
+  document.getElementById('buy-shares-input').style.display=m==='shares'?'block':'none';
+  document.getElementById('buy-amount-input').style.display=m==='amount'?'block':'none';
 }
 
-function toggleSellDate() { document.getElementById('sell-date-row').classList.toggle('show', document.getElementById('sell-check').checked); }
+function toggleSellDate(){document.getElementById('sell-date-row').classList.toggle('show',document.getElementById('sell-check').checked)}
+function showError(msg){const e=document.getElementById('error-msg');e.textContent='⚠ '+msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000)}
+function showToast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2500)}
+function fN(n,d=2){return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fC(a,c){const ab=Math.abs(a);let f;if(ab>=1e8)f=(ab/1e8).toFixed(2)+'亿';else if(ab>=1e4)f=(ab/1e4).toFixed(2)+'万';else f=fN(ab);return(a>=0?'+':'-')+c+f}
 
-function showError(msg) { const e = document.getElementById('error-msg'); e.textContent = '⚠ '+msg; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),5000); }
-function showToast(msg) { const e = document.getElementById('toast'); e.textContent = msg; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2500); }
-
-function fmtNum(n, d=2) { return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}); }
-function fmtCur(amount, cur) {
-  const a = Math.abs(amount); let f;
-  if (a>=1e8) f=(a/1e8).toFixed(2)+'亿'; else if (a>=1e4) f=(a/1e4).toFixed(2)+'万'; else f=fmtNum(a);
-  return (amount>=0?'+':'-')+cur+f;
-}
-
-// ===== Data =====
-async function fetchStockData(symbol, market) {
-  const cfg = MARKET_CONFIG[market];
-  const ys = symbol + cfg.suffix;
-  const yu = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ys)}?range=max&interval=1d`;
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(yu)}`,
-    `https://corsproxy.io/?${encodeURIComponent(yu)}`,
-    yu,
-  ];
-  let data = null;
-  for (const url of proxies) {
-    try {
-      const r = await fetch(url, {signal:AbortSignal.timeout(12000)});
-      if (!r.ok) continue;
-      data = await r.json();
-      if (data.chart?.result?.[0]) break;
-      data = null;
-    } catch(e) { continue; }
-  }
-  if (!data?.chart?.result?.[0]) throw new Error('查不到数据，代码打错了？');
-  const res = data.chart.result[0];
-  const ts = res.timestamp, q = res.indicators.quote[0], dd = [];
-  for (let i=0;i<ts.length;i++) {
-    if (q.close[i]!=null && q.high[i]!=null) dd.push({date:new Date(ts[i]*1000),high:q.high[i],close:q.close[i]});
-  }
-  return { name: res.meta?.shortName || res.meta?.symbol || symbol, dailyData: dd };
+// ===== Data fetch =====
+async function fetchStockData(sym,mkt) {
+  const cfg=MARKET_CONFIG[mkt]; const ys=sym+cfg.suffix;
+  const yu=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ys)}?range=max&interval=1d`;
+  const px=[`https://api.allorigins.win/raw?url=${encodeURIComponent(yu)}`,`https://corsproxy.io/?${encodeURIComponent(yu)}`,yu];
+  let data=null;
+  for(const url of px){try{const r=await fetch(url,{signal:AbortSignal.timeout(12000)});if(!r.ok)continue;data=await r.json();if(data.chart?.result?.[0])break;data=null}catch(e){continue}}
+  if(!data?.chart?.result?.[0])throw new Error('查不到数据，代码打错了？');
+  const res=data.chart.result[0];const ts=res.timestamp,q=res.indicators.quote[0],dd=[];
+  for(let i=0;i<ts.length;i++){if(q.close[i]!=null&&q.high[i]!=null)dd.push({date:new Date(ts[i]*1000),high:q.high[i],close:q.close[i]})}
+  return{name:res.meta?.shortName||res.meta?.symbol||sym,dailyData:dd}
 }
 
 // ===== Calculate =====
 async function calculate() {
-  const btn = document.getElementById('btn-calc');
-  const code = (document.getElementById('stock-code').value||selectedStock).trim().toUpperCase();
-  const dateStr = document.getElementById('buy-date').value;
-  if (!code) { showError('先选一只票吧'); return; }
-  if (!dateStr) { showError('上车日期呢？'); return; }
+  const btn=document.getElementById('btn-calc');
+  const code=(document.getElementById('stock-code').value||selectedStock).trim().toUpperCase();
+  const dateStr=document.getElementById('buy-date').value;
+  if(!code){showError('先选一只票吧');return}
+  if(!dateStr){showError('上车日期呢？');return}
+  let quantity,manualPrice,buyAmount;
+  if(buyMode==='shares'){quantity=parseInt(document.getElementById('buy-quantity').value);manualPrice=parseFloat(document.getElementById('buy-price').value);if(!quantity||quantity<=0){showError('至少1股吧');return}}
+  else{buyAmount=parseFloat(document.getElementById('buy-amount').value);if(!buyAmount||buyAmount<=0){showError('总得投点钱吧');return}}
+  const hasSell=document.getElementById('sell-check').checked;
+  const sellDateStr=document.getElementById('sell-date').value;
+  const sellPriceManual=parseFloat(document.getElementById('sell-price').value);
+  if(hasSell&&!sellDateStr){showError('卖出日期呢？');return}
 
-  let quantity, manualPrice, buyAmount;
-  if (buyMode==='shares') {
-    quantity = parseInt(document.getElementById('buy-quantity').value);
-    manualPrice = parseFloat(document.getElementById('buy-price').value);
-    if (!quantity||quantity<=0) { showError('至少1股吧'); return; }
-  } else {
-    buyAmount = parseFloat(document.getElementById('buy-amount').value);
-    if (!buyAmount||buyAmount<=0) { showError('总得投点钱吧'); return; }
-  }
+  const buyDate=new Date(dateStr);
+  btn.disabled=true;btn.textContent='LOADING...';
 
-  const hasSell = document.getElementById('sell-check').checked;
-  const sellDateStr = document.getElementById('sell-date').value;
-  const sellPriceManual = parseFloat(document.getElementById('sell-price').value);
-  if (hasSell && !sellDateStr) { showError('卖出日期呢？'); return; }
+  try{
+    const{dailyData,name}=await fetchStockData(code,currentMarket);
+    if(!dailyData.length)throw new Error('没数据');
+    let buyDayData=null;
+    for(const d of dailyData){if(d.date>=buyDate){buyDayData=d;break}}
+    if(!buyDayData)throw new Error('日期超范围');
+    const buyPrice=manualPrice||buyDayData.close;
+    if(buyMode==='amount'){quantity=Math.floor(buyAmount/buyPrice);if(quantity<=0)throw new Error('钱不够买1股')}
+    let hp=0,hd=null;
+    for(const d of dailyData){if(d.date>=buyDate&&d.high>hp){hp=d.high;hd=d.date}}
+    if(!hd)throw new Error('找不到最高价');
+    let sellPrice=null,sellDate=null,actualProfit=null,actualPct=null;
+    if(hasSell){const sd=new Date(sellDateStr);let sdd=null;for(const d of dailyData){if(d.date>=sd){sdd=d;break}}if(!sdd)sdd=dailyData[dailyData.length-1];sellDate=sdd.date;sellPrice=sellPriceManual||sdd.close;actualProfit=(sellPrice-buyPrice)*quantity;actualPct=(sellPrice-buyPrice)/buyPrice*100}
+    const cfg=MARKET_CONFIG[currentMarket];
+    const peakProfit=(hp-buyPrice)*quantity,peakPct=(hp-buyPrice)/buyPrice*100;
+    const holdDays=Math.floor((hd-buyDate)/(1000*60*60*24));
+    const cp=dailyData[dailyData.length-1].close;
+    const curProfit=(cp-buyPrice)*quantity,curPct=(cp-buyPrice)/buyPrice*100;
+    const missed=hasSell?peakProfit-actualProfit:peakProfit-curProfit;
 
-  const buyDate = new Date(dateStr);
-  btn.disabled = true; btn.textContent = 'LOADING...';
+    // Filter chart data: from buy date onward
+    const chartData=dailyData.filter(d=>d.date>=buyDate);
 
-  try {
-    const {dailyData, name} = await fetchStockData(code, currentMarket);
-    if (!dailyData.length) throw new Error('没数据，退市了？');
-
-    let buyDayData = null;
-    for (const d of dailyData) { if (d.date>=buyDate) { buyDayData=d; break; } }
-    if (!buyDayData) throw new Error('日期超范围');
-
-    const buyPrice = manualPrice || buyDayData.close;
-    if (buyMode==='amount') { quantity=Math.floor(buyAmount/buyPrice); if(quantity<=0) throw new Error('钱不够买1股'); }
-
-    let highestPrice=0, highestDate=null;
-    for (const d of dailyData) { if (d.date>=buyDate && d.high>highestPrice) { highestPrice=d.high; highestDate=d.date; } }
-    if (!highestDate) throw new Error('找不到最高价');
-
-    let sellPrice=null, sellDate=null, actualProfit=null, actualPercent=null;
-    if (hasSell) {
-      const sd = new Date(sellDateStr);
-      let sellDayData = null;
-      for (const d of dailyData) { if (d.date>=sd) { sellDayData=d; break; } }
-      if (!sellDayData) sellDayData = dailyData[dailyData.length-1];
-      sellDate = sellDayData.date;
-      sellPrice = sellPriceManual || sellDayData.close;
-      actualProfit = (sellPrice-buyPrice)*quantity;
-      actualPercent = (sellPrice-buyPrice)/buyPrice*100;
-    }
-
-    const cfg = MARKET_CONFIG[currentMarket];
-    const peakProfit = (highestPrice-buyPrice)*quantity;
-    const peakPct = (highestPrice-buyPrice)/buyPrice*100;
-    const holdDays = Math.floor((highestDate-buyDate)/(1000*60*60*24));
-    const currentPrice = dailyData[dailyData.length-1].close;
-    const currentProfit = (currentPrice-buyPrice)*quantity;
-    const currentPct = (currentPrice-buyPrice)/buyPrice*100;
-    const missedProfit = hasSell ? peakProfit-actualProfit : peakProfit-currentProfit;
-
-    lastResult = {
-      stockCode:code, stockName:name, market:cfg.name, currency:cfg.currency,
-      buyPrice, highPrice:highestPrice, currentPrice,
-      buyDate:buyDayData.date, highDate:highestDate,
-      quantity, holdDays,
-      profit:peakProfit, profitPercent:peakPct,
-      totalCost:buyPrice*quantity,
-      currentProfit, currentPct,
-      hasSell, sellDate, sellPrice, actualProfit, actualPercent,
-      missedProfit,
-    };
-
+    lastResult={stockCode:code,stockName:name,market:cfg.name,currency:cfg.currency,
+      buyPrice,highPrice:hp,currentPrice:cp,buyDate:buyDayData.date,highDate:hd,
+      quantity,holdDays,profit:peakProfit,profitPercent:peakPct,totalCost:buyPrice*quantity,
+      currentProfit:curProfit,currentPct:curPct,
+      hasSell,sellDate,sellPrice,actualProfit,actualPct,missedProfit:missed,
+      chartData};
     displayResults(lastResult);
-    saveToHistory({code,name,market:currentMarket,buyPrice,highPrice:highestPrice,buyDate:dateStr,quantity,profit:peakProfit,profitPercent:peakPct,currency:cfg.currency});
+    saveToHistory({code,name,market:currentMarket,buyPrice,highPrice:hp,buyDate:dateStr,quantity,profit:peakProfit,profitPercent:peakPct,currency:cfg.currency});
+    document.getElementById('wallet-hp').style.width=Math.max(5,100-Math.min(peakPct,100))+'%';
+  }catch(err){showError(err.message||'出错了')}
+  finally{btn.disabled=false;btn.textContent='PRESS START >>> 开算！🕹️'}
+}
 
-    const hp = Math.max(5, Math.min(100, 100-Math.min(peakPct,100)));
-    document.getElementById('wallet-hp').style.width = hp+'%';
-  } catch(err) {
-    showError(err.message||'出错了');
-  } finally {
-    btn.disabled = false; btn.textContent = 'PRESS START >>> 开算！🕹️';
+// ===== Result meta =====
+function getMeta(pct){
+  let emoji,title,roast,qp;
+  if(pct>2000){emoji='💀';title='GAME OVER x9999';roast='你和财务自由之间只差一个卖出键';qp='legendary'}
+  else if(pct>1000){emoji='🚀';title='LEGENDARY MISS!';roast='十倍股从指缝溜走了';qp='legendary'}
+  else if(pct>500){emoji='😱';title='EPIC FAIL!';roast='错过一套房的钱，建议抱K线图哭';qp='epic'}
+  else if(pct>200){emoji='🤯';title='CRITICAL HIT!';roast='翻了好几倍！可惜只在平行宇宙';qp='epic'}
+  else if(pct>100){emoji='💰';title='DOUBLE KILL!';roast='翻倍了但没卖，股市渣男实锤';qp='good'}
+  else if(pct>50){emoji='😏';title='NOT BAD...';roast='够吃几顿海底捞，离自由差亿点点';qp='good'}
+  else if(pct>10){emoji='🥲';title='MEH...';roast='这涨幅不够手续费+心理咨询费';qp='meh'}
+  else if(pct>0){emoji='🤷';title='WHATEVER';roast='赚是赚了，说出去不好意思';qp='meh'}
+  else if(pct>-20){emoji='🤡';title='接盘侠 DETECTED';roast='精准买在别人的最高点';qp='loss'}
+  else{emoji='☠️';title='WASTED';roast='建议远离股市回去搬砖';qp='loss'}
+  const qs=MEME_QUOTES[qp];const q=qs[Math.floor(Math.random()*qs.length)];
+  return{emoji,title,roast,quote:q,quotePool:qp}
+}
+
+// ===== Display results =====
+function displayResults(d){
+  document.getElementById('placeholder-panel').style.display='none';
+  const sec=document.getElementById('result-section'),m=getMeta(d.profitPercent);
+  if(d.profitPercent>500||d.profitPercent<-30){const f=document.createElement('div');f.className='game-over-flash';document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}
+  document.getElementById('r-emoji').textContent=m.emoji;
+  document.getElementById('r-title').textContent=m.title;
+  document.getElementById('r-roast').textContent=m.roast;
+  document.getElementById('r-stock-tag').textContent=`${d.stockCode} ${d.stockName}`;
+  document.getElementById('r-market-tag').textContent=d.market;
+  document.getElementById('r-buy-price').textContent=d.currency+fN(d.buyPrice);
+  document.getElementById('r-high-price').textContent=d.currency+fN(d.highPrice);
+  document.getElementById('r-buy-date').textContent=d.buyDate.toLocaleDateString('zh-CN');
+  document.getElementById('r-high-date').textContent=d.highDate.toLocaleDateString('zh-CN');
+  document.getElementById('r-qty').textContent=d.quantity.toLocaleString()+'股';
+  document.getElementById('r-hold').textContent=d.holdDays+'天';
+  const cb=document.getElementById('comp-box');
+  if(d.hasSell){cb.classList.add('show');document.getElementById('c-sell-date').textContent=d.sellDate.toLocaleDateString('zh-CN');document.getElementById('c-sell-price').textContent=d.currency+fN(d.sellPrice);const ae=document.getElementById('c-actual');ae.textContent=fC(d.actualProfit,d.currency);ae.className='cv '+(d.actualProfit>=0?'green':'red');document.getElementById('c-peak').textContent=fC(d.profit,d.currency);document.getElementById('c-missed').textContent=fC(d.missedProfit,d.currency)}else{cb.classList.remove('show')}
+  const pb=document.getElementById('profit-box');pb.className='profit-box '+(d.profit>=0?'gain':'loss');
+  document.getElementById('r-profit').textContent=fC(d.profit,d.currency);
+  document.getElementById('r-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+  const pp=Math.min(100,Math.max(0,d.profitPercent>0?Math.min(d.profitPercent/10,100):50+Math.min(Math.abs(d.profitPercent)/2,50)));
+  const pl=['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
+  const pi=Math.min(pl.length-1,Math.floor(pp/(100/pl.length)));
+  document.getElementById('pain-bar').style.width=pp+'%';
+  document.getElementById('pain-text').textContent=pl[pi];
+  genEquiv(d,'equiv-list',true);genAlt(d,'alt-content');genVerdict(d,'verdict-content');
+  sec.classList.add('show');sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ===== Generators =====
+function genEquiv(d,elId,asList){
+  const abs=Math.abs(d.profit),c=d.currency;const rates={'$':1,'HK$':7.8,'¥':7.2};const usd=abs/(rates[c]||1);
+  const items=[];
+  const ip=c==='$'?1199:c==='HK$'?9399:8999;if(Math.floor(abs/ip)>0)items.push({i:'📱',t:'iPhone 16 Pro Max',n:Math.floor(abs/ip).toLocaleString()+'部'});
+  const tp=c==='$'?6:c==='HK$'?40:30;if(Math.floor(abs/tp)>1)items.push({i:'🧋',t:'喜茶',n:Math.floor(abs/tp).toLocaleString()+'杯'});
+  if(usd>=500)items.push({i:'🎮',t:'PS5',n:Math.floor(usd/500).toLocaleString()+'台'});
+  if(usd>=30)items.push({i:'🎯',t:'Steam大作',n:Math.floor(usd/30).toLocaleString()+'款'});
+  const mp=c==='$'?15:c==='HK$'?80:50;items.push({i:'🍜',t:'外卖',n:Math.floor(abs/mp).toLocaleString()+'顿'});
+  if(usd>=1000)items.push({i:'✈️',t:'日本往返',n:Math.floor(usd/1000).toLocaleString()+'张'});
+  if(usd>=3000)items.push({i:'🏝️',t:'马代游',n:Math.floor(usd/3000).toLocaleString()+'次'});
+  const ds=c==='$'?200:c==='HK$'?1500:800;items.push({i:'👔',t:'打工日薪',n:Math.floor(abs/ds).toLocaleString()+'天'});
+  const el=document.getElementById(elId);
+  if(asList)el.innerHTML=items.slice(0,6).map(x=>`<li><span>${x.i}</span>${x.t} <span class="equiv-num">${x.n}</span></li>`).join('');
+  else el.innerHTML=items.slice(0,5).map(x=>`<div class="eq-item"><span>${x.i}</span> ${x.t} <span class="eq-num">${x.n}</span></div>`).join('');
+}
+
+function genAlt(d,elId){
+  const el=document.getElementById(elId);const ls=[];
+  if(d.profitPercent>0){ls.push(`平行宇宙的你在${d.highDate.toLocaleDateString('zh-CN')}完美逃顶`);
+    if(d.hasSell){if(d.actualProfit<0)ls.push(`<br>而你割肉了...差了<span style="color:var(--gold)">${fC(d.missedProfit,d.currency)}</span>`);
+    else ls.push(`<br>你卖了赚${fC(d.actualProfit,d.currency)}，但比最高少<span style="color:var(--gold)">${fC(d.missedProfit,d.currency)}</span>`)}
+    else{if(d.currentPct<0)ls.push(`<br>你还在死扛 <span style="color:var(--red)">${d.currentPct.toFixed(1)}%</span>`);else ls.push(`<br>你还在拿着"再等等"...`)}}
+  else ls.push(`所有平行宇宙里你都买在山顶🏔️`);el.innerHTML=ls.join('');
+}
+
+function genVerdict(d,elId){
+  const el=document.getElementById(elId),pct=d.profitPercent;let g,cm;
+  if(pct>500){g='S';cm='选股神人手太慢'}else if(pct>200){g='A';cm='钻石手害死人'}else if(pct>100){g='B+';cm='还行隔壁老王换车了'}else if(pct>50){g='B';cm='勉强及格'}else if(pct>0){g='C';cm='不如余额宝'}else{g='F';cm='建议卸载炒股软件'}
+  let ex='';
+  if(d.hasSell){const gap=Math.floor((d.highDate-d.sellDate)/(1000*60*60*24));
+    if(d.sellDate<d.highDate)ex=`<br>最高点前${Math.abs(gap)}天卖了 差一点是股神`;
+    else if(d.sellDate>d.highDate)ex=`<br>最高点后${Math.abs(gap)}天才卖 看它从山顶滚下来`;
+    else ex=`<br><span style="color:var(--gold)">最高点当天卖？你是庄家？</span>`}
+  const daily=pct>0?`<br>每天少赚${d.currency}${fN(d.profit/Math.max(1,d.holdDays))}`:'';
+  el.innerHTML=`<strong>评分:${g}</strong> — ${cm}${ex}${daily}`;
+}
+
+// ===== Draw chart =====
+function drawChart(canvas, d) {
+  const cd = d.chartData;
+  if (!cd || cd.length < 2) return;
+  const dpr = 2;
+  const W = 400 * dpr, H = 260 * dpr;
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = '400px'; canvas.style.height = '260px';
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  // Sample data to max 200 points
+  let pts = cd;
+  if (pts.length > 200) {
+    const step = Math.floor(pts.length / 200);
+    pts = pts.filter((_, i) => i % step === 0);
   }
-}
 
-// ===== Display =====
-function getResultMeta(pct) {
-  let emoji, title, roast, quotePool;
-  if (pct>2000) { emoji='💀'; title='GAME OVER x9999'; roast='你和财务自由之间只差一个卖出键'; quotePool='legendary'; }
-  else if (pct>1000) { emoji='🚀'; title='LEGENDARY MISS!'; roast='十倍股就这么从指缝溜走了'; quotePool='legendary'; }
-  else if (pct>500) { emoji='😱'; title='EPIC FAIL!'; roast='错过了一套房的钱，建议抱着K线图哭一会儿'; quotePool='epic'; }
-  else if (pct>200) { emoji='🤯'; title='CRITICAL HIT!'; roast='翻了好几倍！可惜只存在于平行宇宙'; quotePool='epic'; }
-  else if (pct>100) { emoji='💰'; title='DOUBLE KILL!'; roast='翻倍了但没卖，股市渣男实锤'; quotePool='good'; }
-  else if (pct>50) { emoji='😏'; title='NOT BAD...'; roast='够吃几顿海底捞，但离财务自由差亿点点'; quotePool='good'; }
-  else if (pct>10) { emoji='🥲'; title='MEH...'; roast='这涨幅还不够手续费和心理咨询费'; quotePool='meh'; }
-  else if (pct>0) { emoji='🤷'; title='WHATEVER'; roast='赚是赚了，说出去都不好意思'; quotePool='meh'; }
-  else if (pct>-20) { emoji='🤡'; title='接盘侠 DETECTED'; roast='恭喜精准买在别人眼中的最高点'; quotePool='loss'; }
-  else { emoji='☠️'; title='WASTED'; roast='建议远离股市，回去搬砖比较适合你'; quotePool='loss'; }
-  const quotes = MEME_QUOTES[quotePool];
-  const quote = quotes[Math.floor(Math.random()*quotes.length)];
-  return { emoji, title, roast, quote };
-}
+  const prices = pts.map(p => p.close);
+  const minP = Math.min(...prices) * 0.98;
+  const maxP = Math.max(...prices) * 1.02;
+  const pad = { t: 30*dpr, b: 30*dpr, l: 10*dpr, r: 10*dpr };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
 
-function displayResults(d) {
-  document.getElementById('placeholder-panel').style.display = 'none';
-  const section = document.getElementById('result-section');
-  const m = getResultMeta(d.profitPercent);
+  const toX = i => pad.l + (i / (pts.length - 1)) * cw;
+  const toY = p => pad.t + (1 - (p - minP) / (maxP - minP)) * ch;
 
-  if (d.profitPercent>500||d.profitPercent<-30) {
-    const flash = document.createElement('div'); flash.className='game-over-flash';
-    document.body.appendChild(flash); setTimeout(()=>flash.remove(),1000);
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const y = pad.t + (ch / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
   }
 
-  // Result summary
-  document.getElementById('r-emoji').textContent = m.emoji;
-  document.getElementById('r-title').textContent = m.title;
-  document.getElementById('r-roast').textContent = m.roast;
-  document.getElementById('r-stock-tag').textContent = `${d.stockCode} ${d.stockName}`;
-  document.getElementById('r-market-tag').textContent = d.market;
-  document.getElementById('r-buy-price').textContent = d.currency+fmtNum(d.buyPrice);
-  document.getElementById('r-high-price').textContent = d.currency+fmtNum(d.highPrice);
-  document.getElementById('r-buy-date').textContent = d.buyDate.toLocaleDateString('zh-CN');
-  document.getElementById('r-high-date').textContent = d.highDate.toLocaleDateString('zh-CN');
-  document.getElementById('r-qty').textContent = d.quantity.toLocaleString()+'股';
-  document.getElementById('r-hold').textContent = d.holdDays+'天';
+  // Price line gradient
+  const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  grad.addColorStop(0, d.profit >= 0 ? '#4ade80' : '#f87171');
+  grad.addColorStop(1, d.profit >= 0 ? '#166534' : '#7f1d1d');
 
-  // Comparison
-  const cb = document.getElementById('comp-box');
-  if (d.hasSell) {
-    cb.classList.add('show');
-    document.getElementById('c-sell-date').textContent = d.sellDate.toLocaleDateString('zh-CN');
-    document.getElementById('c-sell-price').textContent = d.currency+fmtNum(d.sellPrice);
-    const ae = document.getElementById('c-actual');
-    ae.textContent = fmtCur(d.actualProfit, d.currency);
-    ae.className = 'comp-val '+(d.actualProfit>=0?'green':'red');
-    document.getElementById('c-peak').textContent = fmtCur(d.profit, d.currency);
-    document.getElementById('c-missed').textContent = fmtCur(d.missedProfit, d.currency);
-  } else { cb.classList.remove('show'); }
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(toX(0), H - pad.b);
+  for (let i = 0; i < pts.length; i++) ctx.lineTo(toX(i), toY(pts[i].close));
+  ctx.lineTo(toX(pts.length - 1), H - pad.b);
+  ctx.closePath();
+  const areaGrad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  areaGrad.addColorStop(0, d.profit >= 0 ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)');
+  areaGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = areaGrad; ctx.fill();
 
-  // Profit
-  const pb = document.getElementById('profit-box');
-  pb.className = 'profit-box '+(d.profit>=0?'gain':'loss');
-  document.getElementById('r-profit').textContent = fmtCur(d.profit, d.currency);
-  document.getElementById('r-pct').textContent = (d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+  // Price line
+  ctx.beginPath();
+  for (let i = 0; i < pts.length; i++) { i === 0 ? ctx.moveTo(toX(i), toY(pts[i].close)) : ctx.lineTo(toX(i), toY(pts[i].close)); }
+  ctx.strokeStyle = grad; ctx.lineWidth = 2 * dpr; ctx.stroke();
 
-  // Pain
-  const pp = Math.min(100, Math.max(0, d.profitPercent>0 ? Math.min(d.profitPercent/10,100) : 50+Math.min(Math.abs(d.profitPercent)/2,50)));
-  const painLevels = ['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
-  const pi = Math.min(painLevels.length-1, Math.floor(pp/(100/painLevels.length)));
-  document.getElementById('pain-bar').style.width = pp+'%';
-  document.getElementById('pain-text').textContent = painLevels[pi];
-
-  generateEquivalents(d, 'equiv-list', true);
-  generateAltUniverse(d, 'alt-content');
-  generateVerdict(d, 'verdict-content');
-
-  section.classList.add('show');
-  section.scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-function generateEquivalents(d, elId, asList) {
-  const abs = Math.abs(d.profit), c = d.currency;
-  const rates = {'$':1,'HK$':7.8,'¥':7.2};
-  const usd = abs/(rates[c]||1);
-  const items = [];
-
-  const ip = c==='$'?1199:c==='HK$'?9399:8999;
-  if (Math.floor(abs/ip)>0) items.push({i:'📱',t:'iPhone 16 Pro Max',n:Math.floor(abs/ip).toLocaleString()+'部'});
-  const tp = c==='$'?6:c==='HK$'?40:30;
-  if (Math.floor(abs/tp)>1) items.push({i:'🧋',t:'喜茶',n:Math.floor(abs/tp).toLocaleString()+'杯'});
-  if (usd>=500) items.push({i:'🎮',t:'PS5',n:Math.floor(usd/500).toLocaleString()+'台'});
-  if (usd>=30) items.push({i:'🎯',t:'Steam 3A大作',n:Math.floor(usd/30).toLocaleString()+'款'});
-  const mp = c==='$'?15:c==='HK$'?80:50;
-  items.push({i:'🍜',t:'外卖',n:Math.floor(abs/mp).toLocaleString()+'顿'});
-  if (usd>=1000) items.push({i:'✈️',t:'日本往返',n:Math.floor(usd/1000).toLocaleString()+'张'});
-  if (usd>=3000) items.push({i:'🏝️',t:'马尔代夫',n:Math.floor(usd/3000).toLocaleString()+'次'});
-  if (usd>=50000) items.push({i:'🚗',t:'比亚迪',n:Math.floor(usd/12000).toLocaleString()+'辆'});
-  if (usd>=100000) items.push({i:'👜',t:'爱马仕Birkin',n:Math.floor(usd/10000).toLocaleString()+'个'});
-  const ds = c==='$'?200:c==='HK$'?1500:800;
-  items.push({i:'👔',t:'打工日薪',n:Math.floor(abs/ds).toLocaleString()+'天'});
-
-  const el = document.getElementById(elId);
-  if (asList) {
-    el.innerHTML = items.slice(0,6).map(x=>`<li><span>${x.i}</span>${x.t} <span class="equiv-num">${x.n}</span></li>`).join('');
-  } else {
-    el.innerHTML = items.slice(0,5).map(x=>`<div class="eq-item"><span>${x.i}</span> ${x.t} <span class="eq-num">${x.n}</span></div>`).join('');
+  // Find key points in sampled data
+  let buyIdx = 0, peakIdx = 0, sellIdx = -1;
+  let peakP = 0;
+  for (let i = 0; i < pts.length; i++) {
+    if (pts[i].close > peakP) { peakP = pts[i].close; peakIdx = i; }
   }
-}
-
-function generateAltUniverse(d, elId) {
-  const el = document.getElementById(elId);
-  const lines = [];
-  if (d.profitPercent>0) {
-    lines.push(`平行宇宙的你在 ${d.highDate.toLocaleDateString('zh-CN')} 完美逃顶`);
-    if (d.hasSell) {
-      if (d.actualProfit<0) lines.push(`<br>而你在 ${d.sellDate.toLocaleDateString('zh-CN')} 割肉了...差了 <span style="color:var(--gold)">${fmtCur(d.missedProfit,d.currency)}</span>`);
-      else lines.push(`<br>你卖了赚 ${fmtCur(d.actualProfit,d.currency)}，但比最高点少 <span style="color:var(--gold)">${fmtCur(d.missedProfit,d.currency)}</span>`);
-    } else {
-      if (d.currentPct<0) lines.push(`<br>你还在死扛中 <span style="color:var(--red)">${d.currentPct.toFixed(1)}%</span>`);
-      else lines.push(`<br>你还在拿着，嘴上说"再等等"...`);
+  if (d.hasSell && d.sellDate) {
+    let minDiff = Infinity;
+    for (let i = 0; i < pts.length; i++) {
+      const diff = Math.abs(pts[i].date - d.sellDate);
+      if (diff < minDiff) { minDiff = diff; sellIdx = i; }
     }
-  } else {
-    lines.push(`在所有平行宇宙里，你都买在了山顶 🏔️`);
-  }
-  el.innerHTML = lines.join('');
-}
-
-function generateVerdict(d, elId) {
-  const el = document.getElementById(elId);
-  const pct = d.profitPercent;
-  let grade, comment;
-  if (pct>500) { grade='S'; comment='选股神人，就是手慢了'; }
-  else if (pct>200) { grade='A'; comment='眼光不错，钻石手害死人'; }
-  else if (pct>100) { grade='B+'; comment='还行，隔壁老王已换车'; }
-  else if (pct>50) { grade='B'; comment='勉强及格'; }
-  else if (pct>0) { grade='C'; comment='不如余额宝'; }
-  else { grade='F'; comment='建议卸载炒股软件'; }
-
-  let extra = '';
-  if (d.hasSell) {
-    const gap = Math.floor((d.highDate-d.sellDate)/(1000*60*60*24));
-    if (d.sellDate<d.highDate) extra = `<br>在最高点前${Math.abs(gap)}天就卖了<br><span style="color:var(--text-muted)">差一点就是股神</span>`;
-    else if (d.sellDate>d.highDate) extra = `<br>在最高点后${Math.abs(gap)}天才卖<br><span style="color:var(--text-muted)">眼睁睁看它从山顶滚下来</span>`;
-    else extra = `<br><span style="color:var(--gold)">最高点当天卖的？？你是庄家吧！</span>`;
   }
 
-  const daily = pct>0 ? `<br>每天少赚 ${d.currency}${fmtNum(d.profit/Math.max(1,d.holdDays))}` : '';
-  el.innerHTML = `<strong>评分: ${grade}</strong> — ${comment}${extra}${daily}`;
+  // Helper: draw marker
+  function marker(x, y, color, label, above) {
+    // Dot
+    ctx.beginPath(); ctx.arc(x, y, 5*dpr, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2*dpr; ctx.stroke();
+    // Label bg
+    ctx.font = `bold ${9*dpr}px 'PingFang SC',sans-serif`;
+    const tw = ctx.measureText(label).width + 8*dpr;
+    const lx = Math.min(Math.max(x - tw/2, pad.l), W-pad.r-tw);
+    const ly = above ? y - 14*dpr : y + 10*dpr;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(lx, ly, tw, 14*dpr);
+    ctx.fillStyle = color;
+    ctx.fillText(label, lx + 4*dpr, ly + 10*dpr);
+  }
+
+  // Buy point (green)
+  marker(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fN(d.buyPrice, 0), true);
+
+  // Peak point (gold star)
+  marker(toX(peakIdx), toY(pts[peakIdx].close), '#fbbf24', '★最高 ' + d.currency + fN(d.highPrice, 0), true);
+
+  // Sell point (red)
+  if (sellIdx >= 0) {
+    marker(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fN(d.sellPrice, 0), false);
+  }
 }
 
 // ===== Share card =====
-function openShareCard() {
-  if (!lastResult) return;
-  const d = lastResult;
-  const m = getResultMeta(d.profitPercent);
+function openShareCard(){
+  if(!lastResult)return;
+  const d=lastResult,m=getMeta(d.profitPercent);
 
-  document.getElementById('sc-emoji').textContent = m.emoji;
-  document.getElementById('sc-title').textContent = m.title;
-  document.getElementById('sc-roast').textContent = m.roast;
-  document.getElementById('sc-stock').textContent = `${d.stockCode} ${d.stockName}`;
-  document.getElementById('sc-market').textContent = d.market;
-  document.getElementById('sc-buy-price').textContent = d.currency+fmtNum(d.buyPrice);
-  document.getElementById('sc-high-price').textContent = d.currency+fmtNum(d.highPrice);
-  document.getElementById('sc-buy-date').textContent = d.buyDate.toLocaleDateString('zh-CN');
-  document.getElementById('sc-high-date').textContent = d.highDate.toLocaleDateString('zh-CN');
-  document.getElementById('sc-qty').textContent = d.quantity.toLocaleString()+'股';
-  document.getElementById('sc-hold').textContent = d.holdDays+'天';
+  // Set meme background
+  const bgUrl = MEME_BG_URLS[Math.floor(Math.random()*MEME_BG_URLS.length)];
+  document.getElementById('sc-bg').style.backgroundImage = `url(${bgUrl})`;
 
-  const spc = document.getElementById('sc-profit-col');
-  spc.className = 'sc-profit-col '+(d.profit>=0?'gain':'loss');
-  document.getElementById('sc-profit').textContent = fmtCur(d.profit, d.currency);
-  document.getElementById('sc-pct').textContent = (d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+  document.getElementById('sc-emoji').textContent=m.emoji;
+  document.getElementById('sc-title').textContent=m.title;
+  document.getElementById('sc-roast').textContent=m.roast;
+  document.getElementById('sc-stock').textContent=`${d.stockCode} ${d.stockName}`;
+  document.getElementById('sc-market').textContent=d.market;
+  document.getElementById('sc-buy-price').textContent=d.currency+fN(d.buyPrice);
+  document.getElementById('sc-high-price').textContent=d.currency+fN(d.highPrice);
+  document.getElementById('sc-buy-date').textContent=d.buyDate.toLocaleDateString('zh-CN');
+  document.getElementById('sc-high-date').textContent=d.highDate.toLocaleDateString('zh-CN');
+  document.getElementById('sc-qty').textContent=d.quantity.toLocaleString()+'股';
+  document.getElementById('sc-hold').textContent=d.holdDays+'天';
 
-  // Sell comp
-  const scComp = document.getElementById('sc-comp');
-  if (d.hasSell) {
-    scComp.classList.add('show');
-    document.getElementById('sc-c-date').textContent = d.sellDate.toLocaleDateString('zh-CN');
-    document.getElementById('sc-c-price').textContent = d.currency+fmtNum(d.sellPrice);
-    const scA = document.getElementById('sc-c-actual');
-    scA.textContent = fmtCur(d.actualProfit, d.currency);
-    scA.className = 'dv '+(d.actualProfit>=0?'green':'red');
-    document.getElementById('sc-c-peak').textContent = fmtCur(d.profit, d.currency);
-    document.getElementById('sc-c-missed').textContent = fmtCur(d.missedProfit, d.currency);
-  } else { scComp.classList.remove('show'); }
+  const spb=document.getElementById('sc-profit-box');
+  spb.className='sc-profit-box '+(d.profit>=0?'gain':'loss');
+  document.getElementById('sc-profit').textContent=fC(d.profit,d.currency);
+  document.getElementById('sc-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
 
-  // Equivs + verdict
-  generateEquivalents(d, 'sc-equivs', false);
-  generateVerdict(d, 'sc-verdict');
+  const scc=document.getElementById('sc-comp');
+  if(d.hasSell){scc.classList.add('show');
+    document.getElementById('sc-c-date').textContent=d.sellDate.toLocaleDateString('zh-CN');
+    document.getElementById('sc-c-price').textContent=d.currency+fN(d.sellPrice);
+    const sa=document.getElementById('sc-c-actual');sa.textContent=fC(d.actualProfit,d.currency);sa.className='dv '+(d.actualProfit>=0?'green':'red');
+    document.getElementById('sc-c-peak').textContent=fC(d.profit,d.currency);
+    document.getElementById('sc-c-missed').textContent=fC(d.missedProfit,d.currency);
+  }else{scc.classList.remove('show')}
 
-  // Quote
-  document.getElementById('sc-quote').textContent = m.quote.q;
-  document.getElementById('sc-quote-sub').textContent = m.quote.s;
+  genEquiv(d,'sc-equivs',false);
+  document.getElementById('sc-quote').textContent=m.quote.q;
+  document.getElementById('sc-quote-sub').textContent=m.quote.s;
 
-  // Pain
-  const pp = Math.min(100, Math.max(0, d.profitPercent>0?Math.min(d.profitPercent/10,100):50+Math.min(Math.abs(d.profitPercent)/2,50)));
-  const painLevels = ['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
-  const pi = Math.min(painLevels.length-1, Math.floor(pp/(100/painLevels.length)));
-  document.getElementById('sc-pain-bar').style.width = pp+'%';
-  document.getElementById('sc-pain-text').textContent = painLevels[pi];
+  const pp=Math.min(100,Math.max(0,d.profitPercent>0?Math.min(d.profitPercent/10,100):50+Math.min(Math.abs(d.profitPercent)/2,50)));
+  const pl=['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
+  const pi=Math.min(pl.length-1,Math.floor(pp/(100/pl.length)));
+  document.getElementById('sc-pain-bar').style.width=pp+'%';
+  document.getElementById('sc-pain-text').textContent=pl[pi];
+
+  genVerdict(d,'sc-verdict');
+
+  // Draw chart
+  drawChart(document.getElementById('sc-chart'), d);
 
   document.getElementById('share-overlay').classList.add('show');
 }
 
-function closeShareCard() { document.getElementById('share-overlay').classList.remove('show'); }
+function closeShareCard(){document.getElementById('share-overlay').classList.remove('show')}
 
-async function downloadShareImage() {
-  const card = document.getElementById('share-card');
-  try {
-    showToast('正在生成后悔截图...');
-    if (typeof html2canvas === 'undefined') { copyShareText(); return; }
-    const canvas = await html2canvas(card, { backgroundColor:'#0d0f1a', scale:2, useCORS:true, logging:false });
-    canvas.toBlob(async (blob) => {
-      if (navigator.share && navigator.canShare) {
-        try {
-          const f = new File([blob],'stock-regret.png',{type:'image/png'});
-          await navigator.share({title:'要是当初卖了就好了',files:[f]});
-          return;
-        } catch(e){}
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href=url; a.download='要是当初卖了就好了.png'; a.click();
-      URL.revokeObjectURL(url);
-      showToast('图片已下载！');
+async function downloadShareImage(){
+  const card=document.getElementById('share-card');
+  try{showToast('正在生成后悔截图...');
+    if(typeof html2canvas==='undefined'){copyShareText();return}
+    const canvas=await html2canvas(card,{backgroundColor:'#0f1019',scale:2,useCORS:true,logging:false,allowTaint:true});
+    canvas.toBlob(async blob=>{
+      if(navigator.share&&navigator.canShare){try{const f=new File([blob],'stock-regret.png',{type:'image/png'});await navigator.share({title:'要是当初卖了就好了',files:[f]});return}catch(e){}}
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='要是当初卖了就好了.png';a.click();URL.revokeObjectURL(url);showToast('图片已下载！');
     },'image/png');
-  } catch(err) { showError('截图失败: '+err.message); }
+  }catch(err){showError('截图失败:'+err.message)}
 }
 
-function copyShareText() {
-  if (!lastResult) return;
-  const d = lastResult;
-  const m = getResultMeta(d.profitPercent);
-  let text = `🕹️【${m.title}】\n\n📊 ${d.stockCode} ${d.stockName} (${d.market})\n`;
-  text += `💰 买入: ${d.currency}${fmtNum(d.buyPrice)} × ${d.quantity}股\n`;
-  text += `📈 历史最高: ${d.currency}${fmtNum(d.highPrice)}\n`;
-  text += `${d.profit>=0?'🤑':'🤡'} 最高点能赚: ${fmtCur(d.profit,d.currency)} (${d.profitPercent>=0?'+':''}${d.profitPercent.toFixed(2)}%)\n`;
-  if (d.hasSell) {
-    text += `\n⚔️ 实际卖出: ${d.currency}${fmtNum(d.sellPrice)}\n`;
-    text += `😭 少赚了: ${fmtCur(d.missedProfit,d.currency)}\n`;
-  }
-  text += `\n${m.quote.q}\n${m.quote.s}\n\n来算算你错过了多少钱 👇 韭菜后悔计算器`;
-  navigator.clipboard.writeText(text).then(()=>showToast('文案已复制！')).catch(()=>showToast('复制失败'));
+function copyShareText(){
+  if(!lastResult)return;const d=lastResult,m=getMeta(d.profitPercent);
+  let t=`🕹️【${m.title}】\n\n📊 ${d.stockCode} ${d.stockName} (${d.market})\n💰 买入:${d.currency}${fN(d.buyPrice)}×${d.quantity}股\n📈 历史最高:${d.currency}${fN(d.highPrice)}\n${d.profit>=0?'🤑':'🤡'} 最高点能赚:${fC(d.profit,d.currency)} (${d.profitPercent>=0?'+':''}${d.profitPercent.toFixed(2)}%)\n`;
+  if(d.hasSell)t+=`\n⚔️ 实际卖出:${d.currency}${fN(d.sellPrice)}\n😭 少赚了:${fC(d.missedProfit,d.currency)}\n`;
+  t+=`\n${m.quote.q}\n${m.quote.s}\n\n来算算你错过了多少钱👇 韭菜后悔计算器`;
+  navigator.clipboard.writeText(t).then(()=>showToast('文案已复制！')).catch(()=>showToast('复制失败'));
 }
 
-function resetForm() {
+function resetForm(){
   document.getElementById('result-section').classList.remove('show');
   document.getElementById('comp-box').classList.remove('show');
-  document.getElementById('placeholder-panel').style.display = '';
-  selectedStock = '';
-  document.getElementById('stock-code').value = '';
-  document.getElementById('buy-price').value = '';
-  document.getElementById('buy-amount').value = '';
-  document.getElementById('sell-check').checked = false;
-  document.getElementById('sell-date-row').classList.remove('show');
-  document.getElementById('sell-date').value = '';
-  document.getElementById('sell-price').value = '';
+  document.getElementById('placeholder-panel').style.display='';
+  selectedStock='';document.getElementById('stock-code').value='';
+  document.getElementById('buy-price').value='';document.getElementById('buy-amount').value='';
+  document.getElementById('sell-check').checked=false;document.getElementById('sell-date-row').classList.remove('show');
+  document.getElementById('sell-date').value='';document.getElementById('sell-price').value='';
   renderStockGrid();
 }
 
 // ===== History =====
-function saveToHistory(item) {
-  calculationHistory.unshift(item);
-  if (calculationHistory.length>20) calculationHistory.pop();
-  localStorage.setItem('stock-calc-history-v4', JSON.stringify(calculationHistory));
-  renderHistory();
+function saveToHistory(item){calculationHistory.unshift(item);if(calculationHistory.length>20)calculationHistory.pop();localStorage.setItem('stock-calc-history-v5',JSON.stringify(calculationHistory));renderHistory()}
+function renderHistory(){
+  const s=document.getElementById('history-section'),l=document.getElementById('history-list');
+  if(!calculationHistory.length){s.style.display='none';return}s.style.display='block';
+  l.innerHTML=calculationHistory.slice(0,6).map(item=>`<div class="history-item" onclick="fillFromHistory('${item.code}','${item.market}','${item.buyDate}',${item.quantity})"><div class="info"><span class="stock-name">${item.code} ${item.name||''}</span><span class="stock-detail">${MARKET_CONFIG[item.market]?.name||''} · ${item.buyDate} · ${item.quantity}股</span></div><span class="profit ${item.profit<0?'loss':''}">${fC(item.profit,item.currency)}</span></div>`).join('');
 }
-
-function renderHistory() {
-  const s = document.getElementById('history-section'), l = document.getElementById('history-list');
-  if (!calculationHistory.length) { s.style.display='none'; return; }
-  s.style.display = 'block';
-  l.innerHTML = calculationHistory.slice(0,6).map(item=>`
-    <div class="history-item" onclick="fillFromHistory('${item.code}','${item.market}','${item.buyDate}',${item.quantity})">
-      <div class="info">
-        <span class="stock-name">${item.code} ${item.name||''}</span>
-        <span class="stock-detail">${MARKET_CONFIG[item.market]?.name||''} · ${item.buyDate} · ${item.quantity}股</span>
-      </div>
-      <span class="profit ${item.profit<0?'loss':''}">${fmtCur(item.profit,item.currency)}</span>
-    </div>
-  `).join('');
-}
-
-function fillFromHistory(code,market,date,qty) {
-  selectMarket(market); pickStock(code);
-  document.getElementById('buy-date').value = date;
-  document.getElementById('buy-quantity').value = qty;
-  setBuyMode('shares');
-}
+function fillFromHistory(code,market,date,qty){selectMarket(market);pickStock(code);document.getElementById('buy-date').value=date;document.getElementById('buy-quantity').value=qty;setBuyMode('shares')}
 
 // Init
 document.addEventListener('DOMContentLoaded',()=>{
-  const ago = new Date(); ago.setFullYear(ago.getFullYear()-1);
-  document.getElementById('buy-date').value = ago.toISOString().split('T')[0];
-  document.getElementById('buy-date').max = new Date().toISOString().split('T')[0];
-  document.getElementById('sell-date').max = new Date().toISOString().split('T')[0];
-  document.getElementById('buy-quantity').value = 100;
-  renderStockGrid(); renderHistory();
+  const ago=new Date();ago.setFullYear(ago.getFullYear()-1);
+  document.getElementById('buy-date').value=ago.toISOString().split('T')[0];
+  document.getElementById('buy-date').max=new Date().toISOString().split('T')[0];
+  document.getElementById('sell-date').max=new Date().toISOString().split('T')[0];
+  document.getElementById('buy-quantity').value=100;
+  renderStockGrid();renderHistory();initParticles();initMarquee();
 });
 </script>
 </body>
