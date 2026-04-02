@@ -9,9 +9,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
-    // Suppress yahoo-finance2 internal logs
-    yahooFinance.setGlobalConfig({ queue: { concurrency: 1 } });
-
     const result = await yahooFinance.chart(symbol, {
       period1: '1990-01-01',
       interval: '1d',
