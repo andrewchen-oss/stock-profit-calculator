@@ -65,11 +65,24 @@ async function getAuth() {
   return cachedAuth;
 }
 
+function buildYahooUrl(base, symbol, period1, crumb) {
+  const params = new URLSearchParams({
+    interval: '1d',
+    period1: period1.toString(),
+    period2: Math.floor(Date.now() / 1000).toString(),
+  });
+  if (crumb) params.set('crumb', crumb);
+  return `${base}/v8/finance/chart/${encodeURIComponent(symbol)}?${params}`;
+}
+
 export default async function handler(req, res) {
-  const { symbol } = req.query;
+  const { symbol, period1: p1Str } = req.query;
   if (!symbol) {
     return res.status(400).json({ error: 'Missing symbol' });
   }
+
+  // Default period1: 10 years ago (gives daily data)
+  const period1 = p1Str ? parseInt(p1Str) : Math.floor(Date.now() / 1000) - 10 * 365 * 86400;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -83,7 +96,7 @@ export default async function handler(req, res) {
   try {
     const auth = await getAuth();
     if (auth) {
-      const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=max&interval=1d&crumb=${encodeURIComponent(auth.crumb)}`;
+      const url = buildYahooUrl('https://query2.finance.yahoo.com', symbol, period1, auth.crumb);
       const r = await fetch(url, {
         headers: { 'User-Agent': UA, 'Cookie': auth.cookie },
       });
@@ -96,7 +109,6 @@ export default async function handler(req, res) {
         }
       } else {
         lastError = 'crumb-auth:' + r.status;
-        // Invalidate cached auth on failure
         cachedAuth = null;
       }
     }
@@ -105,16 +117,11 @@ export default async function handler(req, res) {
     console.log('Crumb approach error:', e.message);
   }
 
-  // Approach 2: direct query1 (sometimes works without auth)
+  // Approach 2: direct query1
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=max&interval=1d`;
+    const url = buildYahooUrl('https://query1.finance.yahoo.com', symbol, period1);
     const r = await fetch(url, {
-      headers: {
-        'User-Agent': UA,
-        'Accept': 'application/json',
-        'Referer': 'https://finance.yahoo.com/',
-        'Origin': 'https://finance.yahoo.com',
-      },
+      headers: { 'User-Agent': UA },
     });
     console.log('Direct query1 status:', r.status);
     if (r.ok) {
@@ -128,30 +135,6 @@ export default async function handler(req, res) {
     }
   } catch (e) {
     lastError += ' direct-error:' + e.message;
-  }
-
-  // Approach 3: allorigins proxy (server-side)
-  try {
-    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=max&interval=1d`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yUrl)}`;
-    const r = await fetch(proxyUrl, {
-      headers: { 'User-Agent': UA },
-      signal: AbortSignal.timeout(10000),
-    });
-    console.log('allorigins status:', r.status);
-    if (r.ok) {
-      const text = await r.text();
-      // allorigins may return HTML instead of JSON
-      if (text.startsWith('{')) {
-        const data = JSON.parse(text);
-        if (data?.chart?.result?.[0]) {
-          res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-          return res.status(200).json(data);
-        }
-      }
-    }
-  } catch (e) {
-    lastError += ' allorigins-error:' + e.message;
   }
 
   return res.status(502).json({ error: 'All approaches failed. ' + lastError });
