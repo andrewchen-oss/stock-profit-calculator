@@ -81,8 +81,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing symbol' });
   }
 
-  // Default period1: 10 years ago (gives daily data)
-  const period1 = p1Str ? parseInt(p1Str) : Math.floor(Date.now() / 1000) - 10 * 365 * 86400;
+  // Default period1: 30 years ago if not specified
+  const period1 = p1Str ? parseInt(p1Str) : Math.floor(Date.now() / 1000) - 30 * 365 * 86400;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
 

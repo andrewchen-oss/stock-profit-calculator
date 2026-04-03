@@ -945,10 +945,12 @@ function fN(n,d=2){return Number(n).toLocaleString('en-US',{minimumFractionDigit
 function fC(a,c){const ab=Math.abs(a);let f;if(ab>=1e8)f=(ab/1e8).toFixed(2)+'亿';else if(ab>=1e4)f=(ab/1e4).toFixed(2)+'万';else f=fN(ab);return(a>=0?'+':'-')+c+f}
 
 // ===== Data fetch =====
-async function fetchStockData(sym,mkt) {
+async function fetchStockData(sym,mkt,buyDate) {
   const cfg=MARKET_CONFIG[mkt]; const ys=sym+cfg.suffix;
-  const p1=Math.floor(Date.now()/1000)-10*365*86400;
-  const yu=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ys)}?period1=${p1}&period2=${Math.floor(Date.now()/1000)}&interval=1d`;
+  // period1: 7 days before buy date to ensure coverage, minimum 0 (epoch start)
+  const p1=Math.max(0,Math.floor(buyDate.getTime()/1000)-7*86400);
+  const p2=Math.floor(Date.now()/1000);
+  const yu=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ys)}?period1=${p1}&period2=${p2}&interval=1d`;
   const px=[`/api/stock?symbol=${encodeURIComponent(ys)}&period1=${p1}`,`https://api.allorigins.win/raw?url=${encodeURIComponent(yu)}`,`https://corsproxy.io/?${encodeURIComponent(yu)}`,yu];
   let data=null;
   for(const url of px){try{const r=await fetch(url,{signal:AbortSignal.timeout(15000)});if(!r.ok)continue;data=await r.json();if(data.chart?.result?.[0])break;data=null}catch(e){continue}}
@@ -977,7 +979,7 @@ async function calculate() {
   btn.disabled=true;btn.textContent='LOADING...';
 
   try{
-    const{dailyData,name}=await fetchStockData(code,currentMarket);
+    const{dailyData,name}=await fetchStockData(code,currentMarket,buyDate);
     if(!dailyData.length)throw new Error('没数据');
     let buyDayData=null;
     for(const d of dailyData){if(d.date>=buyDate){buyDayData=d;break}}
