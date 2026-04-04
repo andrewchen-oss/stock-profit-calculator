@@ -587,18 +587,18 @@
   .share-actions .dl-btn { background:var(--green-dark); border-color:#16a34a; color:#000; }
   .share-actions .copy-btn { background:var(--card); border-color:var(--card-border); color:var(--text); }
 
-  /* Developer bar */
-  .dev-bar {
-    background:rgba(0,0,0,0.4); border-bottom:1px solid var(--card-border);
-    padding:6px 16px; display:flex; justify-content:center; align-items:center; gap:16px;
-    font-size:11px; color:var(--text-muted);
+  /* Developer info - top right corner */
+  .dev-info {
+    position:fixed; top:8px; right:12px; z-index:999;
+    display:flex; align-items:center; gap:10px;
+    font-size:10px; color:var(--text-muted);
   }
-  .dev-bar a {
+  .dev-info a {
     color:var(--accent-light); text-decoration:none; font-weight:600;
     transition:color 0.2s;
   }
-  .dev-bar a:hover { color:var(--gold); }
-  .dev-bar .sep { color:var(--card-border); }
+  .dev-info a:hover { color:var(--gold); }
+  .dev-info .sep { color:var(--card-border); }
 
   @media (max-width: 768px) {
     .main-content { grid-template-columns:1fr; }
@@ -607,16 +607,14 @@
     .sc-mid { grid-template-columns:1fr; }
     .sc-bottom { grid-template-columns:1fr; }
     .sc-verdict-row { flex-direction:column; }
-    .dev-bar { flex-wrap:wrap; gap:8px; font-size:10px; }
+    .dev-info { font-size:9px; gap:6px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Developer info bar -->
-<div class="dev-bar">
-  <span>Made by <strong>陈锦初 Andrew</strong></span>
-  <span class="sep">|</span>
+<!-- Developer info - top right -->
+<div class="dev-info">
   <a href="https://x.com/0xajc" target="_blank">𝕏 @0xajc</a>
   <span class="sep">|</span>
   <a href="https://www.xiaohongshu.com/user/profile/67c46824000000000a03e9b6" target="_blank">📕 小红书</a>
@@ -637,10 +635,6 @@
       <div class="marquee-inner" id="marquee-inner"></div>
     </div>
 
-    <div class="hp-bar-deco">
-      <span>钱包HP</span>
-      <div class="bar-bg"><div class="bar-fill" id="wallet-hp"></div></div>
-    </div>
   </div>
 
   <div class="main-content">
