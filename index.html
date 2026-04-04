@@ -697,12 +697,8 @@
       <button class="btn-calculate" id="btn-calc" onclick="calculate()">PRESS START >>> 开算！🕹️</button>
       <div class="error-msg" id="error-msg"></div>
 
-      <!-- Chart + fun cards below input (shown after calc) -->
+      <!-- Fun cards below input (shown after calc) -->
       <div class="left-result-extras" id="left-extras" style="display:none">
-        <div class="result-chart-box">
-          <div class="roast-title">📈 PRICE CHART</div>
-          <canvas id="result-chart" width="600" height="260"></canvas>
-        </div>
         <div class="roast-card roast-equivalents"><div class="roast-title">💰 LOOT DROP</div><ul class="equiv-list" id="equiv-list"></ul></div>
         <div class="roast-card roast-alt"><div class="roast-title">🌀 PARALLEL WORLD</div><div class="roast-content" id="alt-content"></div></div>
         <div class="roast-card roast-verdict"><div class="roast-title">📋 FINAL VERDICT</div><div class="roast-content" id="verdict-content"></div></div>
@@ -746,6 +742,10 @@
             <div class="profit-label">最高点完美逃顶</div>
             <div class="profit-amount" id="r-profit">+$0</div>
             <div class="profit-percent" id="r-pct">+0%</div>
+          </div>
+          <div class="result-chart-box">
+            <div class="roast-title">📈 PRICE CHART</div>
+            <canvas id="result-chart" width="800" height="300"></canvas>
           </div>
           <div class="pain-index">
             <div class="pain-label"><span class="pain-title">REGRET LV</span><span class="pain-level" id="pain-text">-</span></div>
@@ -1216,9 +1216,11 @@ function drawChart(canvas, d) {
   const cd = d.chartData;
   if (!cd || cd.length < 2) return;
   const dpr = 2;
-  const W = 400 * dpr, H = 260 * dpr;
+  const displayW = canvas.parentElement.clientWidth - 28; // subtract padding
+  const displayH = Math.round(displayW * 0.5); // 2:1 aspect ratio
+  const W = displayW * dpr, H = displayH * dpr;
   canvas.width = W; canvas.height = H;
-  canvas.style.width = '400px'; canvas.style.height = '260px';
+  canvas.style.width = displayW + 'px'; canvas.style.height = displayH + 'px';
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, W, H);
 
