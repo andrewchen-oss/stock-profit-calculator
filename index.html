@@ -279,6 +279,12 @@
   }
   .result-chart-box canvas { width:100%; height:auto; display:block; margin-top:8px; }
 
+  .left-result-extras {
+    margin-top:12px; display:flex; flex-direction:column; gap:10px;
+    animation:slideUp 0.4s ease;
+  }
+  .left-result-extras .roast-card { margin:0; }
+
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   @keyframes pixelPop { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
   @keyframes shake { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg)} 40%{transform:rotate(8deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(4deg)} }
@@ -690,6 +696,17 @@
       </div>
       <button class="btn-calculate" id="btn-calc" onclick="calculate()">PRESS START >>> 开算！🕹️</button>
       <div class="error-msg" id="error-msg"></div>
+
+      <!-- Chart + fun cards below input (shown after calc) -->
+      <div class="left-result-extras" id="left-extras" style="display:none">
+        <div class="result-chart-box">
+          <div class="roast-title">📈 PRICE CHART</div>
+          <canvas id="result-chart" width="600" height="260"></canvas>
+        </div>
+        <div class="roast-card roast-equivalents"><div class="roast-title">💰 LOOT DROP</div><ul class="equiv-list" id="equiv-list"></ul></div>
+        <div class="roast-card roast-alt"><div class="roast-title">🌀 PARALLEL WORLD</div><div class="roast-content" id="alt-content"></div></div>
+        <div class="roast-card roast-verdict"><div class="roast-title">📋 FINAL VERDICT</div><div class="roast-content" id="verdict-content"></div></div>
+      </div>
     </div>
 
     <!-- RIGHT -->
@@ -730,19 +747,10 @@
             <div class="profit-amount" id="r-profit">+$0</div>
             <div class="profit-percent" id="r-pct">+0%</div>
           </div>
-          <div class="result-chart-box">
-            <div class="roast-title">📈 PRICE CHART</div>
-            <canvas id="result-chart" width="600" height="260"></canvas>
-          </div>
           <div class="pain-index">
             <div class="pain-label"><span class="pain-title">REGRET LV</span><span class="pain-level" id="pain-text">-</span></div>
             <div class="pain-bar-bg"><div class="pain-bar" id="pain-bar" style="width:0%"></div></div>
             <div class="pain-bar-labels"><span>还好</span><span>心痛</span><span>捶腿</span><span>删APP</span><span>出家</span></div>
-          </div>
-          <div class="roast-row">
-            <div class="roast-card roast-equivalents"><div class="roast-title">💰 LOOT DROP</div><ul class="equiv-list" id="equiv-list"></ul></div>
-            <div class="roast-card roast-alt"><div class="roast-title">🌀 PARALLEL WORLD</div><div class="roast-content" id="alt-content"></div></div>
-            <div class="roast-card roast-verdict"><div class="roast-title">📋 FINAL VERDICT</div><div class="roast-content" id="verdict-content"></div></div>
           </div>
           <div class="action-buttons">
             <button class="btn-share primary" onclick="openShareCard()">📸 生成分享图</button>
@@ -1161,6 +1169,7 @@ function displayResults(d){
   document.getElementById('pain-text').textContent=pl[pi];
   genEquiv(d,'equiv-list',true);genAlt(d,'alt-content');genVerdict(d,'verdict-content');
   drawChart(document.getElementById('result-chart'), d);
+  document.getElementById('left-extras').style.display='';
   sec.classList.add('show');sec.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1382,6 +1391,7 @@ function resetForm(){
   document.getElementById('result-section').classList.remove('show');
   document.getElementById('comp-box').classList.remove('show');
   document.getElementById('placeholder-panel').style.display='';
+  document.getElementById('left-extras').style.display='none';
   selectedStock='';document.getElementById('stock-code').value='';
   document.getElementById('buy-price').value='';document.getElementById('buy-amount').value='';
   document.getElementById('sell-check').checked=false;document.getElementById('sell-date-row').classList.remove('show');
