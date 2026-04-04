@@ -1375,10 +1375,9 @@ function openShareCard(){
 
   genVerdict(d,'sc-verdict');
 
-  // Draw chart
-  drawChart(document.getElementById('sc-chart'), d);
-
+  // Show overlay first, then draw chart (needs visible container for sizing)
   document.getElementById('share-overlay').classList.add('show');
+  requestAnimationFrame(()=>{drawChart(document.getElementById('sc-chart'), d)});
 }
 
 function closeShareCard(){document.getElementById('share-overlay').classList.remove('show')}
