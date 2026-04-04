@@ -292,6 +292,7 @@
   .result-summary {
     background:var(--card); border:2px solid var(--card-border);
     border-radius:4px; padding:18px; box-shadow:4px 4px 0px rgba(0,0,0,0.3); position:relative;
+    display:flex; flex-direction:column; gap:10px;
   }
   .result-summary::before {
     content:''; position:absolute; top:0; left:0; width:100%; height:2px;
@@ -362,10 +363,10 @@
 
   .roast-alt { background:rgba(124,92,252,0.04); border-color:var(--accent); }
   .roast-alt .roast-title { color:var(--accent-light); }
-  .roast-verdict { background:rgba(248,113,113,0.04); border-color:var(--red); grid-column:1/-1; }
+  .roast-verdict { background:rgba(248,113,113,0.04); border-color:var(--red); }
   .roast-verdict .roast-title { color:var(--red); }
 
-  .action-buttons { display:flex; gap:8px; }
+  .action-buttons { display:flex; gap:8px; margin-top:10px; }
   .btn-share {
     flex:1; padding:11px; border-radius:2px; font-size:13px; font-weight:700;
     cursor:pointer; border:2px solid; display:flex; align-items:center; justify-content:center; gap:6px;
@@ -1168,9 +1169,11 @@ function displayResults(d){
   document.getElementById('pain-bar').style.width=pp+'%';
   document.getElementById('pain-text').textContent=pl[pi];
   genEquiv(d,'equiv-list',true);genAlt(d,'alt-content');genVerdict(d,'verdict-content');
-  drawChart(document.getElementById('result-chart'), d);
   document.getElementById('left-extras').style.display='';
-  sec.classList.add('show');sec.scrollIntoView({behavior:'smooth',block:'start'});
+  sec.classList.add('show');
+  // Draw chart after section is visible so canvas has proper width
+  requestAnimationFrame(()=>{drawChart(document.getElementById('result-chart'), d)});
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ===== Generators =====
