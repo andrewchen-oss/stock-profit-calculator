@@ -366,7 +366,17 @@
   .roast-verdict { background:rgba(248,113,113,0.04); border-color:var(--red); }
   .roast-verdict .roast-title { color:var(--red); }
 
-  .action-buttons { display:flex; gap:8px; margin-top:10px; }
+  .action-buttons-row {
+    grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:4px;
+  }
+  .btn-action-full {
+    padding:16px; border-radius:4px; font-size:16px; font-weight:700;
+    cursor:pointer; border:2px solid; display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:4px 4px 0px rgba(0,0,0,0.3); transition:all 0.15s;
+  }
+  .btn-action-full:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0px rgba(0,0,0,0.3); }
+  .btn-action-full.primary { background:var(--green-dark); border-color:var(--green); color:#fff; }
+  .btn-action-full.accent { background:var(--accent); border-color:var(--accent-light); color:#fff; }
   .btn-share {
     flex:1; padding:11px; border-radius:2px; font-size:13px; font-weight:700;
     cursor:pointer; border:2px solid; display:flex; align-items:center; justify-content:center; gap:6px;
@@ -753,13 +763,13 @@
             <div class="pain-bar-labels"><span>还好</span><span>心痛</span><span>捶腿</span><span>删APP</span><span>出家</span></div>
           </div>
           <div class="roast-card roast-verdict"><div class="roast-title">📋 FINAL VERDICT</div><div class="roast-content" id="verdict-content"></div></div>
-          <div class="action-buttons">
-            <button class="btn-share primary" onclick="openShareCard()">📸 生成分享图</button>
-            <button class="btn-share secondary" onclick="copyShareText()">📋 复制文案</button>
-            <button class="btn-share accent" onclick="resetForm()">🔄 再来一只</button>
-          </div>
         </div>
       </div>
+    </div>
+
+    <div class="action-buttons-row" id="action-buttons-row" style="display:none">
+      <button class="btn-action-full primary" onclick="openShareCard()">📸 生成分享图</button>
+      <button class="btn-action-full accent" onclick="resetForm()">🔄 再来一只</button>
     </div>
 
     <div class="history-section" id="history-section" style="display:none">
@@ -1170,6 +1180,7 @@ function displayResults(d){
   document.getElementById('pain-text').textContent=pl[pi];
   genEquiv(d,'equiv-list',true);genAlt(d,'alt-content');genVerdict(d,'verdict-content');
   document.getElementById('left-extras').style.display='';
+  document.getElementById('action-buttons-row').style.display='';
   sec.classList.add('show');
   // Draw chart after section is visible so canvas has proper width
   requestAnimationFrame(()=>{drawChart(document.getElementById('result-chart'), d)});
@@ -1397,6 +1408,7 @@ function resetForm(){
   document.getElementById('comp-box').classList.remove('show');
   document.getElementById('placeholder-panel').style.display='';
   document.getElementById('left-extras').style.display='none';
+  document.getElementById('action-buttons-row').style.display='none';
   selectedStock='';document.getElementById('stock-code').value='';
   document.getElementById('buy-price').value='';document.getElementById('buy-amount').value='';
   document.getElementById('sell-check').checked=false;document.getElementById('sell-date-row').classList.remove('show');
