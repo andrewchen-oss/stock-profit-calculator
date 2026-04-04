@@ -182,8 +182,29 @@
 
   .or-divider { text-align:center; color:var(--text-muted); font-family:'Press Start 2P',monospace; font-size:7px; margin:6px 0; }
 
-  .custom-input-row { display:flex; gap:8px; margin-bottom:10px; }
+  .custom-input-row { display:flex; gap:8px; margin-bottom:10px; position:relative; }
   .custom-input-row input { flex:1; }
+
+  /* Autocomplete dropdown */
+  .autocomplete-dropdown {
+    position:absolute; top:100%; left:0; right:0; z-index:100;
+    background:var(--card); border:2px solid var(--accent);
+    border-top:none; border-radius:0 0 4px 4px;
+    max-height:220px; overflow-y:auto; display:none;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  }
+  .autocomplete-dropdown.show { display:block; }
+  .autocomplete-item {
+    padding:8px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.1s;
+  }
+  .autocomplete-item:hover, .autocomplete-item.active { background:rgba(124,92,252,0.2); }
+  .autocomplete-item .ac-symbol { font-weight:800; color:var(--gold); font-size:13px; }
+  .autocomplete-item .ac-name { color:var(--text-dim); font-size:11px; flex:1; margin-left:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .autocomplete-item .ac-exchange { color:var(--text-muted); font-size:9px; font-family:'Press Start 2P',monospace; }
+  .autocomplete-dropdown::-webkit-scrollbar { width:4px; }
+  .autocomplete-dropdown::-webkit-scrollbar-thumb { background:var(--accent); }
+  .ac-hint { padding:6px 12px; color:var(--text-muted); font-size:10px; text-align:center; }
 
   .form-group { margin-bottom:10px; }
   .form-label { display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px; font-weight:600; }
@@ -613,7 +634,10 @@
       <input type="text" class="stock-search" id="stock-search" placeholder="搜索代码或名称..." oninput="filterStocks()">
       <div class="stock-grid" id="stock-grid"></div>
       <div class="or-divider">- OR -</div>
-      <div class="custom-input-row"><input type="text" class="form-input" id="stock-code" placeholder="手动输入代码" autocomplete="off" autocapitalize="characters"></div>
+      <div class="custom-input-row">
+        <input type="text" class="form-input" id="stock-code" placeholder="搜索任意股票代码或名称..." autocomplete="off" autocapitalize="characters" oninput="onStockCodeInput(this.value)" onkeydown="onAcKeydown(event)">
+        <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+      </div>
 
       <div class="card-title">STAGE 3: 你的操作</div>
       <div class="form-group">
@@ -928,7 +952,57 @@ function renderStockGrid(f='') {
 }
 
 function filterStocks(){renderStockGrid(document.getElementById('stock-search').value)}
-function pickStock(c){selectedStock=c;document.getElementById('stock-code').value=c;renderStockGrid(document.getElementById('stock-search').value)}
+function pickStock(c){selectedStock=c;document.getElementById('stock-code').value=c;renderStockGrid(document.getElementById('stock-search').value);hideAcDropdown()}
+
+// ===== Autocomplete for any stock =====
+let acTimer=null, acResults=[], acIdx=-1;
+function onStockCodeInput(val) {
+  clearTimeout(acTimer);
+  if(!val||val.length<1){hideAcDropdown();return}
+  acTimer=setTimeout(()=>searchStocks(val),300);
+}
+async function searchStocks(q) {
+  try {
+    const r=await fetch(`/api/search?q=${encodeURIComponent(q)}`,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)return;
+    const d=await r.json();
+    acResults=d.results||[];
+    renderAcDropdown();
+  } catch(e) {
+    // If API unavailable (local dev), just hide
+    hideAcDropdown();
+  }
+}
+function renderAcDropdown() {
+  const dd=document.getElementById('ac-dropdown');
+  if(!acResults.length){dd.innerHTML='<div class="ac-hint">没找到相关股票</div>';dd.classList.add('show');return}
+  dd.innerHTML=acResults.map((r,i)=>`<div class="autocomplete-item ${i===acIdx?'active':''}" onmousedown="pickAcResult(${i})"><span class="ac-symbol">${r.symbol}</span><span class="ac-name">${r.name}</span><span class="ac-exchange">${r.exchange}</span></div>`).join('');
+  dd.classList.add('show');
+  acIdx=-1;
+}
+function hideAcDropdown(){const dd=document.getElementById('ac-dropdown');dd.classList.remove('show');acResults=[];acIdx=-1}
+function pickAcResult(i) {
+  const r=acResults[i];if(!r)return;
+  // Determine market from symbol suffix
+  const sym=r.symbol;
+  const inp=document.getElementById('stock-code');
+  if(sym.endsWith('.HK')){selectMarket('hk');inp.value=sym.replace('.HK','');selectedStock=inp.value}
+  else if(sym.endsWith('.SS')){selectMarket('sh');inp.value=sym.replace('.SS','');selectedStock=inp.value}
+  else if(sym.endsWith('.SZ')){selectMarket('sz');inp.value=sym.replace('.SZ','');selectedStock=inp.value}
+  else{selectMarket('us');inp.value=sym;selectedStock=sym}
+  hideAcDropdown();
+  renderStockGrid(document.getElementById('stock-search').value);
+}
+function onAcKeydown(e) {
+  const dd=document.getElementById('ac-dropdown');
+  if(!dd.classList.contains('show')||!acResults.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();acIdx=Math.min(acIdx+1,acResults.length-1);renderAcDropdown()}
+  else if(e.key==='ArrowUp'){e.preventDefault();acIdx=Math.max(acIdx-1,0);renderAcDropdown()}
+  else if(e.key==='Enter'&&acIdx>=0){e.preventDefault();pickAcResult(acIdx)}
+  else if(e.key==='Escape'){hideAcDropdown()}
+}
+// Close dropdown when clicking outside
+document.addEventListener('click',e=>{if(!e.target.closest('.custom-input-row'))hideAcDropdown()})
 
 function setBuyMode(m) {
   buyMode=m;
