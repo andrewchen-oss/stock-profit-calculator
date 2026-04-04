@@ -272,6 +272,13 @@
   .result-section { display:none; animation:slideUp 0.4s ease; }
   .result-section.show { display:block; }
 
+  .result-chart-box {
+    background:var(--card); border:2px solid var(--card-border);
+    border-radius:4px; padding:14px; margin-top:10px;
+    box-shadow:4px 4px 0px rgba(0,0,0,0.3);
+  }
+  .result-chart-box canvas { width:100%; height:auto; display:block; margin-top:8px; }
+
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   @keyframes pixelPop { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
   @keyframes shake { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg)} 40%{transform:rotate(8deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(4deg)} }
@@ -723,6 +730,10 @@
             <div class="profit-amount" id="r-profit">+$0</div>
             <div class="profit-percent" id="r-pct">+0%</div>
           </div>
+          <div class="result-chart-box">
+            <div class="roast-title">📈 PRICE CHART</div>
+            <canvas id="result-chart" width="600" height="260"></canvas>
+          </div>
           <div class="pain-index">
             <div class="pain-label"><span class="pain-title">REGRET LV</span><span class="pain-level" id="pain-text">-</span></div>
             <div class="pain-bar-bg"><div class="pain-bar" id="pain-bar" style="width:0%"></div></div>
@@ -1149,6 +1160,7 @@ function displayResults(d){
   document.getElementById('pain-bar').style.width=pp+'%';
   document.getElementById('pain-text').textContent=pl[pi];
   genEquiv(d,'equiv-list',true);genAlt(d,'alt-content');genVerdict(d,'verdict-content');
+  drawChart(document.getElementById('result-chart'), d);
   sec.classList.add('show');sec.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
