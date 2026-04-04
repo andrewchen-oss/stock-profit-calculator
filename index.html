@@ -824,7 +824,7 @@
         <!-- Footer -->
         <div class="sc-footer">
           <div class="sf-left">GAME OVER<br>韭菜后悔计算器</div>
-          <div class="sf-right">你也来算算你错过了多少钱<br>「要是当初卖了就好了...」</div>
+          <div class="sf-right">𝕏 @0xajc · 📕 小红书:陈锦初Andrew<br>你也来算算你错过了多少钱 →</div>
         </div>
       </div>
     </div>
@@ -1359,7 +1359,7 @@ function copyShareText(){
   if(!lastResult)return;const d=lastResult,m=getMeta(d.profitPercent);
   let t=`🕹️【${m.title}】\n\n📊 ${d.stockCode} ${d.stockName} (${d.market})\n💰 买入:${d.currency}${fN(d.buyPrice)}×${d.quantity}股\n📈 历史最高:${d.currency}${fN(d.highPrice)}\n${d.profit>=0?'🤑':'🤡'} 最高点能赚:${fC(d.profit,d.currency)} (${d.profitPercent>=0?'+':''}${d.profitPercent.toFixed(2)}%)\n`;
   if(d.hasSell)t+=`\n⚔️ 实际卖出:${d.currency}${fN(d.sellPrice)}\n😭 少赚了:${fC(d.missedProfit,d.currency)}\n`;
-  t+=`\n${m.quote.q}\n${m.quote.s}\n\n来算算你错过了多少钱👇 韭菜后悔计算器`;
+  t+=`\n${m.quote.q}\n${m.quote.s}\n\n来算算你错过了多少钱👇 韭菜后悔计算器\n𝕏 @0xajc | 📕 小红书:陈锦初Andrew`;
   navigator.clipboard.writeText(t).then(()=>showToast('文案已复制！')).catch(()=>showToast('复制失败'));
 }
 
