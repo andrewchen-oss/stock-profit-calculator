@@ -843,12 +843,13 @@ let currentMarket='us', buyMode='shares', selectedStock='', lastResult=null;
 let calculationHistory = JSON.parse(localStorage.getItem('stock-calc-history-v5')||'[]');
 
 // Meme background images
-const MEME_BG_URLS = [
-  'https://media.giphy.com/media/YnkMcHgNIMW4Ifi4i4/giphy.gif', // wolf of wall street
-  'https://media.giphy.com/media/67ThRZlYBvibtdF9JH/giphy.gif', // stonks
-  'https://media.giphy.com/media/ND6xkVPaj8tHO/giphy.gif', // money rain
-  'https://i.imgflip.com/9mpfqs.jpg', // stonks meme
-  'https://i.imgflip.com/4acd7j.png', // always has been
+// CSS gradient backgrounds for share card (no external dependencies)
+const MEME_BG_STYLES = [
+  'linear-gradient(135deg, #0c0c1d 0%, #1a0a2e 30%, #2d1b4e 60%, #0c0c1d 100%)', // dark purple
+  'linear-gradient(135deg, #0a1628 0%, #0d2137 30%, #132e45 60%, #0a1628 100%)', // dark blue
+  'linear-gradient(135deg, #1a0a0a 0%, #2d1212 30%, #3d1a1a 60%, #1a0a0a 100%)', // dark red (loss)
+  'linear-gradient(135deg, #0a1a0a 0%, #122d12 30%, #1a3d1a 60%, #0a1a0a 100%)', // dark green (profit)
+  'linear-gradient(135deg, #1a1a0a 0%, #2d2d12 30%, #3d3d1a 60%, #1a1a0a 100%)', // dark gold
 ];
 
 const MARKET_CONFIG = {
@@ -1100,7 +1101,6 @@ async function calculate() {
       chartData};
     displayResults(lastResult);
     saveToHistory({code,name,market:currentMarket,buyPrice,highPrice:hp,buyDate:dateStr,quantity,profit:peakProfit,profitPercent:peakPct,currency:cfg.currency});
-    document.getElementById('wallet-hp').style.width=Math.max(5,100-Math.min(peakPct,100))+'%';
   }catch(err){showError(err.message||'出错了')}
   finally{btn.disabled=false;btn.textContent='PRESS START >>> 开算！🕹️'}
 }
@@ -1293,9 +1293,12 @@ function openShareCard(){
   if(!lastResult)return;
   const d=lastResult,m=getMeta(d.profitPercent);
 
-  // Set meme background
-  const bgUrl = MEME_BG_URLS[Math.floor(Math.random()*MEME_BG_URLS.length)];
-  document.getElementById('sc-bg').style.backgroundImage = `url(${bgUrl})`;
+  // Set background - pick color based on profit level
+  const bgIdx = d.profitPercent > 100 ? 3 : d.profitPercent > 0 ? 4 : 2; // green for big win, gold for small win, red for loss
+  const bg = MEME_BG_STYLES[bgIdx] || MEME_BG_STYLES[0];
+  const scBg = document.getElementById('sc-bg');
+  scBg.style.backgroundImage = bg;
+  scBg.style.backgroundSize = 'cover';
 
   document.getElementById('sc-emoji').textContent=m.emoji;
   document.getElementById('sc-title').textContent=m.title;
