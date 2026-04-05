@@ -1,50 +1,68 @@
 # 要是当初卖了就好了... 🕹️
 
-> 韭菜后悔计算器 — 股票假设盈亏计算工具
+> 韭菜后悔计算器 — 看看你错过了多少钱
 
 输入你的买入记录，看看如果在**历史最高点**完美逃顶，你现在应该在马尔代夫而不是在工位。
 
-## 功能特点
+🔗 **在线体验**: [stock-profit-calculator-seven.vercel.app](https://stock-profit-calculator-seven.vercel.app)
 
-- **四大市场**：美股 / 港股 / 沪A / 深A，覆盖 80+ 热门股票，支持手动输入任意代码
-- **灵活买入方式**：按股数或按总金额买入，买入价可自动获取或手动填写
-- **卖出对比**：填写实际卖出信息，展示「你的操作 VS 完美操作」，看看你少赚了多少
-- **像素游戏风格**：Press Start 2P 字体、STAGE 关卡引导、REGRET LV 后悔进度条、GAME OVER 特效
-- **Meme 语录库**：按收益率分 5 档，随机生成搞笑配文（"拿住！钻石手！然后就没有然后了"）
-- **等价物换算**：把你错过的钱换算成 iPhone、喜茶、PS5、日本机票、马尔代夫旅游...
-- **韭菜鉴定报告**：选股评分 S~F、持有分析、每天少赚多少
-- **分享图生成**：一键生成包含完整数据和 meme 的分享卡片，支持下载图片和复制文案
-- **计算历史**：本地存储，方便回顾你的后悔清单
+## 功能
 
-## 使用方式
+- **全球股票** — 美股 / 港股 / 沪A / 深A 热门股票一键选择，支持搜索任意股票
+- **灵活输入** — 按股数或总金额买入，支持填写实际卖出日期对比
+- **你的操作 VS 完美操作** — 看看你比最佳时机少赚了多少
+- **价格走势图** — 标注买入点、卖出点、历史最高点
+- **等价物换算** — 错过的钱能买多少 iPhone、喜茶、PS5、日本机票...
+- **韭菜鉴定** — S~F 评分、后悔等级、每天少赚多少
+- **Meme 语录** — 按收益率分 5 档随机生成搞笑配文
+- **分享图生成** — 一键生成带数据和走势图的分享卡片
+- **像素游戏风格** — STAGE 关卡、REGRET LV 后悔条、GAME OVER 特效
 
-纯静态单页应用，无需后端，直接打开 `index.html` 即可使用。
+## 技术栈
 
-### 在线访问
+- 纯前端单页应用 (HTML/CSS/JS)，无框架依赖
+- Vercel Serverless Functions 代理 Yahoo Finance API
+- Canvas API 绘制价格走势图
+- html2canvas 生成分享截图
+- Press Start 2P 像素字体
 
-开启 GitHub Pages 后可通过以下地址访问：
+## 部署
 
-```
-https://andrewchen-oss.github.io/stock-profit-calculator/
-```
-
-### 本地运行
+### Vercel (推荐)
 
 ```bash
-# 直接用浏览器打开
-open index.html
+# 安装 Vercel CLI
+npm i -g vercel
 
-# 或者起一个本地服务器
+# 一键部署
+vercel --prod
+```
+
+### 本地开发
+
+```bash
 npx http-server -p 8080
 ```
 
-## 数据来源
+> 注意：本地运行时 `/api/stock` 代理不可用，需要部署到 Vercel 才能正常获取股票数据。
 
-股票历史数据通过 Yahoo Finance API 获取，使用 CORS 代理解决跨域问题。
+## 项目结构
 
-## 免责声明
+```
+├── index.html        # 完整的单页应用
+├── api/
+│   ├── stock.js      # Yahoo Finance 数据代理 (Vercel Serverless)
+│   └── search.js     # 股票搜索接口 (Vercel Serverless)
+├── vercel.json       # Vercel 配置
+└── package.json
+```
 
-本工具纯属娱乐整活，数据来自公开市场接口，不构成任何投资建议。股市有风险，韭菜需自知。
+## 作者
+
+**陈锦初 Andrew**
+
+- 𝕏: [@0xajc](https://x.com/0xajc)
+- 小红书: [陈锦初Andrew（AI创业版）](https://www.xiaohongshu.com/user/profile/67c46824000000000a03e9b6)
 
 ## License
 
