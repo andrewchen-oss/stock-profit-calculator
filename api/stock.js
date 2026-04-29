@@ -54,10 +54,41 @@ async function fetchTushareDaily(symbol, period1) {
   const endDate = ymd(Math.floor(Date.now() / 1000));
   const isHK = ts.endsWith('.HK');
   const isA = /\.(SH|SZ|BJ)$/i.test(ts);
-  const apiName = isHK ? 'hk_daily' : (isA ? 'daily' : 'us_daily');
   const fields = 'ts_code,trade_date,open,high,low,close,vol';
-  // Tushare returns up to 6000 rows per call; for very long history we may need pagination
-  let rows = await tushare(apiName, { ts_code: ts, start_date: startDate, end_date: endDate }, fields);
+
+  let rows;
+  if (isHK) {
+    // hk_daily_adj returns front-adjusted (qfq) prices
+    rows = await tushare('hk_daily_adj', { ts_code: ts, start_date: startDate, end_date: endDate }, fields);
+  } else if (isA) {
+    // A-shares: combine daily + adj_factor for qfq
+    const [daily, factors] = await Promise.all([
+      tushare('daily', { ts_code: ts, start_date: startDate, end_date: endDate }, fields),
+      tushare('adj_factor', { ts_code: ts, start_date: startDate, end_date: endDate }, 'ts_code,trade_date,adj_factor'),
+    ]);
+    if (!daily || daily.length === 0) return null;
+    const factorMap = new Map(factors.map(f => [f.trade_date, Number(f.adj_factor)]));
+    // Latest factor = factor on most recent trade date in range
+    const latestFactor = factors.length ? Number(factors[0].adj_factor) : 1;
+    rows = daily.map(r => {
+      const f = factorMap.get(r.trade_date) || latestFactor;
+      const ratio = f / latestFactor;
+      return {
+        ts_code: r.ts_code,
+        trade_date: r.trade_date,
+        open: Number(r.open) * ratio,
+        high: Number(r.high) * ratio,
+        low: Number(r.low) * ratio,
+        close: Number(r.close) * ratio,
+        vol: r.vol,
+      };
+    });
+  } else {
+    // US: Tushare us_daily_adj is rate-limited (1/hr on lower tiers).
+    // Return null so the handler falls back to Yahoo (which provides adjclose).
+    return null;
+  }
+
   if (!rows || rows.length === 0) return null;
   // Tushare returns descending by date — sort ascending
   rows.sort((a, b) => a.trade_date.localeCompare(b.trade_date));
@@ -122,6 +153,29 @@ function buildYahooUrl(base, symbol, period1, crumb) {
   return `${base}/v8/finance/chart/${encodeURIComponent(symbol)}?${params}`;
 }
 
+function applyAdjClose(data) {
+  // Yahoo returns BOTH close (raw) and adjclose (split+dividend adjusted).
+  // Replace close with adjclose so the frontend gets corrected prices.
+  const r = data?.chart?.result?.[0];
+  if (!r) return data;
+  const adj = r.indicators?.adjclose?.[0]?.adjclose;
+  const q = r.indicators?.quote?.[0];
+  if (!adj || !q || !q.close) return data;
+  // Compute scale = adjclose / close, apply to OHLC so chart highs/lows are also adjusted
+  const n = q.close.length;
+  for (let i = 0; i < n; i++) {
+    const c = q.close[i];
+    const a = adj[i];
+    if (c == null || a == null || c === 0) continue;
+    const k = a / c;
+    q.close[i] = a;
+    if (q.open?.[i] != null) q.open[i] *= k;
+    if (q.high?.[i] != null) q.high[i] *= k;
+    if (q.low?.[i] != null) q.low[i] *= k;
+  }
+  return data;
+}
+
 async function fetchYahoo(symbol, period1) {
   // Approach 1: crumb auth
   try {
@@ -131,7 +185,7 @@ async function fetchYahoo(symbol, period1) {
       const r = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': auth.cookie } });
       if (r.ok) {
         const data = await r.json();
-        if (data?.chart?.result?.[0]) return data;
+        if (data?.chart?.result?.[0]) return applyAdjClose(data);
       } else {
         cachedAuth = null;
       }
@@ -143,7 +197,7 @@ async function fetchYahoo(symbol, period1) {
     const r = await fetch(url, { headers: { 'User-Agent': UA } });
     if (r.ok) {
       const data = await r.json();
-      if (data?.chart?.result?.[0]) return data;
+      if (data?.chart?.result?.[0]) return applyAdjClose(data);
     }
   } catch {}
   return null;
