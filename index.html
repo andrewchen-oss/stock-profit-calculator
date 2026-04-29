@@ -672,13 +672,12 @@
         <button class="market-tab" data-market="sz" onclick="selectMarket('sz')"><span class="flag">🇨🇳</span>深A</button>
       </div>
       <div class="card-title">STAGE 2: 选一只心痛的票</div>
-      <input type="text" class="stock-search" id="stock-search" placeholder="搜索代码或名称..." oninput="filterStocks()">
-      <div class="stock-grid" id="stock-grid"></div>
-      <div class="or-divider">- OR -</div>
-      <div class="custom-input-row">
-        <input type="text" class="form-input" id="stock-code" placeholder="搜索任意股票代码或名称..." autocomplete="off" autocapitalize="characters" oninput="onStockCodeInput(this.value)" onkeydown="onAcKeydown(event)">
+      <div class="custom-input-row" style="margin-bottom:8px">
+        <input type="text" class="form-input" id="stock-code" placeholder="输入代码或名称搜索（如 AAPL、苹果、贵州茅台）..." autocomplete="off" autocapitalize="characters" oninput="onStockCodeInput(this.value)" onkeydown="onAcKeydown(event)" onfocus="onStockCodeInput(this.value)">
         <div class="autocomplete-dropdown" id="ac-dropdown"></div>
       </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">或从下方热门票快速选择 ↓</div>
+      <div class="stock-grid" id="stock-grid"></div>
 
       <div class="card-title">STAGE 3: 你的操作</div>
       <div class="form-group">
@@ -1040,99 +1039,92 @@ function selectMarket(m) {
   document.querySelectorAll('.market-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector(`[data-market="${m}"]`).classList.add('active');
   document.getElementById('stock-code').value='';
-  document.getElementById('stock-search').value='';
   renderStockGrid();
 }
 
-function renderStockGrid(f='', extra=[]) {
+function renderStockGrid() {
   const g=document.getElementById('stock-grid');
   const stocks=MARKET_CONFIG[currentMarket].stocks;
-  const fl=f.toLowerCase();
-  let list=fl?stocks.filter(s=>s.code.toLowerCase().includes(fl)||s.name.toLowerCase().includes(fl)):stocks;
-  // Merge in API results (deduped by code)
-  if(extra&&extra.length){
-    const seen=new Set(list.map(s=>s.code));
-    for(const e of extra){if(!seen.has(e.code)){list.push(e);seen.add(e.code)}}
-  }
-  if(!list.length){
-    g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--text-muted);font-size:11px">没找到，试试在下方"搜索任意股票"框里输入完整代码</div>`;
-    return;
-  }
-  g.innerHTML=list.map(s=>`<div class="stock-chip ${selectedStock===s.code?'selected':''}" onclick="pickStock('${s.code}')"><span class="code">${s.code}</span>${s.name}</div>`).join('');
+  g.innerHTML=stocks.map(s=>`<div class="stock-chip ${selectedStock===s.code?'selected':''}" onclick="pickStock('${s.code}')"><span class="code">${s.code}</span>${s.name}</div>`).join('');
 }
 
-let stockSearchTimer=null;
-function filterStocks(){
-  const v=document.getElementById('stock-search').value;
-  renderStockGrid(v);
-  // If user typed something, also query API to find more matches across the whole market
-  clearTimeout(stockSearchTimer);
-  if(!v||v.length<1)return;
-  stockSearchTimer=setTimeout(()=>fetchAndMergeStocks(v),350);
+function pickStock(c){
+  selectedStock=c;
+  const stocks=MARKET_CONFIG[currentMarket].stocks;
+  const found=stocks.find(s=>s.code===c);
+  document.getElementById('stock-code').value=found?`${c} ${found.name}`:c;
+  renderStockGrid();
+  hideAcDropdown();
 }
-async function fetchAndMergeStocks(q){
-  // Skip if user already cleared input
-  if(document.getElementById('stock-search').value!==q)return;
-  try{
-    const r=await fetch(`/api/search?q=${encodeURIComponent(q)}`,{signal:AbortSignal.timeout(5000)});
-    if(!r.ok)return;
-    const d=await r.json();
-    const suffix=MARKET_CONFIG[currentMarket].suffix;
-    // Filter API results to current market only
-    const extra=(d.results||[]).filter(item=>{
-      const sym=item.symbol||'';
-      if(currentMarket==='us'){return !sym.includes('.')||sym.endsWith('.US')}
-      return sym.endsWith(suffix);
-    }).map(item=>({
-      code:(item.symbol||'').replace(suffix,''),
-      name:item.name||item.symbol,
-    }));
-    // Re-render with merged results (only if user is still on the same query)
-    if(document.getElementById('stock-search').value===q){
-      renderStockGrid(q,extra);
-    }
-  }catch(e){/* silent */}
-}
-function pickStock(c){selectedStock=c;document.getElementById('stock-code').value=c;renderStockGrid(document.getElementById('stock-search').value);hideAcDropdown()}
 
-// ===== Autocomplete for any stock =====
+// ===== Autocomplete: local + API combined =====
 let acTimer=null, acResults=[], acIdx=-1;
 function onStockCodeInput(val) {
   clearTimeout(acTimer);
-  if(!val||val.length<1){hideAcDropdown();return}
-  acTimer=setTimeout(()=>searchStocks(val),300);
+  // Show local matches immediately
+  const local=getLocalMatches(val);
+  acResults=local;
+  if(local.length){renderAcDropdown()}
+  // Then enrich with API results (only if user typed something)
+  if(!val||val.length<1){
+    if(!local.length)hideAcDropdown();
+    return;
+  }
+  acTimer=setTimeout(()=>searchStocks(val,local),300);
 }
-async function searchStocks(q) {
+function getLocalMatches(val){
+  if(!val)return [];
+  const v=val.toLowerCase().trim();
+  // Search across ALL markets so user can find stocks regardless of current tab
+  const out=[];
+  for(const [mkt,cfg] of Object.entries(MARKET_CONFIG)){
+    for(const s of cfg.stocks){
+      if(s.code.toLowerCase().includes(v)||s.name.toLowerCase().includes(v)){
+        out.push({symbol:s.code+cfg.suffix,name:s.name,exchange:cfg.name,_market:mkt,_code:s.code});
+      }
+    }
+  }
+  return out.slice(0,12);
+}
+async function searchStocks(q,localResults) {
   try {
     const r=await fetch(`/api/search?q=${encodeURIComponent(q)}`,{signal:AbortSignal.timeout(5000)});
     if(!r.ok)return;
     const d=await r.json();
-    acResults=d.results||[];
+    // Merge local + API, dedupe by symbol
+    const merged=[...(localResults||[])];
+    const seen=new Set(merged.map(x=>x.symbol));
+    for(const a of (d.results||[])){
+      if(!seen.has(a.symbol)){merged.push(a);seen.add(a.symbol)}
+    }
+    acResults=merged;
     renderAcDropdown();
   } catch(e) {
-    // If API unavailable (local dev), just hide
-    hideAcDropdown();
+    // If API unavailable, keep local results visible
+    if(!acResults.length)hideAcDropdown();
   }
 }
 function renderAcDropdown() {
   const dd=document.getElementById('ac-dropdown');
-  if(!acResults.length){dd.innerHTML='<div class="ac-hint">没找到相关股票</div>';dd.classList.add('show');return}
-  dd.innerHTML=acResults.map((r,i)=>`<div class="autocomplete-item ${i===acIdx?'active':''}" onmousedown="pickAcResult(${i})"><span class="ac-symbol">${r.symbol}</span><span class="ac-name">${r.name}</span><span class="ac-exchange">${r.exchange}</span></div>`).join('');
+  if(!acResults.length){dd.innerHTML='<div class="ac-hint">没找到相关股票，试试输入完整代码</div>';dd.classList.add('show');return}
+  dd.innerHTML=acResults.map((r,i)=>`<div class="autocomplete-item ${i===acIdx?'active':''}" onmousedown="pickAcResult(${i})"><span class="ac-symbol">${r.symbol}</span><span class="ac-name">${r.name||''}</span><span class="ac-exchange">${r.exchange||''}</span></div>`).join('');
   dd.classList.add('show');
   acIdx=-1;
 }
 function hideAcDropdown(){const dd=document.getElementById('ac-dropdown');dd.classList.remove('show');acResults=[];acIdx=-1}
 function pickAcResult(i) {
   const r=acResults[i];if(!r)return;
-  // Determine market from symbol suffix
   const sym=r.symbol;
   const inp=document.getElementById('stock-code');
-  if(sym.endsWith('.HK')){selectMarket('hk');inp.value=sym.replace('.HK','');selectedStock=inp.value}
-  else if(sym.endsWith('.SS')){selectMarket('sh');inp.value=sym.replace('.SS','');selectedStock=inp.value}
-  else if(sym.endsWith('.SZ')){selectMarket('sz');inp.value=sym.replace('.SZ','');selectedStock=inp.value}
-  else{selectMarket('us');inp.value=sym;selectedStock=sym}
+  let code=sym, name=r.name||'';
+  if(sym.endsWith('.HK')){selectMarket('hk');code=sym.replace('.HK','')}
+  else if(sym.endsWith('.SS')){selectMarket('sh');code=sym.replace('.SS','')}
+  else if(sym.endsWith('.SZ')){selectMarket('sz');code=sym.replace('.SZ','')}
+  else{selectMarket('us')}
+  selectedStock=code;
+  inp.value=name?`${code} ${name}`:code;
   hideAcDropdown();
-  renderStockGrid(document.getElementById('stock-search').value);
+  renderStockGrid();
 }
 function onAcKeydown(e) {
   const dd=document.getElementById('ac-dropdown');
@@ -1178,7 +1170,9 @@ async function fetchStockData(sym,mkt,buyDate) {
 // ===== Calculate =====
 async function calculate() {
   const btn=document.getElementById('btn-calc');
-  const code=(document.getElementById('stock-code').value||selectedStock).trim().toUpperCase();
+  // Input may contain "CODE NAME" — extract first token as the code
+  const rawInput=(document.getElementById('stock-code').value||selectedStock).trim();
+  const code=(selectedStock||rawInput.split(/\s+/)[0]||'').trim().toUpperCase();
   const dateStr=document.getElementById('buy-date').value;
   if(!code){showError('先选一只票吧');return}
   if(!dateStr){showError('上车日期呢？');return}
