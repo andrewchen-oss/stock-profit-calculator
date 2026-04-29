@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>韭菜人格鉴定 · 16人格风格预览</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #f3efe6;
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2d2d2d;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 900;
+    color: #2d2d2d;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 40px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    margin: 50px 0 20px;
+    letter-spacing: 4px;
+    font-weight: 500;
+  }
+  .section-title::before, .section-title::after {
+    content: "━";
+    margin: 0 12px;
+    color: #ccc;
+  }
+
+  /* ========== GRID OF SMALL CARDS (16personalities style) ========== */
+  .grid-section {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .mini-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .mini-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  }
+  .mini-emoji {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    line-height: 1;
+  }
+  .mini-card.purple .mini-emoji { background: linear-gradient(135deg, #b8a4d4, #8b7aa8); }
+  .mini-card.green .mini-emoji { background: linear-gradient(135deg, #a8d4b8, #6ab089); }
+  .mini-card.yellow .mini-emoji { background: linear-gradient(135deg, #f0c870, #d49d2c); }
+  .mini-card.blue .mini-emoji { background: linear-gradient(135deg, #a4c8e0, #5a91b8); }
+  .mini-zh {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 2px;
+    color: #2d2d2d;
+  }
+  .mini-en {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .mini-card.purple .mini-en { color: #6f5b95; }
+  .mini-card.green .mini-en { color: #4a9970; }
+  .mini-card.yellow .mini-en { color: #b88a1a; }
+  .mini-card.blue .mini-en { color: #3a7da4; }
+  .mini-tagline {
+    font-size: 11px;
+    color: #777;
+    line-height: 1.5;
+    min-height: 32px;
+  }
+  .mini-rarity {
+    font-size: 10px;
+    color: #aaa;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Group label above each row */
+  .group-row {
+    margin-bottom: 32px;
+  }
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+  .group-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .group-dot.purple { background: #8b7aa8; }
+  .group-dot.green { background: #6ab089; }
+  .group-dot.yellow { background: #d49d2c; }
+  .group-dot.blue { background: #5a91b8; }
+  .group-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 2px;
+  }
+  .group-sub {
+    font-size: 11px;
+    color: #999;
+  }
+
+  /* ========== RESULT / SHARE CARD (large) ========== */
+  .preview-row {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .card-wrapper { text-align: center; }
+  .card-tag {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+  .share-card {
+    width: 360px;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  .card-top {
+    padding: 28px 24px 20px;
+    text-align: center;
+    color: white;
+    position: relative;
+  }
+  .card-top.purple { background: linear-gradient(135deg, #8b7aa8 0%, #6f5b95 100%); }
+  .card-top.green { background: linear-gradient(135deg, #6ab089 0%, #4a9970 100%); }
+  .card-top.yellow { background: linear-gradient(135deg, #d49d2c 0%, #b88a1a 100%); }
+  .card-top.blue { background: linear-gradient(135deg, #5a91b8 0%, #3a7da4 100%); }
+  .top-pretitle {
+    font-size: 11px;
+    opacity: 0.85;
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+  }
+  .top-emoji {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+    line-height: 1;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  .top-zh {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    margin-bottom: 4px;
+  }
+  .top-en {
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+  .top-rarity {
+    display: inline-block;
+    background: rgba(0,0,0,0.18);
+    padding: 5px 14px;
+    border-radius: 14px;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .card-body {
+    padding: 22px 22px 18px;
+  }
+  .tagline {
+    text-align: center;
+    font-size: 15px;
+    color: #2d2d2d;
+    font-weight: 500;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+  .desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.7;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .trade-box {
+    background: #f7f5ef;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+  .trade-title {
+    font-size: 10px;
+    color: #999;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+  .trade-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    color: #555;
+  }
+  .trade-line .red { color: #c0524a; font-weight: 700; }
+  .trade-line .green { color: #4a9970; font-weight: 700; }
+
+  .profit-box {
+    text-align: center;
+    padding: 14px;
+    background: #fff8e6;
+    border: 1.5px dashed #d4a02c;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .profit-label {
+    font-size: 10px;
+    color: #b88a1a;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .profit-num {
+    font-size: 26px;
+    font-weight: 900;
+    color: #2d2d2d;
+    margin-bottom: 4px;
+  }
+  .profit-note {
+    font-size: 11px;
+    color: #888;
+  }
+
+  .card-footer {
+    text-align: center;
+    padding: 14px;
+    border-top: 1px dashed #eee;
+    background: #fafaf7;
+  }
+  .footer-domain {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d2d2d;
+    margin-bottom: 4px;
+  }
+  .footer-cta {
+    font-size: 11px;
+    color: #888;
+  }
+
+  /* OLD badge */
+  .old-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: #fbbf24;
+    color: #4a3500;
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <h1>韭菜人格鉴定 · 16 型图鉴</h1>
+  <div class="subtitle">参考 16personalities 视觉风格 · 颜色按罕见度分组</div>
+
+  <!-- ============ GRID 16 (4x4) ============ -->
+  <div class="grid-section">
+
+    <!-- Row 1: 神级稀有 (紫) -->
+    <div class="group-row">
+      <div class="group-label">
+        <span class="group-dot purple"></span>
+        <span class="group-name">神级稀有 · LEGENDARY</span>
+        <span class="group-sub">罕见度 < 3%</span>
+      </div>
+      <div class="grid">
+        <div class="mini-card purple">
+          <div class="mini-emoji">🐔</div>
+          <div class="mini-zh">鸡神</div>
+          <div class="mini-en">GOD</div>
+          <div class="mini-tagline">买在低点卖在高点的稀有物种</div>
+          <div class="mini-rarity">罕见度 2.1%</div>
+        </div>
+        <div class="mini-card purple">
+          <div class="mini-emoji">💎</div>
+          <div class="mini-zh">钻手</div>
+          <div class="mini-en">DMD</div>
+          <div class="mini-tagline">钻石手活到了铂金</div>
+          <div class="mini-rarity">罕见度 1.8%</div>
+        </div>
+        <div class="mini-card purple">
+          <div class="mini-emoji">🍀</div>
+          <div class="mini-zh">上头</div>
+          <div class="mini-en">YOLO</div>
+          <div class="mini-tagline">梭哈居然真的赚到</div>
+          <div class="mini-rarity">罕见度 0.7%</div>
+        </div>
+        <div class="mini-card purple">
+          <div class="mini-emoji">🪦</div>
+          <div class="mini-zh">神出</div>
+          <div class="mini-en">666</div>
+          <div class="mini-tagline">完美逃顶 · 韭菜界 GOAT</div>
+          <div class="mini-rarity">罕见度 0.5%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: 罕见 (绿) -->
+    <div class="group-row">
+      <div class="group-label">
+        <span class="group-dot green"></span>
+        <span class="group-name">罕见 · RARE</span>
+        <span class="group-sub">罕见度 3–5%</span>
+      </div>
+      <div class="grid">
+        <div class="mini-card green">
+          <div class="mini-emoji">🪨</div>
+          <div class="mini-zh">钢手</div>
+          <div class="mini-en">STEEL</div>
+          <div class="mini-tagline">心态比 K 线还稳</div>
+          <div class="mini-rarity">罕见度 3.4%</div>
+        </div>
+        <div class="mini-card green">
+          <div class="mini-emoji">🥬</div>
+          <div class="mini-zh">蹲底</div>
+          <div class="mini-en">DIP</div>
+          <div class="mini-tagline">真的抄到底了一次</div>
+          <div class="mini-rarity">罕见度 2.8%</div>
+        </div>
+        <div class="mini-card green">
+          <div class="mini-emoji">🤐</div>
+          <div class="mini-zh">见好</div>
+          <div class="mini-en">EXIT</div>
+          <div class="mini-tagline">翻倍前先跑一步</div>
+          <div class="mini-rarity">罕见度 4.5%</div>
+        </div>
+        <div class="mini-card green">
+          <div class="mini-emoji">🐢</div>
+          <div class="mini-zh">佛系</div>
+          <div class="mini-en">COZY</div>
+          <div class="mini-tagline">不慌不忙赚一口饭钱</div>
+          <div class="mini-rarity">罕见度 8.5%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: 中等 (黄) -->
+    <div class="group-row">
+      <div class="group-label">
+        <span class="group-dot yellow"></span>
+        <span class="group-name">中等 · COMMON</span>
+        <span class="group-sub">罕见度 5–10%</span>
+      </div>
+      <div class="grid">
+        <div class="mini-card yellow">
+          <div class="mini-emoji">🎁</div>
+          <div class="mini-zh">送了</div>
+          <div class="mini-en">SOLD</div>
+          <div class="mini-tagline">卖出键 = 涨停按钮</div>
+          <div class="mini-rarity">罕见度 6.2%</div>
+        </div>
+        <div class="mini-card yellow">
+          <div class="mini-emoji">🏔️</div>
+          <div class="mini-zh">接盘</div>
+          <div class="mini-en">TOP</div>
+          <div class="mini-tagline">你买的不是股票，是塔尖</div>
+          <div class="mini-rarity">罕见度 7.5%</div>
+        </div>
+        <div class="mini-card yellow">
+          <div class="mini-emoji">🃏</div>
+          <div class="mini-zh">小丑</div>
+          <div class="mini-en">JOKE</div>
+          <div class="mini-tagline">自导自演的悲喜剧</div>
+          <div class="mini-rarity">罕见度 5.8%</div>
+        </div>
+        <div class="mini-card yellow">
+          <div class="mini-emoji">💸</div>
+          <div class="mini-zh">跳楼</div>
+          <div class="mini-en">DUMP</div>
+          <div class="mini-tagline">砸盘式止损往往是地板价</div>
+          <div class="mini-rarity">罕见度 5.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 4: 常见 (蓝) -->
+    <div class="group-row">
+      <div class="group-label">
+        <span class="group-dot blue"></span>
+        <span class="group-name">常见 · BASIC</span>
+        <span class="group-sub">罕见度 10–20%</span>
+      </div>
+      <div class="grid">
+        <div class="mini-card blue">
+          <div class="mini-emoji">🍜</div>
+          <div class="mini-zh">没了</div>
+          <div class="mini-en">MAI</div>
+          <div class="mini-tagline">你的钱包刚到，它就走了</div>
+          <div class="mini-rarity">罕见度 15.3%</div>
+        </div>
+        <div class="mini-card blue">
+          <div class="mini-emoji">🔥</div>
+          <div class="mini-zh">烤糊</div>
+          <div class="mini-en">BBQ</div>
+          <div class="mini-tagline">焦了但不舍得扔</div>
+          <div class="mini-rarity">罕见度 14.7%</div>
+        </div>
+        <div class="mini-card blue">
+          <div class="mini-emoji">💤</div>
+          <div class="mini-zh">麻了</div>
+          <div class="mini-en">EMO</div>
+          <div class="mini-tagline">心如止水，因为水里都是泪</div>
+          <div class="mini-rarity">罕见度 12.4%</div>
+        </div>
+        <div class="mini-card blue">
+          <div class="mini-emoji">✂️</div>
+          <div class="mini-zh">割我</div>
+          <div class="mini-en">CUT</div>
+          <div class="mini-tagline">卖完三天后悔三个月</div>
+          <div class="mini-rarity">罕见度 11.8%</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ LARGE SHARE CARDS ============ -->
+  <div class="section-title">分享卡（点击图鉴里任意一型，会展开成下面这种大卡）</div>
+
+  <div class="preview-row">
+
+    <!-- Card 1: BBQ blue -->
+    <div class="card-wrapper">
+      <div class="card-tag">[ 常见 · 蓝 ]</div>
+      <div class="share-card">
+        <div class="card-top blue">
+          <div class="top-pretitle">你的韭菜人格类型是</div>
+          <div class="top-emoji">🔥</div>
+          <div class="top-zh">烤糊</div>
+          <div class="top-en">BBQ</div>
+          <div class="top-rarity">罕见度 14.7%</div>
+        </div>
+        <div class="card-body">
+          <div class="tagline">"焦了但不舍得扔"</div>
+          <div class="desc">深度套牢钻石手。你看到亏损就关 APP，但从未真的卖出，理由是"等回本"，结果一等就是几年。</div>
+          <div class="trade-box">
+            <div class="trade-title">━ 你的这一笔 ━</div>
+            <div class="trade-line"><span>$NVDA 英伟达</span><span>2020-03</span></div>
+            <div class="trade-line"><span>买入 / 当前</span><span>¥120 → ¥85</span></div>
+            <div class="trade-line"><span>盈亏</span><span class="red">-29.2%</span></div>
+            <div class="trade-line"><span>持仓</span><span>4 年 1 个月</span></div>
+          </div>
+          <div class="profit-box">
+            <div class="profit-label">本可以赚（神出版本）</div>
+            <div class="profit-num">¥285,000</div>
+            <div class="profit-note">≈ 27 部 iPhone · 9,500 杯喜茶</div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="footer-domain">jiucai.run</div>
+          <div class="footer-cta">👉 测测你是哪型韭菜</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: YOLO purple -->
+    <div class="card-wrapper">
+      <div class="card-tag">[ 神级稀有 · 紫 ]</div>
+      <div class="share-card">
+        <div class="card-top purple">
+          <div class="top-pretitle">你的韭菜人格类型是</div>
+          <div class="top-emoji">🍀</div>
+          <div class="top-zh">上头</div>
+          <div class="top-en">YOLO</div>
+          <div class="top-rarity">★ 神级稀有 0.7% ★</div>
+        </div>
+        <div class="card-body">
+          <div class="tagline">"上帝今天有空，但下次不一定"</div>
+          <div class="desc">短期梭哈翻倍党。你赌对了一次，但这种事概率告诉你不会持续，建议立刻收手。</div>
+          <div class="trade-box">
+            <div class="trade-title">━ 你的这一笔 ━</div>
+            <div class="trade-line"><span>$TSLA 特斯拉</span><span>2020-03</span></div>
+            <div class="trade-line"><span>买入 / 卖出</span><span>$80 → $200</span></div>
+            <div class="trade-line"><span>盈亏</span><span class="green">+150%</span></div>
+            <div class="trade-line"><span>持仓</span><span>23 天</span></div>
+          </div>
+          <div class="profit-box">
+            <div class="profit-label">完美逃顶差距</div>
+            <div class="profit-num">$3,500</div>
+            <div class="profit-note">还行 · 这次你已经很神了</div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="footer-domain">jiucai.run</div>
+          <div class="footer-cta">👉 测测你是哪型韭菜</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: MAI + OLD badge -->
+    <div class="card-wrapper">
+      <div class="card-tag">[ 常见 + 老登彩蛋 ]</div>
+      <div class="share-card">
+        <div class="card-top blue">
+          <div class="old-badge">🧙 老登</div>
+          <div class="top-pretitle">你的韭菜人格类型是</div>
+          <div class="top-emoji">🍜</div>
+          <div class="top-zh">没了</div>
+          <div class="top-en">MAI</div>
+          <div class="top-rarity">罕见度 15.3%</div>
+        </div>
+        <div class="card-body">
+          <div class="tagline">"你的钱包刚到，它就走了"</div>
+          <div class="desc">买在反指点的常见型。你一买它就跌，但你坚信"长线持有"，于是跌了又跌还在拿。</div>
+          <div class="trade-box">
+            <div class="trade-title">━ 你的这一笔 ━</div>
+            <div class="trade-line"><span>$BABA 阿里巴巴</span><span>2014-09</span></div>
+            <div class="trade-line"><span>买入 / 当前</span><span>$92 → $78</span></div>
+            <div class="trade-line"><span>盈亏</span><span class="red">-15.2%</span></div>
+            <div class="trade-line"><span>持仓</span><span>9 年 7 个月 🧙</span></div>
+          </div>
+          <div class="profit-box">
+            <div class="profit-label">原本可以避免亏损</div>
+            <div class="profit-num">¥215,000</div>
+            <div class="profit-note">≈ 一辆奥迪 A4L</div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="footer-domain">jiucai.run</div>
+          <div class="footer-cta">👉 测测你是哪型韭菜</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-top:50px;color:#aaa;font-size:11px">
+    Emoji 是占位 · 后续可以请插画师画 16 个原创小人替换
+  </div>
+
+</body>
+</html>

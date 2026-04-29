@@ -1073,16 +1073,17 @@ function onStockCodeInput(val) {
   acTimer=setTimeout(()=>searchStocks(val,local),300);
 }
 // Full stock universe loaded from /stocks-data/*.json (populated at startup)
-const FULL_STOCKS = { sh:[], sz:[], hk:[], bse:[] };
+const FULL_STOCKS = { sh:[], sz:[], hk:[], bse:[], us:[] };
 async function loadFullStocks(){
   try{
-    const [sh,sz,hk,bse]=await Promise.all([
+    const [sh,sz,hk,bse,us]=await Promise.all([
       fetch('/stocks-data/sh.json').then(r=>r.json()).catch(()=>[]),
       fetch('/stocks-data/sz.json').then(r=>r.json()).catch(()=>[]),
       fetch('/stocks-data/hk.json').then(r=>r.json()).catch(()=>[]),
       fetch('/stocks-data/bse.json').then(r=>r.json()).catch(()=>[]),
+      fetch('/stocks-data/us.json').then(r=>r.json()).catch(()=>[]),
     ]);
-    FULL_STOCKS.sh=sh; FULL_STOCKS.sz=sz; FULL_STOCKS.hk=hk; FULL_STOCKS.bse=bse;
+    FULL_STOCKS.sh=sh; FULL_STOCKS.sz=sz; FULL_STOCKS.hk=hk; FULL_STOCKS.bse=bse; FULL_STOCKS.us=us;
   }catch(e){/* silent — fallback to MARKET_CONFIG */}
 }
 function getLocalMatches(val){
@@ -1095,24 +1096,16 @@ function getLocalMatches(val){
     {list:FULL_STOCKS.sz,suffix:'.SZ',exchange:'深A'},
     {list:FULL_STOCKS.bse,suffix:'.BJ',exchange:'北A'},
     {list:FULL_STOCKS.hk,suffix:'.HK',exchange:'港股'},
+    {list:FULL_STOCKS.us,suffix:'',exchange:'美股'},
   ];
   for(const src of sources){
     for(const s of src.list){
-      if(s.code.toLowerCase().includes(v)||s.name.toLowerCase().includes(v)){
+      if(s.code.toLowerCase().includes(v)||(s.name&&s.name.toLowerCase().includes(v))){
         out.push({symbol:s.code+src.suffix,name:s.name,exchange:src.exchange,_code:s.code});
         if(out.length>=20)break;
       }
     }
     if(out.length>=20)break;
-  }
-  // 2) US stocks come from MARKET_CONFIG (no Tushare data) — also search them
-  if(out.length<20){
-    for(const s of MARKET_CONFIG.us.stocks){
-      if(s.code.toLowerCase().includes(v)||s.name.toLowerCase().includes(v)){
-        out.push({symbol:s.code,name:s.name,exchange:'美股',_code:s.code});
-        if(out.length>=20)break;
-      }
-    }
   }
   return out.slice(0,20);
 }

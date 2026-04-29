@@ -53,8 +53,35 @@ async function main() {
     console.warn(`  HK fetch failed (may need higher tier): ${e.message}`);
   }
 
-  // ===== US (skip — use Yahoo) =====
-  console.log('US: skipped (using Yahoo Finance)');
+  // ===== US =====
+  console.log('Fetching US stock list...');
+  try {
+    // us_basic returns paged results; iterate by classify to get full coverage
+    const classes = ['EQ', 'ADR', 'ETF', 'CEF', 'GS', 'MF']; // common, ADR, ETF, etc.
+    const seen = new Set();
+    const usList = [];
+    for (const classify of classes) {
+      let offset = 0;
+      while (true) {
+        const batch = await tushare('us_basic', { classify, offset: String(offset) }, 'ts_code,name,enname');
+        if (!batch.length) break;
+        for (const s of batch) {
+          if (!s.ts_code || seen.has(s.ts_code)) continue;
+          seen.add(s.ts_code);
+          // Prefer Chinese name, else short English name
+          const name = s.name || (s.enname ? s.enname.split(/[\s\.,]/)[0] : s.ts_code);
+          usList.push({ code: s.ts_code, name });
+        }
+        if (batch.length < 6000) break;
+        offset += batch.length;
+      }
+      console.log(`  classify=${classify}: total now ${usList.length}`);
+    }
+    await fs.writeFile(path.join(OUT_DIR, 'us.json'), JSON.stringify(usList));
+    console.log(`  Saved us.json (${usList.length})`);
+  } catch (e) {
+    console.warn(`  US fetch failed: ${e.message}`);
+  }
 
   console.log('\nDone!');
 }

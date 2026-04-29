@@ -34,14 +34,16 @@ function parseTushareDate(s) {
 }
 
 function symbolToTushare(sym) {
-  // Our symbols: 600519.SS, 000001.SZ, 430047.BJ, 0700.HK
-  // Tushare:    600519.SH, 000001.SZ, 430047.BJ, 00700.HK (HK 5-digit padded)
+  // Our symbols: 600519.SS, 000001.SZ, 430047.BJ, 0700.HK, AAPL (no suffix = US)
+  // Tushare:    600519.SH, 000001.SZ, 430047.BJ, 00700.HK, AAPL
   if (sym.endsWith('.SS')) return sym.replace('.SS', '.SH');
   if (sym.endsWith('.SZ') || sym.endsWith('.BJ')) return sym;
   if (sym.endsWith('.HK')) {
     const code = sym.replace('.HK', '');
     return code.padStart(5, '0') + '.HK';
   }
+  // US: no suffix in our format
+  if (!sym.includes('.')) return sym.toUpperCase();
   return null;
 }
 
@@ -51,7 +53,8 @@ async function fetchTushareDaily(symbol, period1) {
   const startDate = ymd(period1);
   const endDate = ymd(Math.floor(Date.now() / 1000));
   const isHK = ts.endsWith('.HK');
-  const apiName = isHK ? 'hk_daily' : 'daily';
+  const isA = /\.(SH|SZ|BJ)$/i.test(ts);
+  const apiName = isHK ? 'hk_daily' : (isA ? 'daily' : 'us_daily');
   const fields = 'ts_code,trade_date,open,high,low,close,vol';
   // Tushare returns up to 6000 rows per call; for very long history we may need pagination
   let rows = await tushare(apiName, { ts_code: ts, start_date: startDate, end_date: endDate }, fields);
@@ -67,12 +70,13 @@ async function fetchTushareDaily(symbol, period1) {
   const volume = rows.map(r => Math.round(Number(r.vol) * 100)); // tushare vol is in 手 (100 shares)
 
   // Mirror Yahoo's chart response shape so the frontend doesn't need changes
+  const currency = isHK ? 'HKD' : (isA ? 'CNY' : 'USD');
   return {
     chart: {
       result: [{
         meta: {
           symbol,
-          currency: isHK ? 'HKD' : 'CNY',
+          currency,
           regularMarketPrice: close[close.length - 1],
           firstTradeDate: timestamp[0],
         },
@@ -154,30 +158,20 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Route by symbol suffix
-  const isAOrHK = /\.(SS|SZ|BJ|HK)$/i.test(symbol);
+  // All markets → Tushare Pro first
   try {
-    if (isAOrHK) {
-      const data = await fetchTushareDaily(symbol, period1);
-      if (data) {
-        res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=1800');
-        return res.status(200).json(data);
-      }
-      // Fallback to Yahoo if Tushare returns nothing
-      const yh = await fetchYahoo(symbol, period1);
-      if (yh) {
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-        return res.status(200).json(yh);
-      }
-      return res.status(502).json({ error: 'No data from Tushare or Yahoo' });
-    } else {
-      const yh = await fetchYahoo(symbol, period1);
-      if (yh) {
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-        return res.status(200).json(yh);
-      }
-      return res.status(502).json({ error: 'Yahoo failed' });
+    const data = await fetchTushareDaily(symbol, period1);
+    if (data) {
+      res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=1800');
+      return res.status(200).json(data);
     }
+    // Fallback: Yahoo (only useful for US — A/HK should always have Tushare data)
+    const yh = await fetchYahoo(symbol, period1);
+    if (yh) {
+      res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+      return res.status(200).json(yh);
+    }
+    return res.status(502).json({ error: 'No data from Tushare or Yahoo' });
   } catch (e) {
     return res.status(502).json({ error: e.message });
   }
