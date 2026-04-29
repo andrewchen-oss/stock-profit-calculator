@@ -1219,8 +1219,9 @@ async function calculate() {
     if(!buyDayData)throw new Error('日期超范围');
     const buyPrice=manualPrice||buyDayData.close;
     if(buyMode==='amount'){quantity=Math.floor(buyAmount/buyPrice);if(quantity<=0)throw new Error('钱不够买1股')}
+    // Use closing price (not intraday high) to match what mainstream charts show (Google/Yahoo etc.)
     let hp=0,hd=null;
-    for(const d of dailyData){if(d.date>=buyDate&&d.high>hp){hp=d.high;hd=d.date}}
+    for(const d of dailyData){if(d.date>=buyDate&&d.close>hp){hp=d.close;hd=d.date}}
     if(!hd)throw new Error('找不到最高价');
     let sellPrice=null,sellDate=null,actualProfit=null,actualPct=null;
     if(hasSell){const sd=new Date(sellDateStr);let sdd=null;for(const d of dailyData){if(d.date>=sd){sdd=d;break}}if(!sdd)sdd=dailyData[dailyData.length-1];sellDate=sdd.date;sellPrice=sellPriceManual||sdd.close;actualProfit=(sellPrice-buyPrice)*quantity;actualPct=(sellPrice-buyPrice)/buyPrice*100}
