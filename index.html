@@ -1072,19 +1072,49 @@ function onStockCodeInput(val) {
   }
   acTimer=setTimeout(()=>searchStocks(val,local),300);
 }
+// Full stock universe loaded from /stocks-data/*.json (populated at startup)
+const FULL_STOCKS = { sh:[], sz:[], hk:[], bse:[] };
+async function loadFullStocks(){
+  try{
+    const [sh,sz,hk,bse]=await Promise.all([
+      fetch('/stocks-data/sh.json').then(r=>r.json()).catch(()=>[]),
+      fetch('/stocks-data/sz.json').then(r=>r.json()).catch(()=>[]),
+      fetch('/stocks-data/hk.json').then(r=>r.json()).catch(()=>[]),
+      fetch('/stocks-data/bse.json').then(r=>r.json()).catch(()=>[]),
+    ]);
+    FULL_STOCKS.sh=sh; FULL_STOCKS.sz=sz; FULL_STOCKS.hk=hk; FULL_STOCKS.bse=bse;
+  }catch(e){/* silent — fallback to MARKET_CONFIG */}
+}
 function getLocalMatches(val){
   if(!val)return [];
   const v=val.toLowerCase().trim();
-  // Search across ALL markets so user can find stocks regardless of current tab
   const out=[];
-  for(const [mkt,cfg] of Object.entries(MARKET_CONFIG)){
-    for(const s of cfg.stocks){
+  // 1) Search full universe (A股 + 港股) loaded from JSON
+  const sources=[
+    {list:FULL_STOCKS.sh,suffix:'.SS',exchange:'沪A'},
+    {list:FULL_STOCKS.sz,suffix:'.SZ',exchange:'深A'},
+    {list:FULL_STOCKS.bse,suffix:'.BJ',exchange:'北A'},
+    {list:FULL_STOCKS.hk,suffix:'.HK',exchange:'港股'},
+  ];
+  for(const src of sources){
+    for(const s of src.list){
       if(s.code.toLowerCase().includes(v)||s.name.toLowerCase().includes(v)){
-        out.push({symbol:s.code+cfg.suffix,name:s.name,exchange:cfg.name,_market:mkt,_code:s.code});
+        out.push({symbol:s.code+src.suffix,name:s.name,exchange:src.exchange,_code:s.code});
+        if(out.length>=20)break;
+      }
+    }
+    if(out.length>=20)break;
+  }
+  // 2) US stocks come from MARKET_CONFIG (no Tushare data) — also search them
+  if(out.length<20){
+    for(const s of MARKET_CONFIG.us.stocks){
+      if(s.code.toLowerCase().includes(v)||s.name.toLowerCase().includes(v)){
+        out.push({symbol:s.code,name:s.name,exchange:'美股',_code:s.code});
+        if(out.length>=20)break;
       }
     }
   }
-  return out.slice(0,12);
+  return out.slice(0,20);
 }
 async function searchStocks(q,localResults) {
   try {
@@ -1120,6 +1150,7 @@ function pickAcResult(i) {
   if(sym.endsWith('.HK')){selectMarket('hk');code=sym.replace('.HK','')}
   else if(sym.endsWith('.SS')){selectMarket('sh');code=sym.replace('.SS','')}
   else if(sym.endsWith('.SZ')){selectMarket('sz');code=sym.replace('.SZ','')}
+  else if(sym.endsWith('.BJ')){selectMarket('sh');code=sym.replace('.BJ','')}
   else{selectMarket('us')}
   selectedStock=code;
   inp.value=name?`${code} ${name}`:code;
@@ -1519,6 +1550,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('sell-date').max=new Date().toISOString().split('T')[0];
   document.getElementById('buy-quantity').value=100;
   renderStockGrid();renderHistory();initParticles();initMarquee();
+  loadFullStocks();
 });
 </script>
 </body>
