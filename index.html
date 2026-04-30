@@ -113,43 +113,44 @@
   .calligraphy { font-family: 'ZCOOL KuaiLe', 'Noto Serif SC', 'KaiTi', '楷体', serif; }
 
   /* === PAGE LAYOUT === */
-  .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px 24px 40px; position:relative; z-index:1; }
+  .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 8px 24px 40px; position:relative; z-index:1; }
 
-  .header { text-align: center; padding: 24px 0 20px; position: relative; }
+  .header { text-align: center; padding: 8px 0 6px; position: relative; }
 
   .header .banner {
-    font-size: 48px; margin-bottom: 6px; display: inline-block;
+    font-size: 28px; margin-bottom: 0; display: inline-block;
     animation: bounce 2s ease infinite;
-    filter: drop-shadow(0 4px 8px rgba(139,0,0,0.6));
+    filter: drop-shadow(0 3px 6px rgba(139,0,0,0.6));
   }
 
-  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
   .header h1 {
     font-family: 'ZCOOL KuaiLe', 'Noto Serif SC', 'KaiTi', serif;
     font-weight: 900;
-    font-size: 64px; line-height: 1.1;
+    font-size: 42px; line-height: 1.1;
     color: #FFD700;
-    letter-spacing: 8px;
+    letter-spacing: 6px;
     text-shadow:
       -2px -2px 0 #8B0000, 2px -2px 0 #8B0000, -2px 2px 0 #8B0000, 2px 2px 0 #8B0000,
-      4px 4px 0 #4A0000,
-      0 0 24px rgba(255,215,0,0.6),
-      0 0 48px rgba(255,215,0,0.3);
-    margin: 8px 0 14px;
+      3px 3px 0 #4A0000,
+      0 0 18px rgba(255,215,0,0.6),
+      0 0 36px rgba(255,215,0,0.3);
+    margin: 2px 0 4px;
     animation: titleGlow 3s ease-in-out infinite;
   }
   @keyframes titleGlow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.15)} }
 
   @media (max-width:640px) {
-    .header h1 { font-size: 42px; letter-spacing:4px; }
+    .header h1 { font-size: 32px; letter-spacing:3px; }
+    .header .banner { font-size:22px; }
   }
 
   .header .subtitle {
-    color: #FFF8DC; font-size: 18px; line-height: 1.6; font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: #FFF8DC; font-size: 14px; line-height: 1.4; font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
   }
-  .header .subtitle .hl { color: var(--gold); font-weight: 900; font-size: 22px; }
+  .header .subtitle .hl { color: var(--gold); font-weight: 900; font-size: 18px; }
 
   /* Dynamic regret ticker */
   .dynamic-regret {
@@ -182,21 +183,21 @@
     .dynamic-regret .dr-detail { font-size: 9px; }
   }
 
-  /* Marquee ticker - now a gold-bordered banner */
+  /* Marquee ticker - compact gold-bordered banner */
   .marquee-bar {
-    overflow: hidden; margin: 16px auto;
-    padding: 10px 0; max-width:920px;
+    overflow: hidden; margin: 6px auto 8px;
+    padding: 5px 0; max-width:920px;
     background: linear-gradient(90deg, rgba(255,215,0,0.15), rgba(255,215,0,0.3), rgba(255,215,0,0.15));
-    border-top: 3px double #FFD700;
-    border-bottom: 3px double #FFD700;
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    border-top: 2px double #FFD700;
+    border-bottom: 2px double #FFD700;
+    box-shadow: 0 0 12px rgba(255,215,0,0.3);
   }
 
   .marquee-inner {
-    display: flex; gap: 40px;
+    display: flex; gap: 32px;
     animation: marquee 30s linear infinite;
     white-space: nowrap;
-    font-family: 'ZCOOL KuaiLe', sans-serif; font-size: 13px; color: #FFF8DC;
+    font-family: 'ZCOOL KuaiLe', sans-serif; font-size: 12px; color: #FFF8DC;
     font-weight: 700;
   }
 
@@ -772,16 +773,19 @@
 
   /* Developer info - top right corner */
   .dev-info {
-    position:fixed; top:8px; right:12px; z-index:999;
+    position:fixed; top:10px; right:14px; z-index:999;
     display:flex; align-items:center; gap:10px;
-    font-size:10px; color:var(--text-muted);
+    font-size:12px; font-weight:700;
+    background:rgba(255,248,220,0.95); padding:6px 12px;
+    border:2px solid #B8860B; border-radius:20px;
+    box-shadow:0 4px 12px rgba(139,0,0,0.4);
   }
   .dev-info a {
-    color:var(--accent-light); text-decoration:none; font-weight:600;
+    color:#8B0000; text-decoration:none; font-weight:800;
     transition:color 0.2s;
   }
-  .dev-info a:hover { color:var(--gold); }
-  .dev-info .sep { color:var(--card-border); }
+  .dev-info a:hover { color:#FFD700; text-shadow:0 0 4px #8B0000; }
+  .dev-info .sep { color:#B8860B; }
 
   @media (max-width: 768px) {
     .main-content { grid-template-columns:1fr; }
