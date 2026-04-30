@@ -4,37 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>同花损 · 假如那天你没卖</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+SC:wght@600;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@700;900&family=Noto+Serif+SC:wght@700;900&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    /* === 中老年表情包配色 === */
-    --bg: #C8102E;            /* 大红 */
-    --bg-deep: #8B0000;       /* 深红 */
-    --card: #FFF8DC;          /* 米黄羊皮纸 */
-    --card-border: #B8860B;   /* 暗金 */
-    --card-shadow: rgba(139,0,0,0.4);
-    --accent: #C8102E;        /* 主红 */
+    /* === 韭菜版阴阳配色（红+绿） === */
+    --red: #C8102E;
+    --red-deep: #8B0000;
+    --red-light: #DC143C;
+    --green: #228B22;
+    --green-deep: #145A14;
+    --green-light: #4ade80;
+    --card: #FFF8DC;
+    --card-border: #B8860B;
+    --card-shadow: rgba(0,0,0,0.4);
+    --accent: #C8102E;
     --accent-light: #DC143C;
-    --green: #228B22;         /* 福禄绿 */
-    --green-dark: #006400;
-    --red: #B22222;
-    --gold: #FFD700;          /* 金 */
+    --gold: #FFD700;
     --gold-deep: #B8860B;
-    --text: #4A1C0A;          /* 暗红黑 */
-    --text-dim: #8B4513;
-    --text-muted: #A0522D;
-    --pixel-shadow: 3px 3px 0px rgba(139,0,0,0.4);
+    --text: #2A1810;
+    --text-dim: #5A3A20;
+    --text-muted: #8B6F47;
+    --pixel-shadow: 3px 3px 0px rgba(0,0,0,0.4);
     --gold-glow: 0 0 16px rgba(255,215,0,0.5);
+    /* 涨跌色（默认 A股口径：红涨绿跌；可被 .convention-cn-flipped 覆盖） */
+    --color-up: #C8102E;
+    --color-down: #228B22;
+  }
+  /* 国际口径：绿涨红跌 */
+  body.convention-intl {
+    --color-up: #228B22;
+    --color-down: #C8102E;
   }
 
   body {
     font-family: 'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
     background:
-      radial-gradient(ellipse at top, #FFD700 0%, transparent 60%),
-      radial-gradient(ellipse at bottom, #FF6B35 0%, transparent 70%),
-      linear-gradient(135deg, #C8102E 0%, #8B0000 50%, #C8102E 100%);
+      /* 左侧红，右侧绿，中间过渡区放金色光斑 */
+      radial-gradient(circle at 50% 30%, rgba(255,215,0,0.25) 0%, transparent 40%),
+      linear-gradient(90deg,
+        #8B0000 0%, #C8102E 35%, #B8390F 48%,
+        #1F5F1F 52%, #228B22 65%, #145A14 100%);
     background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
@@ -65,18 +76,20 @@
   }
   @keyframes sunSpin { from{transform:translateX(-50%) rotate(0)} to{transform:translateX(-50%) rotate(360deg)} }
 
-  /* Corner rose decorations */
-  body::after {
-    content:'🌹'; position:fixed; top:18px; left:18px; font-size:36px;
-    pointer-events:none; z-index:0; opacity:0.55; filter:drop-shadow(0 2px 4px rgba(139,0,0,0.5));
-    animation: rosePulse 4s ease-in-out infinite;
+  /* Convention toggle (红涨绿跌 / 绿涨红跌) - top-left pill */
+  .convention-toggle {
+    position:fixed; top:10px; left:14px; z-index:999;
+    background:rgba(255,248,220,0.95); padding:6px 14px;
+    border:2px solid #B8860B; border-radius:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    font-size:13px; font-weight:800; color:var(--text);
+    cursor:pointer; user-select:none;
+    display:flex; align-items:center; gap:6px;
+    transition:all 0.15s;
   }
-  .corner-rose { position:fixed; pointer-events:none; z-index:0; font-size:36px; opacity:0.55;
-    filter:drop-shadow(0 2px 4px rgba(139,0,0,0.5)); animation: rosePulse 4s ease-in-out infinite; }
-  .corner-rose.tr { top:18px; right:18px; animation-delay:1s; }
-  .corner-rose.bl { bottom:18px; left:18px; animation-delay:2s; }
-  .corner-rose.br { bottom:18px; right:18px; animation-delay:3s; }
-  @keyframes rosePulse { 0%,100%{transform:scale(1);opacity:0.55} 50%{transform:scale(1.15);opacity:0.7} }
+  .convention-toggle:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.5); }
+  .convention-toggle .ct-up { color:var(--color-up); font-weight:900; }
+  .convention-toggle .ct-down { color:var(--color-down); font-weight:900; }
 
   /* === ANIMATED BACKGROUND: roses + coins + fortune chars === */
   .bg-falling {
@@ -110,7 +123,7 @@
   }
 
   .pixel-font { font-family: 'Press Start 2P', monospace; }
-  .calligraphy { font-family: 'ZCOOL KuaiLe', 'Noto Serif SC', 'KaiTi', '楷体', serif; }
+  .calligraphy { font-family: 'ZCOOL QingKe HuangYou', 'Noto Sans SC', 'Noto Serif SC', 'KaiTi', '楷体', serif; }
 
   /* === PAGE LAYOUT === */
   .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 8px 24px 40px; position:relative; z-index:1; }
@@ -126,7 +139,7 @@
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
   .header h1 {
-    font-family: 'ZCOOL KuaiLe', 'Noto Serif SC', 'KaiTi', serif;
+    font-family: 'ZCOOL QingKe HuangYou', 'Noto Sans SC', 'Noto Serif SC', 'KaiTi', serif;
     font-weight: 900;
     font-size: 42px; line-height: 1.1;
     color: #FFD700;
@@ -197,15 +210,15 @@
     display: flex; gap: 32px;
     animation: marquee 30s linear infinite;
     white-space: nowrap;
-    font-family: 'ZCOOL KuaiLe', sans-serif; font-size: 12px; color: #FFF8DC;
+    font-family: 'ZCOOL QingKe HuangYou', 'Noto Sans SC', sans-serif; font-size: 12px; color: #FFF8DC;
     font-weight: 700;
   }
 
   @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
   .marquee-inner .ticker-item { display: flex; align-items: center; gap: 6px; text-shadow:1px 1px 2px rgba(0,0,0,0.6); }
-  .marquee-inner .up { color: #90EE90; font-weight:900; }
-  .marquee-inner .down { color: #FFB6C1; font-weight:900; }
+  .marquee-inner .up { color: var(--color-up); font-weight:900; filter:brightness(1.4); }
+  .marquee-inner .down { color: var(--color-down); font-weight:900; filter:brightness(1.4); }
 
   /* HP bar */
   .hp-bar-deco {
@@ -243,7 +256,7 @@
   @keyframes rainbow { 0%{background-position:0% 0} 100%{background-position:200% 0} }
 
   .card-title {
-    font-family:'ZCOOL KuaiLe', 'KaiTi', serif; font-size:18px; color:#8B0000;
+    font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC', 'KaiTi', serif; font-size:18px; color:#8B0000;
     margin-bottom:14px; display:flex; align-items:center; gap:8px;
     line-height:1.6; font-weight:900;
     text-shadow: 1px 1px 0 #FFD700, 2px 2px 4px rgba(255,215,0,0.3);
@@ -303,7 +316,7 @@
   .stock-chip .code { font-weight:800; font-size:12px; display:block; color:var(--text); }
   .stock-chip.selected .code { color:#8B0000; }
 
-  .or-divider { text-align:center; color:#8B0000; font-family:'ZCOOL KuaiLe',serif; font-size:14px; margin:8px 0; font-weight:700; }
+  .or-divider { text-align:center; color:#8B0000; font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; font-size:14px; margin:8px 0; font-weight:700; }
 
   .custom-input-row { display:flex; gap:8px; margin-bottom:10px; position:relative; }
   .custom-input-row input { flex:1; }
@@ -370,7 +383,7 @@
     background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
     border:3px solid #8B0000; border-radius:8px;
     color:#8B0000; font-size:20px; font-weight:900; cursor:pointer;
-    font-family:'ZCOOL KuaiLe', 'KaiTi', serif;
+    font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC', 'KaiTi', serif;
     letter-spacing:6px;
     text-shadow: 1px 1px 0 #FFF8DC, 0 2px 4px rgba(139,0,0,0.3);
     box-shadow:
@@ -407,7 +420,7 @@
     animation:bounce 2s ease infinite;
   }
   .placeholder-panel .pixel-hint {
-    font-family:'ZCOOL KuaiLe', serif; font-size:14px; color:var(--text-dim);
+    font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC', serif; font-size:14px; color:var(--text-dim);
     margin-top:14px; line-height:2;
   }
 
@@ -448,7 +461,7 @@
   .result-header { display:flex; align-items:center; gap:14px; margin-bottom:8px; padding-bottom:10px; border-bottom:2px dashed #B8860B; }
   .result-header .emoji { font-size:54px; animation:pixelPop 0.5s ease, shake 0.6s ease 0.5s; filter:drop-shadow(0 4px 8px rgba(139,0,0,0.4)); }
   .result-header .info { flex:1; }
-  .result-header h2 { font-family:'ZCOOL KuaiLe','KaiTi',serif; font-size:22px; line-height:1.4; color:#8B0000; text-shadow:1px 1px 0 #FFD700, 2px 2px 4px rgba(255,215,0,0.4); font-weight:900; }
+  .result-header h2 { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC','KaiTi',serif; font-size:22px; line-height:1.4; color:#8B0000; text-shadow:1px 1px 0 #FFD700, 2px 2px 4px rgba(255,215,0,0.4); font-weight:900; }
   .result-header .roast { font-size:14px; color:var(--text-dim); margin-top:6px; font-weight:600; }
   .result-header .stock-badge { font-size:14px; font-weight:800; padding:4px 12px; background:linear-gradient(180deg,#FFD700,#FFA500); border:2px solid #8B0000; border-radius:4px; margin-top:6px; display:inline-block; color:#8B0000; }
   .result-header .market-badge { font-size:11px; color:var(--text-muted); margin-left:8px; font-weight:700; }
@@ -464,15 +477,15 @@
     background:linear-gradient(135deg, rgba(255,248,220,0.7), rgba(255,215,0,0.15));
     box-shadow:0 4px 12px rgba(139,0,0,0.2), 0 0 0 2px rgba(255,215,0,0.3) inset;
   }
-  .profit-box.gain { background:linear-gradient(135deg, rgba(255,248,220,0.7), rgba(34,139,34,0.15)); border-color:#228B22; }
-  .profit-box.loss { background:linear-gradient(135deg, rgba(255,248,220,0.7), rgba(178,34,34,0.15)); border-color:#B22222; }
+  .profit-box.gain { background:linear-gradient(135deg, rgba(255,248,220,0.7), color-mix(in srgb, var(--color-up) 18%, transparent)); border-color:var(--color-up); }
+  .profit-box.loss { background:linear-gradient(135deg, rgba(255,248,220,0.7), color-mix(in srgb, var(--color-down) 18%, transparent)); border-color:var(--color-down); }
   .profit-box .profit-label { font-size:13px; color:#8B0000; margin-bottom:6px; font-weight:700; }
-  .profit-box .profit-amount { font-family:'ZCOOL KuaiLe','KaiTi',serif; font-size:30px; font-weight:900; line-height:1.2; animation:pixelPop 0.6s ease; text-shadow:2px 2px 0 #FFD700, 3px 3px 6px rgba(0,0,0,0.2); }
-  .profit-box.gain .profit-amount { color:#006400; }
-  .profit-box.loss .profit-amount { color:#8B0000; }
+  .profit-box .profit-amount { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC','KaiTi',serif; font-size:30px; font-weight:900; line-height:1.2; animation:pixelPop 0.6s ease; text-shadow:2px 2px 0 #FFD700, 3px 3px 6px rgba(0,0,0,0.2); }
+  .profit-box.gain .profit-amount { color:var(--color-up); }
+  .profit-box.loss .profit-amount { color:var(--color-down); }
   .profit-box .profit-percent { font-size:16px; font-weight:900; margin-top:4px; }
-  .profit-box.gain .profit-percent { color:#228B22; }
-  .profit-box.loss .profit-percent { color:#B22222; }
+  .profit-box.gain .profit-percent { color:var(--color-up); }
+  .profit-box.loss .profit-percent { color:var(--color-down); }
 
   .comparison-box {
     display:none; border:3px solid #FFD700; padding:14px 16px;
@@ -482,26 +495,26 @@
     box-shadow:0 4px 12px rgba(139,0,0,0.2);
   }
   .comparison-box.show { display:block; }
-  .comparison-box .comp-title { font-family:'ZCOOL KuaiLe',serif; font-size:14px; color:#8B0000; margin-bottom:8px; line-height:1.6; font-weight:900; }
+  .comparison-box .comp-title { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; font-size:14px; color:#8B0000; margin-bottom:8px; line-height:1.6; font-weight:900; }
   .comp-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(184,134,11,0.3); font-size:13px; }
   .comp-row:last-child { border-bottom:none; }
   .comp-row .cl { color:var(--text-dim); font-weight:600; }
   .comp-row .cv { font-weight:800; }
-  .comp-row .cv.green { color:#228B22; }
-  .comp-row .cv.red { color:#B22222; }
+  .comp-row .cv.green { color:var(--color-up); }
+  .comp-row .cv.red { color:var(--color-down); }
   .comp-row .cv.gold { color:#B8860B; }
 
   .pain-index { padding:10px 12px; background:rgba(255,215,0,0.15); border:2px solid #B8860B; border-radius:6px; margin-bottom:10px; }
   .pain-index .pain-label { display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; }
-  .pain-index .pain-title { font-family:'ZCOOL KuaiLe',serif; font-size:13px; color:#8B0000; font-weight:900; }
-  .pain-index .pain-level { font-family:'ZCOOL KuaiLe',serif; font-size:13px; color:#B22222; font-weight:900; }
+  .pain-index .pain-title { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; font-size:13px; color:#8B0000; font-weight:900; }
+  .pain-index .pain-level { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; font-size:13px; color:#B22222; font-weight:900; }
   .pain-bar-bg { height:10px; background:#FFF8DC; border:2px solid #B8860B; overflow:hidden; border-radius:5px; }
   .pain-bar { height:100%; transition:width 1s; background:repeating-linear-gradient(90deg,#228B22 0%,#228B22 20%,#FFD700 20%,#FFD700 40%,#FF8C00 40%,#FF8C00 60%,#DC143C 60%,#DC143C 80%,#8B0000 80%,#8B0000 100%); }
   .pain-bar-labels { display:flex; justify-content:space-between; margin-top:4px; font-size:10px; color:var(--text-muted); font-weight:600; }
 
   .roast-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
   .roast-card { padding:12px; border-radius:6px; border:3px solid; box-shadow:0 4px 10px rgba(139,0,0,0.2); }
-  .roast-card .roast-title { font-family:'ZCOOL KuaiLe',serif; font-size:13px; margin-bottom:6px; line-height:1.6; font-weight:900; }
+  .roast-card .roast-title { font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; font-size:13px; margin-bottom:6px; line-height:1.6; font-weight:900; }
   .roast-card .roast-content { font-size:13px; color:var(--text); line-height:1.7; font-weight:600; }
 
   .roast-equivalents { background:linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,248,220,0.5)); border-color:#FFD700; }
@@ -523,7 +536,7 @@
     padding:18px; border-radius:8px; font-size:18px; font-weight:900;
     cursor:pointer; border:3px solid; display:flex; align-items:center; justify-content:center; gap:8px;
     transition:all 0.15s;
-    font-family:'ZCOOL KuaiLe',serif; letter-spacing:2px;
+    font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif; letter-spacing:2px;
   }
   .btn-action-full:hover { transform:translateY(-2px); }
   .btn-action-full.primary {
@@ -559,8 +572,8 @@
   .history-item .info { display:flex; flex-direction:column; gap:1px; }
   .history-item .stock-name { font-size:13px; font-weight:900; color:var(--text); }
   .history-item .stock-detail { font-size:11px; color:var(--text-dim); font-weight:600; }
-  .history-item .profit { font-size:15px; font-weight:900; color:#228B22; }
-  .history-item .profit.loss { color:#B22222; }
+  .history-item .profit { font-size:15px; font-weight:900; color:var(--color-up); }
+  .history-item .profit.loss { color:var(--color-down); }
 
   .toast {
     position:fixed; bottom:30px; left:50%;
@@ -573,7 +586,7 @@
   .toast.show { transform:translateX(-50%) translateY(0); }
 
   .disclaimer {
-    text-align:center; font-family:'ZCOOL KuaiLe',serif;
+    text-align:center; font-family:'ZCOOL QingKe HuangYou', 'Noto Sans SC',serif;
     font-size:12px; color:#FFF8DC; margin-top:24px; line-height:2;
     grid-column:1/-1; opacity:0.85;
     text-shadow:1px 1px 2px rgba(0,0,0,0.5);
@@ -807,12 +820,16 @@
   <a href="https://www.xiaohongshu.com/user/profile/67c46824000000000a03e9b6" target="_blank">📕 小红书</a>
 </div>
 
+<!-- Convention toggle: red-up-green-down ↔ green-up-red-down -->
+<div class="convention-toggle" id="convention-toggle" onclick="toggleConvention()" title="切换涨跌颜色口径">
+  <span class="ct-icon">📊</span>
+  <span class="ct-up">●</span>涨
+  <span class="ct-down">●</span>跌
+</div>
+
 <!-- Falling particles background -->
 <div class="bg-falling" id="bg-falling"></div>
 <div class="bg-grid"></div>
-<span class="corner-rose tr">🌹</span>
-<span class="corner-rose bl">🌹</span>
-<span class="corner-rose br">🌹</span>
 
 <div class="page-wrapper">
   <div class="header">
@@ -833,14 +850,14 @@
   <div class="main-content">
     <!-- LEFT: Input -->
     <div class="card" id="input-section">
-      <div class="card-title">🌹 一、您当年在哪个市场被割？</div>
+      <div class="card-title">① 选个被割的市场</div>
       <div class="market-tabs">
         <button class="market-tab active" data-market="us" onclick="selectMarket('us')"><span class="flag">🇺🇸</span>美股</button>
         <button class="market-tab" data-market="hk" onclick="selectMarket('hk')"><span class="flag">🇭🇰</span>港股</button>
         <button class="market-tab" data-market="sh" onclick="selectMarket('sh')"><span class="flag">🇨🇳</span>沪A</button>
         <button class="market-tab" data-market="sz" onclick="selectMarket('sz')"><span class="flag">🇨🇳</span>深A</button>
       </div>
-      <div class="card-title">🌹 二、是哪一只让您心痛？</div>
+      <div class="card-title">② 选一只心痛的票</div>
       <div class="custom-input-row" style="margin-bottom:8px">
         <input type="text" class="form-input" id="stock-code" placeholder="输入代码或名称搜索（如 AAPL、苹果、贵州茅台）..." autocomplete="off" autocapitalize="characters" oninput="onStockCodeInput(this.value)" onkeydown="onAcKeydown(event)" onfocus="onStockCodeInput(this.value)">
         <div class="autocomplete-dropdown" id="ac-dropdown"></div>
@@ -848,7 +865,7 @@
       <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">或从下方热门票快速选择 ↓</div>
       <div class="stock-grid" id="stock-grid"></div>
 
-      <div class="card-title">🌹 三、馆主需要您的交易细节</div>
+      <div class="card-title">③ 你的交易细节</div>
       <div class="form-group">
         <label class="form-label">什么时候上的车？</label>
         <input type="date" class="form-input" id="buy-date">
@@ -873,7 +890,7 @@
           <div class="form-group"><label class="form-label">卖出价（选填）</label><input type="number" class="form-input" id="sell-price" placeholder="自动" step="0.01" min="0"></div>
         </div>
       </div>
-      <button class="btn-calculate" id="btn-calc" onclick="calculate()">🙏 求 签 算 命 🙏</button>
+      <button class="btn-calculate" id="btn-calc" onclick="calculate()">📊 算 一 算</button>
       <div class="error-msg" id="error-msg"></div>
 
       <!-- Fun cards below input (shown after calc) -->
@@ -886,9 +903,9 @@
     <!-- RIGHT -->
     <div class="right-panel">
       <div class="placeholder-panel" id="placeholder-panel">
-        <span class="big-emoji">🧧</span>
-        <div>馆主已就位<br>请在左边输入您的交易</div>
-        <div class="pixel-hint">—— 开光中 · 量化您的"如果当初" ——</div>
+        <span class="big-emoji">📊</span>
+        <div>在左边输入你的那笔交易<br>这边会告诉你少赚了多少</div>
+        <div class="pixel-hint">—— 量化你的『如果当初』 ——</div>
       </div>
       <div class="result-section" id="result-section">
         <div class="result-summary">
@@ -944,7 +961,7 @@
       <div class="card-title" style="padding:0 4px;margin-bottom:8px">📝 SAVE FILE: 后悔清单</div>
       <div class="history-list" id="history-list"></div>
     </div>
-    <div class="disclaimer">🌹 馆主温馨提示：纯属整活 · 数据来自公开接口 · 不构成投资建议 · 股市有风险 · 韭菜需自知 🌹</div>
+    <div class="disclaimer">⚠ 纯属整活 · 数据来自公开接口 · 不构成投资建议 · 股市有风险 · 韭菜需自知</div>
   </div>
 </div>
 
@@ -1175,7 +1192,7 @@ const MEME_QUOTES = {
 // ===== Background particles =====
 function initParticles() {
   const c = document.getElementById('bg-falling');
-  const emojis = ['🌹','🌹','🌹','💰','🪙','💴','✨','🧧','🍀','💎','🌟','💫'];
+  const emojis = ['🤡','💩','😭','🥲','😱','💸','📉','📈','🐂','🐻','🥬','🤔','😵‍💫','🎰','🚀','🪦','☠️','🤮','😬','🥹'];
   let html = '';
   for (let i=0; i<35; i++) {
     const e = emojis[Math.floor(Math.random()*emojis.length)];
@@ -1510,7 +1527,7 @@ async function calculate() {
   if(hasSell&&!sellDateStr){showError('卖出日期呢？');return}
 
   const buyDate=new Date(dateStr);
-  btn.disabled=true;btn.textContent='⏳ 馆主开光中…';
+  btn.disabled=true;btn.textContent='⏳ 算命中…';
 
   try{
     const{dailyData,name}=await fetchStockData(code,currentMarket,buyDate);
@@ -1545,7 +1562,7 @@ async function calculate() {
     displayResults(lastResult);
     saveToHistory({code,name,market:currentMarket,buyPrice,highPrice:hp,buyDate:dateStr,quantity,profit:peakProfit,profitPercent:peakPct,currency:cfg.currency});
   }catch(err){showError(err.message||'出错了')}
-  finally{btn.disabled=false;btn.textContent='🙏 求 签 算 命 🙏'}
+  finally{btn.disabled=false;btn.textContent='📊 算 一 算'}
 }
 
 // ===== Result meta =====
@@ -1847,7 +1864,25 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderStockGrid();renderHistory();initParticles();initMarquee();
   loadFullStocks();
   initRegretTicker();
+  initConvention();
 });
+
+// ===== Up/Down color convention =====
+function initConvention() {
+  const saved = localStorage.getItem('color_convention') || 'cn'; // 'cn'=红涨绿跌, 'intl'=绿涨红跌
+  applyConvention(saved);
+}
+function toggleConvention() {
+  const current = document.body.classList.contains('convention-intl') ? 'intl' : 'cn';
+  const next = current === 'cn' ? 'intl' : 'cn';
+  applyConvention(next);
+  localStorage.setItem('color_convention', next);
+  showToast(next === 'cn' ? '已切换：红涨 · 绿跌（A股）' : '已切换：绿涨 · 红跌（国际）');
+}
+function applyConvention(c) {
+  if (c === 'intl') document.body.classList.add('convention-intl');
+  else document.body.classList.remove('convention-intl');
+}
 </script>
 </body>
 </html>
