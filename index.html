@@ -629,12 +629,172 @@
   }
   .share-overlay.show { display:flex; }
 
-  .share-overlay-inner { max-width:900px; width:100%; max-height:90vh; overflow-y:auto; position:relative; }
+  .share-overlay-inner { max-width:480px; width:100%; max-height:95vh; overflow-y:auto; position:relative; }
 
   .share-close { position:sticky; top:0; text-align:right; z-index:5; padding-bottom:8px; }
   .share-close button {
-    background:rgba(0,0,0,0.7); border:2px solid var(--card-border);
-    color:var(--text); font-size:14px; padding:6px 16px; cursor:pointer; border-radius:2px;
+    background:rgba(0,0,0,0.7); border:2px solid #FFD700;
+    color:#FFD700; font-size:14px; padding:6px 16px; cursor:pointer; border-radius:6px; font-weight:700;
+  }
+
+  /* ===== VERTICAL CARD (9:16) ===== */
+  .vc-card {
+    width:100%; aspect-ratio: 9/16;
+    border-radius:18px; overflow:hidden; position:relative;
+    display:flex; flex-direction:column;
+    color:#fff; padding:24px 22px;
+    box-shadow:0 16px 48px rgba(0,0,0,0.6);
+    transition:background 0.3s;
+    /* default tier = loss */
+    background: linear-gradient(160deg, #1a0a0a 0%, #4a0a0a 35%, #2a0505 70%, #0a0202 100%);
+  }
+  /* Tier themes */
+  .vc-card[data-tier="legendary"] {
+    background:
+      radial-gradient(circle at 20% 0%, rgba(255,215,0,0.5) 0%, transparent 50%),
+      linear-gradient(160deg, #4A1B6D 0%, #8B0F8B 40%, #C8102E 75%, #2A0033 100%);
+  }
+  .vc-card[data-tier="missed"] {
+    background:
+      radial-gradient(circle at 80% 10%, rgba(255,200,80,0.35) 0%, transparent 55%),
+      linear-gradient(160deg, #FFB347 0%, #FF8C00 35%, #C45E00 75%, #4A2500 100%);
+  }
+  .vc-card[data-tier="wash"] {
+    background:
+      radial-gradient(circle at 30% 20%, rgba(180,200,220,0.2) 0%, transparent 50%),
+      linear-gradient(160deg, #2D3E50 0%, #4A5568 50%, #1A202C 100%);
+  }
+  .vc-card[data-tier="loss"] {
+    background:
+      radial-gradient(circle at 70% 80%, rgba(220,20,60,0.3) 0%, transparent 60%),
+      linear-gradient(160deg, #1a0202 0%, #4A0000 35%, #8B0000 60%, #200000 100%);
+  }
+
+  .vc-top-stripe {
+    position:absolute; top:0; left:0; right:0; height:6px;
+    background:linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    background-size:200% 100%;
+    animation:goldShine 3s linear infinite;
+  }
+
+  /* HEADER */
+  .vc-header {
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:14px; border-bottom:1px dashed rgba(255,255,255,0.18);
+    margin-bottom:14px;
+  }
+  .vc-brand {
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',serif;
+    font-size:22px; font-weight:900; color:#FFD700; letter-spacing:3px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.5);
+  }
+  .vc-brand-sub {
+    font-size:11px; color:rgba(255,255,255,0.7); font-weight:600;
+  }
+
+  /* HERO */
+  .vc-hero {
+    text-align:center; padding:8px 0 16px;
+  }
+  .vc-emoji {
+    font-size:72px; line-height:1; margin-bottom:8px;
+    filter:drop-shadow(0 6px 16px rgba(0,0,0,0.5));
+    animation:pixelPop 0.6s ease;
+  }
+  .vc-label-name {
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',serif;
+    font-size:32px; font-weight:900;
+    color:#FFD700; letter-spacing:6px;
+    text-shadow:
+      -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000,
+      0 4px 12px rgba(0,0,0,0.6);
+    margin-bottom:6px;
+    line-height:1.2;
+  }
+  .vc-label-sub {
+    font-size:14px; color:rgba(255,255,255,0.85); font-weight:600;
+    letter-spacing:1px;
+  }
+
+  /* AMOUNT */
+  .vc-amount-box {
+    text-align:center; padding:18px 12px;
+    background:rgba(0,0,0,0.35);
+    border:2px solid rgba(255,215,0,0.4);
+    border-radius:12px;
+    margin-bottom:14px;
+    backdrop-filter: blur(4px);
+  }
+  .vc-amount-label {
+    font-size:13px; color:#FFD700; font-weight:700; letter-spacing:4px;
+    margin-bottom:4px;
+  }
+  .vc-amount {
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',monospace;
+    font-size:42px; font-weight:900; color:#fff;
+    line-height:1.1; letter-spacing:1px;
+    text-shadow:0 0 16px rgba(255,215,0,0.4), 0 4px 8px rgba(0,0,0,0.5);
+  }
+  .vc-amount-pct {
+    font-size:16px; font-weight:800; color:rgba(255,255,255,0.85);
+    margin-top:4px;
+  }
+
+  /* TRADE INFO */
+  .vc-trade-info {
+    text-align:center; padding:6px 0 12px;
+  }
+  .vc-stock { font-size:18px; font-weight:800; color:#fff; margin-bottom:3px; }
+  .vc-stock-code { color:#FFD700; margin-right:6px; letter-spacing:1px; }
+  .vc-stock-name { font-weight:700; }
+  .vc-dates { font-size:12px; color:rgba(255,255,255,0.75); font-weight:600; }
+
+  /* CHART */
+  .vc-chart-box {
+    flex:1; min-height:0;
+    background:rgba(0,0,0,0.3);
+    border:1px solid rgba(255,215,0,0.25);
+    border-radius:8px;
+    padding:8px;
+    margin-bottom:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .vc-chart-box canvas { width:100%; height:100%; display:block; }
+
+  /* FOOTER */
+  .vc-footer {
+    border-top:1px dashed rgba(255,255,255,0.18);
+    padding-top:12px;
+  }
+  .vc-footer-tagline {
+    text-align:center; font-size:13px; color:#FFD700;
+    font-weight:700; margin-bottom:6px; letter-spacing:1px;
+    text-shadow:0 2px 4px rgba(0,0,0,0.4);
+  }
+  .vc-footer-meta {
+    display:flex; flex-direction:column; gap:2px; align-items:center;
+    font-size:10px; color:rgba(255,255,255,0.65);
+  }
+  .vc-footer-site { color:#FFD700; font-weight:800; font-size:11px; letter-spacing:1px; }
+  .vc-footer-social { font-weight:600; }
+  .vc-footer-date { color:rgba(255,255,255,0.5); }
+
+  .share-actions { margin-top:14px; display:flex; gap:10px; }
+  .share-actions button {
+    flex:1; padding:13px; border:none; border-radius:8px;
+    font-size:14px; font-weight:800; cursor:pointer;
+    font-family:'PingFang SC',sans-serif;
+  }
+  .dl-btn { background:linear-gradient(180deg,#FFD700,#FFA500); color:#8B0000; box-shadow:0 4px 0 #8B0000; }
+  .dl-btn:hover { transform:translateY(-1px); }
+  .copy-btn { background:#FFF8DC; color:#8B0000; border:2px solid #B8860B!important; box-shadow:0 4px 0 #B8860B; }
+  .copy-btn:hover { transform:translateY(-1px); }
+
+  @media (max-width:520px) {
+    .vc-card { padding:18px 16px; }
+    .vc-emoji { font-size:56px; }
+    .vc-label-name { font-size:26px; letter-spacing:4px; }
+    .vc-amount { font-size:34px; }
   }
 
   /* The actual share card (screenshot target) */
@@ -989,81 +1149,51 @@
   </div>
 </div>
 
-<!-- ===== SHARE CARD OVERLAY ===== -->
+<!-- ===== SHARE CARD OVERLAY (vertical card, 9:16) ===== -->
 <div class="share-overlay" id="share-overlay" onclick="if(event.target===this)closeShareCard()">
   <div class="share-overlay-inner">
     <div class="share-close"><button onclick="closeShareCard()">✕ 关闭</button></div>
-    <div class="sc-card" id="share-card">
-      <div class="sc-bg" id="sc-bg"></div>
-      <div class="sc-content">
-        <!-- Top row -->
-        <div class="sc-top-row">
-          <span class="sc-emoji" id="sc-emoji">🤡</span>
-          <div class="sc-info">
-            <div class="sc-title" id="sc-title">GAME OVER</div>
-            <div class="sc-roast" id="sc-roast">...</div>
-            <div><span class="sc-stock-info" id="sc-stock">-</span><span class="sc-market-label" id="sc-market">-</span></div>
-          </div>
-        </div>
-        <!-- Mid: data + chart -->
-        <div class="sc-mid">
-          <div class="sc-data-col">
-            <div class="sc-data-row"><span class="dl">买入价</span><span class="dv" id="sc-buy-price">-</span></div>
-            <div class="sc-data-row"><span class="dl">历史最高</span><span class="dv gold" id="sc-high-price">-</span></div>
-            <div class="sc-data-row"><span class="dl">上车日期</span><span class="dv" id="sc-buy-date">-</span></div>
-            <div class="sc-data-row"><span class="dl">巅峰日期</span><span class="dv" id="sc-high-date">-</span></div>
-            <div class="sc-data-row"><span class="dl">买入数量</span><span class="dv" id="sc-qty">-</span></div>
-            <div class="sc-data-row"><span class="dl">等到巅峰</span><span class="dv" id="sc-hold">-</span></div>
-            <div class="sc-profit-box gain" id="sc-profit-box">
-              <div class="sp-label">最高点逃顶可赚</div>
-              <div class="sp-amount" id="sc-profit">+$0</div>
-              <div class="sp-pct" id="sc-pct">+0%</div>
-            </div>
-          </div>
-          <div class="sc-chart-col">
-            <div class="chart-title">📈 PRICE CHART</div>
-            <canvas id="sc-chart" width="400" height="260"></canvas>
-          </div>
-        </div>
-        <!-- Sell comparison -->
-        <div class="sc-comp" id="sc-comp">
-          <div class="sc-comp-title">⚔️ 你的操作 VS 完美操作</div>
-          <div class="sc-data-row"><span class="dl">你的卖出日</span><span class="dv" id="sc-c-date">-</span></div>
-          <div class="sc-data-row"><span class="dl">你的卖出价</span><span class="dv" id="sc-c-price">-</span></div>
-          <div class="sc-data-row"><span class="dl">你实际赚了</span><span class="dv" id="sc-c-actual">-</span></div>
-          <div class="sc-data-row"><span class="dl">最高点能赚</span><span class="dv gold" id="sc-c-peak">-</span></div>
-          <div class="sc-data-row" style="border-top:2px dashed rgba(251,191,36,0.15);padding-top:5px;margin-top:3px">
-            <span class="dl" style="font-weight:700;color:var(--text)">你少赚了</span>
-            <span class="dv red" style="font-size:15px" id="sc-c-missed">-</span>
-          </div>
-        </div>
-        <!-- Bottom: equivs + quote -->
-        <div class="sc-bottom">
-          <div class="sc-meme-box equivs">
-            <div class="mb-title">💰 这笔钱等于...</div>
-            <div id="sc-equivs"></div>
-          </div>
-          <div class="sc-meme-box quote">
-            <div class="mb-title">💬 韭菜语录</div>
-            <div class="quote-text" id="sc-quote">"..."</div>
-            <div class="quote-sub" id="sc-quote-sub">——</div>
-          </div>
-        </div>
-        <!-- Pain + verdict -->
-        <div class="sc-verdict-row">
-          <div class="sc-pain-wrap">
-            <div class="sp-label-row"><span class="sp-title">REGRET LV</span><span class="sp-level" id="sc-pain-text">-</span></div>
-            <div class="sp-bar-bg"><div class="sp-bar" id="sc-pain-bar" style="width:0%"></div></div>
-          </div>
-          <div class="sc-verdict-wrap">
-            <div class="vd-title">📋 韭菜鉴定</div>
-            <div class="vd-content" id="sc-verdict"></div>
-          </div>
-        </div>
-        <!-- Footer -->
-        <div class="sc-footer">
-          <div class="sf-left">同 花 损 · 假如那天你没卖<br><span id="sc-date" style="color:#FFD700;font-family:'Noto Sans SC',sans-serif;font-size:10px">--</span></div>
-          <div class="sf-right">𝕏 @0xajc · 📕 小红书:陈锦初Andrew<br>你也来算算你错过了多少钱 →</div>
+    <div class="vc-card" id="share-card" data-tier="loss">
+      <!-- decorative top stripe -->
+      <div class="vc-top-stripe"></div>
+      <!-- Header: brand -->
+      <div class="vc-header">
+        <span class="vc-brand">同花损</span>
+        <span class="vc-brand-sub">假如那天你没卖</span>
+      </div>
+
+      <!-- Hero: emoji + label name + sub -->
+      <div class="vc-hero">
+        <div class="vc-emoji" id="vc-emoji">🤡</div>
+        <div class="vc-label-name" id="vc-label-name">接 盘 侠</div>
+        <div class="vc-label-sub" id="vc-label-sub">主力的亲儿子</div>
+      </div>
+
+      <!-- Big number -->
+      <div class="vc-amount-box">
+        <div class="vc-amount-label" id="vc-amount-label">少 赚 了</div>
+        <div class="vc-amount" id="vc-amount">+$0</div>
+        <div class="vc-amount-pct" id="vc-amount-pct">+0%</div>
+      </div>
+
+      <!-- Stock + dates -->
+      <div class="vc-trade-info">
+        <div class="vc-stock"><span class="vc-stock-code" id="vc-stock-code">AAPL</span><span class="vc-stock-name" id="vc-stock-name">苹果</span></div>
+        <div class="vc-dates" id="vc-dates">2020/04 → 2024/11 · 持仓 1314 天</div>
+      </div>
+
+      <!-- Mini chart -->
+      <div class="vc-chart-box">
+        <canvas id="vc-chart" width="600" height="180"></canvas>
+      </div>
+
+      <!-- Footer -->
+      <div class="vc-footer">
+        <div class="vc-footer-tagline" id="vc-tagline">每一笔卖飞，都值得被纪念</div>
+        <div class="vc-footer-meta">
+          <div class="vc-footer-site">test.jiucai.run</div>
+          <div class="vc-footer-social">𝕏 @0xajc · 📕 小红书 陈锦初Andrew</div>
+          <div class="vc-footer-date" id="vc-date">--</div>
         </div>
       </div>
     </div>
@@ -1799,62 +1929,211 @@ function drawChart(canvas, d) {
   ctx.textAlign = 'start';
 }
 
-// ===== Share card =====
+// ===== 16 韭菜人格匹配 =====
+// Tiers: legendary(大赚) | missed(踏空/卖飞) | wash(白折腾) | loss(亏损)
+const PERSONALITY_LABELS = [
+  // === 大赚 (legendary) ===
+  { name:'您就是下一个巴菲特', sub:'一笔交易，封神之作', emoji:'👑', tier:'legendary', amountLabel:'你赚了',
+    tagline:'这种操作，应该出书',
+    match:(d)=> d.hasSell && d.actualPct >= 1000 },
+  { name:'天 才！真 的 是 天 才！', sub:'卖在最高点附近', emoji:'🏆', tier:'legendary', amountLabel:'你赚了',
+    tagline:'人类高质量操作',
+    match:(d)=> d.hasSell && d.actualPct >= 200 && (d.sellPrice/d.highPrice) >= 0.9 },
+  { name:'大师的境界我们不懂', sub:'浮盈五倍仍未卖出', emoji:'🧙', tier:'legendary', amountLabel:'当前浮盈',
+    tagline:'这种定力，菩萨看了都点头',
+    match:(d)=> !d.hasSell && d.profitPercent >= 500 },
+  { name:'运气也是实力的一部分', sub:'一个月翻一半', emoji:'🍀', tier:'legendary', amountLabel:'你赚了',
+    tagline:'承认吧 你就是赌赢了',
+    match:(d)=> d.hasSell && d.holdDays <= 30 && d.actualPct >= 50 },
+
+  // === 踏空 (missed) ===
+  { name:'与暴富擦肩而过', sub:'卖了之后它涨了一倍以上', emoji:'😩', tier:'missed', amountLabel:'少赚了',
+    tagline:'这辈子最痛的离别',
+    match:(d)=> d.hasSell && d.actualPct > 0 && (d.highPrice/d.sellPrice) >= 2 },
+  { name:'天 选 抄 底 侠', sub:'真的买在了底部', emoji:'🎯', tier:'missed', amountLabel:'你赚了',
+    tagline:'这不是技术 这是命',
+    match:(d)=> {
+      if(!d.hasSell || d.actualPct <= 0) return false;
+      // Approx "buy near low": buy price within 20% above the trough — we don't have trough,
+      // so approximate via "buy within 25% of low end of [buy..high] range"
+      // Use price normalized position: buy is "low" if buyPrice / highPrice < 0.4
+      return d.buyPrice / d.highPrice < 0.4;
+    } },
+  { name:'止盈止了个寂寞', sub:'赚了，但没完全赚', emoji:'🥲', tier:'missed', amountLabel:'少赚了',
+    tagline:'懂得，都懂',
+    match:(d)=> d.hasSell && d.actualPct > 0 && d.actualPct < 30 && (d.highPrice/d.sellPrice) >= 1.5 },
+  { name:'白 白 蹉 跎', sub:'拿了一年，啥也没动', emoji:'😶', tier:'missed', amountLabel:'你赚了',
+    tagline:'青春不再，韭菜依旧',
+    match:(d)=> d.holdDays > 365 && Math.abs(d.profitPercent) < 30 },
+
+  // === 白折腾 (wash) ===
+  { name:'死猪不怕开水烫', sub:'扛过 35% 回撤还在场', emoji:'🐷', tier:'wash', amountLabel:'当前浮盈/亏',
+    tagline:'跌了40%没跑 现在快回来了',
+    match:(d)=> !d.hasSell && Math.abs(d.profitPercent) < 15 },
+  { name:'白 坐 了 趟 过 山 车', sub:'大起大落，回到原点', emoji:'🎢', tier:'wash', amountLabel:'最终',
+    tagline:'图什么 图个心跳',
+    match:(d)=> d.hasSell && Math.abs(d.actualPct) < 20 && (d.highPrice/d.buyPrice) >= 1.5 },
+
+  // === 亏损 (loss) ===
+  { name:'主力的亲儿子', sub:'高位接盘 含泪卖出', emoji:'🤝', tier:'loss', amountLabel:'亏了',
+    tagline:'感谢您的贡献',
+    match:(d)=> d.hasSell && d.actualPct < -10 && (d.buyPrice/d.highPrice) > 0.85 },
+  { name:'天生反指 建议出书', sub:'高买低卖 教科书反向', emoji:'🃏', tier:'loss', amountLabel:'亏了',
+    tagline:'稳定输出 这是天赋',
+    match:(d)=> d.hasSell && d.actualPct < -10 && (d.buyPrice/d.highPrice) > 0.75 && (d.sellPrice/d.highPrice) < 0.45 },
+  { name:'建 议 改 行', sub:'两个月亏 20%', emoji:'🚪', tier:'loss', amountLabel:'亏了',
+    tagline:'股市不适合每个人',
+    match:(d)=> d.hasSell && d.holdDays < 60 && d.actualPct < -20 },
+  { name:'亏 钱 还 费 时 间', sub:'拿了好几个月 钱时间双失', emoji:'⏳', tier:'loss', amountLabel:'亏了',
+    tagline:'钱没了 时间也没了',
+    match:(d)=> d.hasSell && d.holdDays > 90 && d.actualPct >= -40 && d.actualPct < -10 },
+  { name:'你的钱已经成为别人的年终奖', sub:'持仓半年以上 巨亏', emoji:'🎁', tier:'loss', amountLabel:'亏了',
+    tagline:'感谢您的"资助"',
+    match:(d)=> d.hasSell && d.holdDays > 180 && d.actualPct < -50 },
+  { name:'认知和本金一起亏完了', sub:'还套着呢，浮亏过半', emoji:'💀', tier:'loss', amountLabel:'当前浮亏',
+    tagline:'建议深刻反思',
+    match:(d)=> !d.hasSell && d.profitPercent < -40 },
+];
+
+function matchPersonality(d){
+  for(const p of PERSONALITY_LABELS){
+    try { if(p.match(d)) return p; } catch(e) {}
+  }
+  // Fallback: pick by tier based on profitPercent
+  if(d.hasSell){
+    if(d.actualPct >= 50) return PERSONALITY_LABELS.find(p=>p.name==='运气也是实力的一部分');
+    if(d.actualPct > 0) return PERSONALITY_LABELS.find(p=>p.name==='止盈止了个寂寞');
+    return PERSONALITY_LABELS.find(p=>p.name==='亏 钱 还 费 时 间');
+  }
+  return d.profitPercent >= 0
+    ? PERSONALITY_LABELS.find(p=>p.name==='大师的境界我们不懂')
+    : PERSONALITY_LABELS.find(p=>p.name==='认知和本金一起亏完了');
+}
+
+function pickAmount(d, p){
+  // Returns {amount, pct, signed}
+  if(p.tier === 'legendary' || p.tier === 'wash' && d.hasSell){
+    if(d.hasSell) return { amount:d.actualProfit, pct:d.actualPct };
+    return { amount:d.profit, pct:d.profitPercent };
+  }
+  if(p.tier === 'missed'){
+    // Show "missed" amount (peak - actual), or actual gain if abs gain is the headline
+    if(d.hasSell && d.missedProfit > 0) return { amount:d.missedProfit, pct:(d.profit-d.actualProfit)/(d.buyPrice*d.quantity)*100 };
+    return { amount:d.profit, pct:d.profitPercent };
+  }
+  if(p.tier === 'loss'){
+    if(d.hasSell) return { amount:d.actualProfit, pct:d.actualPct };
+    return { amount:d.profit, pct:d.profitPercent };
+  }
+  // wash without sell
+  return { amount:d.profit, pct:d.profitPercent };
+}
+
+// ===== Share card (vertical) =====
 function openShareCard(){
   if(!lastResult)return;
-  const d=lastResult,m=getMeta(d.profitPercent);
+  const d=lastResult;
+  const p=matchPersonality(d);
+  const amt=pickAmount(d, p);
 
-  // Set background - pick color based on profit level
-  const bgIdx = d.profitPercent > 100 ? 3 : d.profitPercent > 0 ? 4 : 2; // green for big win, gold for small win, red for loss
-  const bg = MEME_BG_STYLES[bgIdx] || MEME_BG_STYLES[0];
-  const scBg = document.getElementById('sc-bg');
-  scBg.style.backgroundImage = bg;
-  scBg.style.backgroundSize = 'cover';
+  // Apply tier theme
+  document.getElementById('share-card').setAttribute('data-tier', p.tier);
 
-  document.getElementById('sc-emoji').textContent=m.emoji;
-  document.getElementById('sc-title').textContent=m.title;
-  document.getElementById('sc-roast').textContent=m.roast;
-  document.getElementById('sc-stock').textContent=`${d.stockCode} ${d.stockName}`;
-  document.getElementById('sc-market').textContent=d.market;
-  document.getElementById('sc-buy-price').textContent=d.currency+fN(d.buyPrice);
-  document.getElementById('sc-high-price').textContent=d.currency+fN(d.highPrice);
-  document.getElementById('sc-buy-date').textContent=d.buyDate.toLocaleDateString('zh-CN');
-  document.getElementById('sc-high-date').textContent=d.highDate.toLocaleDateString('zh-CN');
-  document.getElementById('sc-qty').textContent=d.quantity.toLocaleString()+'股';
-  document.getElementById('sc-hold').textContent=d.holdDays+'天';
-  // Footer date stamp
+  // Hero
+  document.getElementById('vc-emoji').textContent=p.emoji;
+  document.getElementById('vc-label-name').textContent=p.name;
+  document.getElementById('vc-label-sub').textContent=p.sub;
+
+  // Amount
+  document.getElementById('vc-amount-label').textContent=p.amountLabel;
+  const sign = amt.amount >= 0 ? '+' : '';
+  document.getElementById('vc-amount').textContent = sign + fC(amt.amount, d.currency);
+  document.getElementById('vc-amount-pct').textContent = (amt.pct >= 0 ? '+' : '') + amt.pct.toFixed(2) + '%';
+
+  // Trade info
+  document.getElementById('vc-stock-code').textContent = d.stockCode;
+  document.getElementById('vc-stock-name').textContent = d.stockName || '';
+  const fmtYM = (dt) => dt.getFullYear() + '/' + String(dt.getMonth()+1).padStart(2,'0');
+  const endDt = d.hasSell ? d.sellDate : new Date();
+  document.getElementById('vc-dates').textContent = `${fmtYM(d.buyDate)} → ${fmtYM(endDt)} · 持仓 ${d.holdDays} 天`;
+
+  // Footer
+  document.getElementById('vc-tagline').textContent = p.tagline;
   const today=new Date();
-  document.getElementById('sc-date').textContent='生成于 '+today.getFullYear()+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+String(today.getDate()).padStart(2,'0');
+  document.getElementById('vc-date').textContent='生成于 '+today.getFullYear()+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+String(today.getDate()).padStart(2,'0');
 
-  const spb=document.getElementById('sc-profit-box');
-  spb.className='sc-profit-box '+(d.profit>=0?'gain':'loss');
-  document.getElementById('sc-profit').textContent=fC(d.profit,d.currency);
-  document.getElementById('sc-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
-
-  const scc=document.getElementById('sc-comp');
-  if(d.hasSell){scc.classList.add('show');
-    document.getElementById('sc-c-date').textContent=d.sellDate.toLocaleDateString('zh-CN');
-    document.getElementById('sc-c-price').textContent=d.currency+fN(d.sellPrice);
-    const sa=document.getElementById('sc-c-actual');sa.textContent=fC(d.actualProfit,d.currency);sa.className='dv '+(d.actualProfit>=0?'green':'red');
-    document.getElementById('sc-c-peak').textContent=fC(d.profit,d.currency);
-    document.getElementById('sc-c-missed').textContent=fC(d.missedProfit,d.currency);
-  }else{scc.classList.remove('show')}
-
-  genEquiv(d,'sc-equivs',false);
-  document.getElementById('sc-quote').textContent=m.quote.q;
-  document.getElementById('sc-quote-sub').textContent=m.quote.s;
-
-  const pp=Math.min(100,Math.max(0,d.profitPercent>0?Math.min(d.profitPercent/10,100):50+Math.min(Math.abs(d.profitPercent)/2,50)));
-  const pl=['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
-  const pi=Math.min(pl.length-1,Math.floor(pp/(100/pl.length)));
-  document.getElementById('sc-pain-bar').style.width=pp+'%';
-  document.getElementById('sc-pain-text').textContent=pl[pi];
-
-  genVerdict(d,'sc-verdict');
-
-  // Show overlay first, then draw chart (needs visible container for sizing)
+  // Show overlay then draw chart
   document.getElementById('share-overlay').classList.add('show');
-  requestAnimationFrame(()=>{drawChart(document.getElementById('sc-chart'), d)});
+  requestAnimationFrame(()=>{ drawMiniChart(document.getElementById('vc-chart'), d, p.tier); });
+}
+
+function drawMiniChart(canvas, d, tier){
+  const cd = d.chartData;
+  if(!cd || cd.length < 2) return;
+  const dpr = 2;
+  const cw = canvas.parentElement.clientWidth - 16;
+  const ch = canvas.parentElement.clientHeight - 16;
+  if(cw<=0 || ch<=0) return;
+  canvas.width = cw*dpr; canvas.height = ch*dpr;
+  canvas.style.width = cw+'px'; canvas.style.height = ch+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,cw*dpr,ch*dpr);
+
+  // sample to <= 150 points
+  let pts = cd;
+  if(pts.length > 150){const step=Math.floor(pts.length/150); pts = pts.filter((_,i)=>i%step===0);}
+
+  const prices = pts.map(p=>p.close);
+  const minP = Math.min(...prices)*0.98;
+  const maxP = Math.max(...prices)*1.02;
+  const pad = {t:8*dpr, b:18*dpr, l:6*dpr, r:6*dpr};
+  const W=cw*dpr, H=ch*dpr;
+  const w = W-pad.l-pad.r, h = H-pad.t-pad.b;
+  const toX = i => pad.l + (i/(pts.length-1))*w;
+  const toY = p => pad.t + (1 - (p-minP)/(maxP-minP))*h;
+
+  // tier-based colors
+  const tierColor = {
+    legendary:{line:'#FFD700', fill:'rgba(255,215,0,0.25)'},
+    missed:{line:'#FFB347', fill:'rgba(255,179,71,0.25)'},
+    wash:{line:'#9CA3AF', fill:'rgba(156,163,175,0.2)'},
+    loss:{line:'#FF6B6B', fill:'rgba(255,107,107,0.25)'},
+  }[tier] || {line:'#FFD700', fill:'rgba(255,215,0,0.25)'};
+
+  // area
+  ctx.beginPath();
+  ctx.moveTo(toX(0), H-pad.b);
+  for(let i=0;i<pts.length;i++) ctx.lineTo(toX(i), toY(pts[i].close));
+  ctx.lineTo(toX(pts.length-1), H-pad.b);
+  ctx.closePath();
+  ctx.fillStyle = tierColor.fill; ctx.fill();
+
+  // line
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++){i===0 ? ctx.moveTo(toX(i),toY(pts[i].close)) : ctx.lineTo(toX(i),toY(pts[i].close));}
+  ctx.strokeStyle = tierColor.line; ctx.lineWidth = 2*dpr; ctx.stroke();
+
+  // dots: buy/peak/sell
+  let buyIdx=0, peakIdx=0, sellIdx=-1, peakP=0;
+  for(let i=0;i<pts.length;i++){ if(pts[i].close>peakP){peakP=pts[i].close; peakIdx=i;} }
+  if(d.hasSell && d.sellDate){
+    let m=Infinity;
+    for(let i=0;i<pts.length;i++){const diff=Math.abs(pts[i].date-d.sellDate); if(diff<m){m=diff; sellIdx=i;}}
+  }
+  function dot(x,y,col){ ctx.beginPath(); ctx.arc(x,y,4*dpr,0,Math.PI*2); ctx.fillStyle=col; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.5*dpr; ctx.stroke(); }
+  dot(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80');
+  dot(toX(peakIdx), toY(pts[peakIdx].close), '#FFD700');
+  if(sellIdx>=0) dot(toX(sellIdx), toY(pts[sellIdx].close), '#f87171');
+
+  // 2 date labels (start, end)
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = `${9*dpr}px 'PingFang SC',sans-serif`;
+  ctx.textAlign = 'left';
+  const fmtDate = (ts)=>{const dt=new Date(ts);return dt.getFullYear()+'/'+String(dt.getMonth()+1).padStart(2,'0');};
+  ctx.fillText(fmtDate(pts[0].date), pad.l, H-4);
+  ctx.textAlign = 'right';
+  ctx.fillText(fmtDate(pts[pts.length-1].date), W-pad.r, H-4);
+  ctx.textAlign = 'start';
 }
 
 function closeShareCard(){document.getElementById('share-overlay').classList.remove('show')}
@@ -1872,10 +2151,12 @@ async function downloadShareImage(){
 }
 
 function copyShareText(){
-  if(!lastResult)return;const d=lastResult,m=getMeta(d.profitPercent);
-  let t=`🕹️【${m.title}】\n\n📊 ${d.stockCode} ${d.stockName} (${d.market})\n💰 买入:${d.currency}${fN(d.buyPrice)}×${d.quantity}股\n📈 历史最高:${d.currency}${fN(d.highPrice)}\n${d.profit>=0?'🤑':'🤡'} 最高点能赚:${fC(d.profit,d.currency)} (${d.profitPercent>=0?'+':''}${d.profitPercent.toFixed(2)}%)\n`;
-  if(d.hasSell)t+=`\n⚔️ 实际卖出:${d.currency}${fN(d.sellPrice)}\n😭 少赚了:${fC(d.missedProfit,d.currency)}\n`;
-  t+=`\n${m.quote.q}\n${m.quote.s}\n\n来算算你错过了多少钱👇 韭菜后悔计算器\n𝕏 @0xajc | 📕 小红书:陈锦初Andrew`;
+  if(!lastResult)return;
+  const d=lastResult; const p=matchPersonality(d); const amt=pickAmount(d, p);
+  const sign = amt.amount >= 0 ? '+' : '';
+  let t=`【${p.name}】${p.sub}\n\n📊 ${d.stockCode} ${d.stockName||''} (${d.market})\n💰 ${p.amountLabel}：${sign}${fC(amt.amount,d.currency)} (${(amt.pct>=0?'+':'')+amt.pct.toFixed(2)}%)\n`;
+  if(d.hasSell)t+=`\n你的卖出价：${d.currency}${fN(d.sellPrice)}\n最高点价：${d.currency}${fN(d.highPrice)}\n少赚了：${fC(d.missedProfit,d.currency)}\n`;
+  t+=`\n${p.tagline}\n\n— 同花损 · 假如那天你没卖 —\n来测测你是哪种韭菜 👇\n𝕏 @0xajc | 📕 小红书:陈锦初Andrew`;
   navigator.clipboard.writeText(t).then(()=>showToast('文案已复制！')).catch(()=>showToast('复制失败'));
 }
 
