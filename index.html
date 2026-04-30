@@ -697,8 +697,8 @@
       <div id="buy-amount-input" style="display:none">
         <div class="form-group"><label class="form-label">买入总金额</label><input type="number" class="form-input" id="buy-amount" placeholder="10000" min="1"></div>
       </div>
-      <label class="sell-toggle"><input type="checkbox" id="sell-check" onchange="toggleSellDate()">已经卖出了？</label>
-      <div class="sell-date-row" id="sell-date-row">
+      <label class="sell-toggle"><input type="checkbox" id="sell-check" checked onchange="toggleSellDate()">是否已卖出？</label>
+      <div class="sell-date-row show" id="sell-date-row">
         <div class="form-row">
           <div class="form-group"><label class="form-label">卖出日期</label><input type="date" class="form-input" id="sell-date"></div>
           <div class="form-group"><label class="form-label">卖出价（选填）</label><input type="number" class="form-input" id="sell-price" placeholder="自动" step="0.01" min="0"></div>
@@ -1522,7 +1522,7 @@ function resetForm(){
   document.getElementById('action-buttons-row').style.display='none';
   selectedStock='';document.getElementById('stock-code').value='';
   document.getElementById('buy-price').value='';document.getElementById('buy-amount').value='';
-  document.getElementById('sell-check').checked=false;document.getElementById('sell-date-row').classList.remove('show');
+  document.getElementById('sell-check').checked=true;document.getElementById('sell-date-row').classList.add('show');
   document.getElementById('sell-date').value='';document.getElementById('sell-price').value='';
   renderStockGrid();
 }
