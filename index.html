@@ -532,6 +532,66 @@
   .profit-box.gain .profit-percent { color:var(--color-up); }
   .profit-box.loss .profit-percent { color:var(--color-down); }
 
+  /* Dual profit display (for sold trades) */
+  .profit-dual {
+    display:grid; grid-template-columns: 1fr auto 1fr; gap:12px; align-items:center;
+    margin-bottom:8px;
+  }
+  .profit-dual .pd-half {
+    text-align:center; padding:14px 12px; border-radius:10px;
+    background:linear-gradient(135deg, rgba(255,248,220,0.7), rgba(34,139,34,0.12));
+    border:3px solid #228B22;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  }
+  .profit-dual .pd-half.loss {
+    background:linear-gradient(135deg, rgba(255,248,220,0.7), rgba(178,34,34,0.12));
+    border-color:#B22222;
+  }
+  .profit-dual .pd-half.pd-peak {
+    background:linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,165,0,0.12));
+    border-color:#B8860B;
+  }
+  .profit-dual .pd-label {
+    font-size:13px; color:#8B0000; font-weight:800; margin-bottom:6px; letter-spacing:1px;
+  }
+  .profit-dual .pd-amount {
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',serif;
+    font-size:22px; font-weight:900; line-height:1.1;
+    color:#0A6B1F;
+    text-shadow:1px 1px 0 #FFD700, 2px 2px 4px rgba(0,0,0,0.15);
+  }
+  .profit-dual .pd-half.loss .pd-amount { color:#8B0000; }
+  .profit-dual .pd-half.pd-peak .pd-amount { color:#B8860B; }
+  .profit-dual .pd-pct { font-size:13px; font-weight:900; margin-top:3px; color:#0A6B1F; }
+  .profit-dual .pd-half.loss .pd-pct { color:#8B0000; }
+  .profit-dual .pd-half.pd-peak .pd-pct { color:#B8860B; }
+  .profit-dual .pd-vs {
+    font-family:'ZCOOL QingKe HuangYou',serif;
+    font-size:18px; font-weight:900; color:#8B0000;
+    background:linear-gradient(135deg, #FFD700, #FFA500);
+    border:2px solid #8B0000; border-radius:50%;
+    width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 8px rgba(139,0,0,0.4);
+  }
+  .profit-missed {
+    display:flex; justify-content:center; align-items:baseline; gap:10px;
+    padding:10px 16px; margin-bottom:10px; border-radius:8px;
+    background:linear-gradient(90deg, rgba(178,34,34,0.12), rgba(178,34,34,0.2), rgba(178,34,34,0.12));
+    border:2px dashed #B22222;
+  }
+  .profit-missed .pm-label {
+    font-size:14px; color:#8B0000; font-weight:800; letter-spacing:2px;
+  }
+  .profit-missed .pm-amount {
+    font-family:'ZCOOL QingKe HuangYou',serif;
+    font-size:24px; font-weight:900; color:#B22222;
+    text-shadow:1px 1px 0 #FFE4E1, 2px 2px 4px rgba(0,0,0,0.2);
+  }
+  @media (max-width:520px) {
+    .profit-dual { grid-template-columns: 1fr; }
+    .profit-dual .pd-vs { margin: 0 auto; transform:rotate(90deg); }
+  }
+
   .comparison-box {
     display:none; border:3px solid #FFD700; padding:14px 16px;
     margin-bottom:10px;
@@ -1242,13 +1302,33 @@
             <div class="item"><div class="label">等巅峰</div><div class="val" id="r-hold">-</div></div>
           </div>
           <div class="comparison-box" id="comp-box">
-            <div class="comp-title">⚔️ 你的操作 VS 完美操作</div>
-            <div class="comp-row"><span class="cl">卖出日</span><span class="cv" id="c-sell-date">-</span></div>
+            <div class="comp-title">📋 卖出明细</div>
+            <div class="comp-row"><span class="cl">卖出日期</span><span class="cv" id="c-sell-date">-</span></div>
             <div class="comp-row"><span class="cl">卖出价</span><span class="cv" id="c-sell-price">-</span></div>
-            <div class="comp-row"><span class="cl">你赚了</span><span class="cv" id="c-actual">-</span></div>
-            <div class="comp-row"><span class="cl">最高能赚</span><span class="cv gold" id="c-peak">-</span></div>
-            <div class="comp-row" style="border-top:2px dashed rgba(251,191,36,0.2);padding-top:5px"><span class="cl" style="font-weight:700">少赚了</span><span class="cv red" id="c-missed" style="font-size:14px">-</span></div>
+            <!-- Hidden but kept for backward compat with code that still sets these -->
+            <span style="display:none" id="c-actual">-</span>
+            <span style="display:none" id="c-peak">-</span>
+            <span style="display:none" id="c-missed">-</span>
           </div>
+          <!-- For sold trades: dual box (actual vs peak) + missed banner -->
+          <div class="profit-dual" id="profit-dual" style="display:none">
+            <div class="pd-half" id="pd-actual-box">
+              <div class="pd-label">你实际赚了</div>
+              <div class="pd-amount" id="pd-actual">+¥0</div>
+              <div class="pd-pct" id="pd-actual-pct">+0%</div>
+            </div>
+            <div class="pd-vs">VS</div>
+            <div class="pd-half pd-peak">
+              <div class="pd-label">最高点能赚</div>
+              <div class="pd-amount" id="pd-peak">+¥0</div>
+              <div class="pd-pct" id="pd-peak-pct">+0%</div>
+            </div>
+          </div>
+          <div class="profit-missed" id="profit-missed" style="display:none">
+            <span class="pm-label">少赚了</span>
+            <span class="pm-amount" id="pd-missed">+¥0</span>
+          </div>
+          <!-- For unrealized (still holding): single box -->
           <div class="profit-box gain" id="profit-box">
             <div class="profit-label">最高点完美逃顶</div>
             <div class="profit-amount" id="r-profit">+$0</div>
@@ -1928,9 +2008,20 @@ function getMeta(pct, opts){
     const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
     return { emoji, title, roast, quote:q, quotePool:qp };
   }
-  // 2. Sold at profit → praise (use ACTUAL gain, not peak)
+  // 2. Sold at profit → judge by ACTUAL gain AND how much was left on the table
   if(opts && opts.hasSell && typeof opts.actualPct === 'number' && opts.actualPct >= 0){
     const ap = opts.actualPct;
+    // Missed ratio: peakPct / actualPct (how many times more you COULD have made)
+    const missedRatio = pct / Math.max(ap, 1);
+    // High missed ratio overrides praise — even huge actual gain becomes "拍断大腿"
+    if(missedRatio >= 8 && ap >= 50){
+      if(ap >= 1000)      { emoji='😩'; title='拍断大腿'; roast='你赚了 但你错过的更让人心痛'; qp='epic'; }
+      else if(ap >= 200)  { emoji='🥲'; title='差点暴富'; roast='你赚了一笔 但天台上还有位置'; qp='epic'; }
+      else                { emoji='😩'; title='与暴富擦肩而过'; roast='你卖出那一刻 巴菲特都落泪了'; qp='epic'; }
+      const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
+      return { emoji, title, roast, quote:q, quotePool:qp };
+    }
+    // Otherwise praise based on actual gain
     if(ap >= 1000)     { emoji='👑'; title='封神级操作'; roast='巴菲特看了直接拜师'; qp='legendary'; }
     else if(ap >= 500) { emoji='🚀'; title='您是真的牛'; roast='这操作教科书都不敢这么写'; qp='legendary'; }
     else if(ap >= 200) { emoji='💎'; title='牛 我直接牛了'; roast='您让股神也黯然失色'; qp='epic'; }
@@ -1981,15 +2072,27 @@ function displayResults(d){
   const cb=document.getElementById('comp-box');
   if(d.hasSell){cb.classList.add('show');document.getElementById('c-sell-date').textContent=d.sellDate.toLocaleDateString('zh-CN');document.getElementById('c-sell-price').textContent=d.currency+fN(d.sellPrice);const ae=document.getElementById('c-actual');ae.textContent=fC(d.actualProfit,d.currency);ae.className='cv '+(d.actualProfit>=0?'green':'red');document.getElementById('c-peak').textContent=fC(d.profit,d.currency);document.getElementById('c-missed').textContent=fC(d.missedProfit,d.currency)}else{cb.classList.remove('show')}
   const pb=document.getElementById('profit-box');
-  // For genuine losses: show actual loss as the headline; for gains/holds: show peak gain
-  if(isRealLoss){
-    pb.className='profit-box loss';
-    pb.querySelector('.profit-label').textContent='你实际亏了';
-    document.getElementById('r-profit').textContent=fC(d.actualProfit,d.currency);
-    document.getElementById('r-pct').textContent=(d.actualPct>=0?'+':'')+d.actualPct.toFixed(2)+'%';
+  const pd=document.getElementById('profit-dual');
+  const pm=document.getElementById('profit-missed');
+  if(d.hasSell){
+    // Dual mode: show actual vs peak side-by-side
+    pb.style.display='none';
+    pd.style.display='';
+    pm.style.display='';
+    const actBox=document.getElementById('pd-actual-box');
+    actBox.className='pd-half ' + (d.actualProfit>=0?'gain':'loss');
+    document.getElementById('pd-actual').textContent=fC(d.actualProfit,d.currency);
+    document.getElementById('pd-actual-pct').textContent=(d.actualPct>=0?'+':'')+d.actualPct.toFixed(2)+'%';
+    document.getElementById('pd-peak').textContent=fC(d.profit,d.currency);
+    document.getElementById('pd-peak-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+    document.getElementById('pd-missed').textContent=fC(d.missedProfit,d.currency);
   } else {
+    // Single box for unrealized
+    pd.style.display='none';
+    pm.style.display='none';
+    pb.style.display='';
     pb.className='profit-box '+(d.profit>=0?'gain':'loss');
-    pb.querySelector('.profit-label').textContent='最高点完美逃顶';
+    pb.querySelector('.profit-label').textContent= d.profit>=0?'当前浮盈':'当前浮亏';
     document.getElementById('r-profit').textContent=fC(d.profit,d.currency);
     document.getElementById('r-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
   }
@@ -2229,12 +2332,17 @@ function drawChart(canvas, d) {
 // Tiers: legendary(大赚) | missed(踏空/卖飞) | wash(白折腾) | loss(亏损)
 const PERSONALITY_LABELS = [
   // === 大赚 (legendary) - 拍马屁拍到天上 ===
+  // Stricter: only "封神" if you truly captured most of the move (sold price ≥ 60% of peak)
   { name:'您就是下一个巴菲特', sub:'一笔交易 直接封神', emoji:'👑', tier:'legendary', amountLabel:'你赚了',
     tagline:'巴菲特看了都要喊您一声哥',
-    match:(d)=> d.hasSell && d.actualPct >= 1000 },
+    match:(d)=> d.hasSell && d.actualPct >= 1000 && (d.sellPrice/d.highPrice) >= 0.6 },
   { name:'天才！真的是天才！', sub:'卖在最高点附近', emoji:'🏆', tier:'legendary', amountLabel:'你赚了',
     tagline:'建议加入门萨 您是人类天花板',
     match:(d)=> d.hasSell && d.actualPct >= 200 && (d.sellPrice/d.highPrice) >= 0.9 },
+  // === 拍断大腿 — 赚了但少赚太多 (放在 missed 区前面，优先匹配) ===
+  { name:'拍断大腿', sub:'赚是赚了 但本可以多赚 N 倍', emoji:'😩', tier:'missed', amountLabel:'少赚了',
+    tagline:'你赚了 但你错过的更让人心痛',
+    match:(d)=> d.hasSell && d.actualPct >= 100 && (d.profitPercent / Math.max(d.actualPct, 1)) >= 8 },
   { name:'大师的境界我们不懂', sub:'浮盈五倍仍未卖出', emoji:'🧙', tier:'legendary', amountLabel:'当前浮盈',
     tagline:'拈花一笑间 韭菜便成庄家',
     match:(d)=> !d.hasSell && d.profitPercent >= 500 },
