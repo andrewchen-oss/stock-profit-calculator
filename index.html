@@ -1941,17 +1941,18 @@ function getMeta(pct, opts){
     const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
     return { emoji, title, roast, quote:q, quotePool:qp };
   }
-  // 3. Still holding → unrealized peak framing
-  if(pct>2000){emoji='💀';title='封神级踏空';roast='你和财务自由之间只差一个卖出键';qp='legendary'}
-  else if(pct>1000){emoji='🚀';title='传说级踏空';roast='十倍股从指缝溜走了';qp='legendary'}
-  else if(pct>500){emoji='😱';title='史诗级遗憾';roast='错过一套房的钱，建议抱K线图哭';qp='epic'}
-  else if(pct>200){emoji='🤯';title='锤胸捶腿';roast='翻了好几倍！可惜只在平行宇宙';qp='epic'}
-  else if(pct>100){emoji='💰';title='翻倍未卖';roast='翻倍了但没卖，股市渣男实锤';qp='good'}
-  else if(pct>50){emoji='😏';title='还不错';roast='够吃几顿海底捞，离自由差亿点点';qp='good'}
-  else if(pct>10){emoji='🥲';title='勉强糊口';roast='这涨幅不够手续费+心理咨询费';qp='meh'}
-  else if(pct>0){emoji='🤷';title='聊胜于无';roast='赚是赚了，说出去不好意思';qp='meh'}
-  else if(pct>-20){emoji='🤡';title='接盘侠认证';roast='精准买在别人的最高点';qp='loss'}
-  else{emoji='☠️';title='完全凉透';roast='建议远离股市回去搬砖';qp='loss'}
+  // 3. Still holding → unrealized P/L framing (gain = praise, loss = attack)
+  // (Reach here when !hasSell. pct is profitPercent = (currentPrice - buyPrice)/buyPrice * 100)
+  if(pct >= 1000)     { emoji='🧙'; title='活着的传说'; roast='浮盈十倍还没卖 这定力菩萨都点头'; qp='legendary'; }
+  else if(pct >= 500) { emoji='💎'; title='钻石手大师'; roast='浮盈五倍还稳坐 真·价值投资者'; qp='legendary'; }
+  else if(pct >= 200) { emoji='🚀'; title='拿稳别动'; roast='账上浮盈数倍 你已经赢了'; qp='epic'; }
+  else if(pct >= 100) { emoji='🏆'; title='浮盈翻倍'; roast='账面好看 现在卖就晚了'; qp='good'; }
+  else if(pct >= 50)  { emoji='😏'; title='账面不错'; roast='浮盈一半 别飘'; qp='good'; }
+  else if(pct >= 10)  { emoji='🥲'; title='账面微赚'; roast='离财富自由还差亿点点'; qp='meh'; }
+  else if(pct > -10)  { emoji='🤷'; title='不赚不赔'; roast='账面横盘 韭菜的日常'; qp='meh'; }
+  else if(pct > -30)  { emoji='😬'; title='账面浮亏'; roast='被套了 但还能扛'; qp='loss'; }
+  else if(pct > -60)  { emoji='🪦'; title='深度被套'; roast='套到现在 建议躺平等回本'; qp='loss'; }
+  else                { emoji='☠️'; title='血亏挂机'; roast='本金腰斩 还在硬扛'; qp='loss'; }
   const qs=MEME_QUOTES[qp];const q=qs[Math.floor(Math.random()*qs.length)];
   return{emoji,title,roast,quote:q,quotePool:qp}
 }
