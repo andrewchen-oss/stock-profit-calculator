@@ -675,7 +675,32 @@
     background:linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
     background-size:200% 100%;
     animation:goldShine 3s linear infinite;
+    z-index:3;
   }
+
+  /* Per-tier decoration: floating background emojis */
+  .vc-bg-deco {
+    position:absolute; inset:0; pointer-events:none; z-index:0;
+    overflow:hidden;
+  }
+  .vc-bg-deco span {
+    position:absolute; opacity:0.18;
+    filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  }
+  .vc-card[data-tier="legendary"] .vc-bg-deco span {
+    animation: floatUp 6s ease-in-out infinite;
+    opacity:0.32;
+  }
+  @keyframes floatUp {
+    0%,100% { transform: translateY(0) rotate(-5deg); }
+    50%     { transform: translateY(-12px) rotate(5deg); }
+  }
+  .vc-card > .vc-header,
+  .vc-card > .vc-hero,
+  .vc-card > .vc-amount-box,
+  .vc-card > .vc-trade-info,
+  .vc-card > .vc-chart-box,
+  .vc-card > .vc-footer { position:relative; z-index:2; }
 
   /* HEADER */
   .vc-header {
@@ -1156,6 +1181,8 @@
     <div class="vc-card" id="share-card" data-tier="loss">
       <!-- decorative top stripe -->
       <div class="vc-top-stripe"></div>
+      <!-- background decoration (filled per-tier in JS) -->
+      <div class="vc-bg-deco" id="vc-bg-deco"></div>
       <!-- Header: brand -->
       <div class="vc-header">
         <span class="vc-brand">同花损</span>
@@ -1191,8 +1218,7 @@
       <div class="vc-footer">
         <div class="vc-footer-tagline" id="vc-tagline">每一笔卖飞，都值得被纪念</div>
         <div class="vc-footer-meta">
-          <div class="vc-footer-site">test.jiucai.run</div>
-          <div class="vc-footer-social">𝕏 @0xajc · 📕 小红书 陈锦初Andrew</div>
+          <div class="vc-footer-site">同 花 损 · test.jiucai.run</div>
           <div class="vc-footer-date" id="vc-date">--</div>
         </div>
       </div>
@@ -1832,7 +1858,8 @@ function drawChart(canvas, d) {
   const prices = pts.map(p => p.close);
   const minP = Math.min(...prices) * 0.98;
   const maxP = Math.max(...prices) * 1.02;
-  const pad = { t: 30*dpr, b: 42*dpr, l: 10*dpr, r: 10*dpr };
+  // Wider l/r padding so the first and last date labels (centered on tick) don't get clipped
+  const pad = { t: 30*dpr, b: 42*dpr, l: 28*dpr, r: 28*dpr };
   const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
 
   const toX = i => pad.l + (i / (pts.length - 1)) * cw;
@@ -1932,68 +1959,111 @@ function drawChart(canvas, d) {
 // ===== 16 韭菜人格匹配 =====
 // Tiers: legendary(大赚) | missed(踏空/卖飞) | wash(白折腾) | loss(亏损)
 const PERSONALITY_LABELS = [
-  // === 大赚 (legendary) ===
-  { name:'您就是下一个巴菲特', sub:'一笔交易，封神之作', emoji:'👑', tier:'legendary', amountLabel:'你赚了',
-    tagline:'这种操作，应该出书',
+  // === 大赚 (legendary) - 拍马屁拍到天上 ===
+  { name:'您就是下一个巴菲特', sub:'一笔交易 直接封神', emoji:'👑', tier:'legendary', amountLabel:'你赚了',
+    tagline:'👏 跪了 这操作我学不会 👏',
     match:(d)=> d.hasSell && d.actualPct >= 1000 },
-  { name:'天 才！真 的 是 天 才！', sub:'卖在最高点附近', emoji:'🏆', tier:'legendary', amountLabel:'你赚了',
-    tagline:'人类高质量操作',
+  { name:'天才！真的是天才！', sub:'卖在最高点附近', emoji:'🏆', tier:'legendary', amountLabel:'你赚了',
+    tagline:'✨ 牛 我 直 接 牛 了 ✨',
     match:(d)=> d.hasSell && d.actualPct >= 200 && (d.sellPrice/d.highPrice) >= 0.9 },
   { name:'大师的境界我们不懂', sub:'浮盈五倍仍未卖出', emoji:'🧙', tier:'legendary', amountLabel:'当前浮盈',
-    tagline:'这种定力，菩萨看了都点头',
+    tagline:'🙏 大师 收下我的膝盖 🙏',
     match:(d)=> !d.hasSell && d.profitPercent >= 500 },
   { name:'运气也是实力的一部分', sub:'一个月翻一半', emoji:'🍀', tier:'legendary', amountLabel:'你赚了',
-    tagline:'承认吧 你就是赌赢了',
+    tagline:'🎰 承认吧 你就是赌赢了 🎰',
     match:(d)=> d.hasSell && d.holdDays <= 30 && d.actualPct >= 50 },
 
-  // === 踏空 (missed) ===
-  { name:'与暴富擦肩而过', sub:'卖了之后它涨了一倍以上', emoji:'😩', tier:'missed', amountLabel:'少赚了',
-    tagline:'这辈子最痛的离别',
+  // === 踏空 (missed) - 心痛但克制 ===
+  { name:'与暴富擦肩而过', sub:'卖完它就翻倍了', emoji:'😩', tier:'missed', amountLabel:'少赚了',
+    tagline:'😭 卖完这一刻 你就是我 😭',
     match:(d)=> d.hasSell && d.actualPct > 0 && (d.highPrice/d.sellPrice) >= 2 },
-  { name:'天 选 抄 底 侠', sub:'真的买在了底部', emoji:'🎯', tier:'missed', amountLabel:'你赚了',
-    tagline:'这不是技术 这是命',
+  { name:'天选抄底侠', sub:'真的买在了底部', emoji:'🎯', tier:'missed', amountLabel:'你赚了',
+    tagline:'这不是技术，这是 命',
     match:(d)=> {
       if(!d.hasSell || d.actualPct <= 0) return false;
-      // Approx "buy near low": buy price within 20% above the trough — we don't have trough,
-      // so approximate via "buy within 25% of low end of [buy..high] range"
-      // Use price normalized position: buy is "low" if buyPrice / highPrice < 0.4
       return d.buyPrice / d.highPrice < 0.4;
     } },
-  { name:'止盈止了个寂寞', sub:'赚了，但没完全赚', emoji:'🥲', tier:'missed', amountLabel:'少赚了',
-    tagline:'懂得，都懂',
+  { name:'止盈止了个寂寞', sub:'赚了 但没完全赚', emoji:'🥲', tier:'missed', amountLabel:'少赚了',
+    tagline:'你赚的钱 还不够请客吃顿火锅',
     match:(d)=> d.hasSell && d.actualPct > 0 && d.actualPct < 30 && (d.highPrice/d.sellPrice) >= 1.5 },
-  { name:'白 白 蹉 跎', sub:'拿了一年，啥也没动', emoji:'😶', tier:'missed', amountLabel:'你赚了',
-    tagline:'青春不再，韭菜依旧',
+  { name:'白白蹉跎', sub:'拿了一年 啥也没赚', emoji:'😶', tier:'missed', amountLabel:'你赚了',
+    tagline:'时间是朋友 但朋友没给你回报',
     match:(d)=> d.holdDays > 365 && Math.abs(d.profitPercent) < 30 },
 
-  // === 白折腾 (wash) ===
-  { name:'死猪不怕开水烫', sub:'扛过 35% 回撤还在场', emoji:'🐷', tier:'wash', amountLabel:'当前浮盈/亏',
-    tagline:'跌了40%没跑 现在快回来了',
+  // === 白折腾 (wash) - 麻木 ===
+  { name:'死猪不怕开水烫', sub:'扛过深度回撤还在场', emoji:'🐷', tier:'wash', amountLabel:'当前',
+    tagline:'已经过了愤怒的阶段',
     match:(d)=> !d.hasSell && Math.abs(d.profitPercent) < 15 },
-  { name:'白 坐 了 趟 过 山 车', sub:'大起大落，回到原点', emoji:'🎢', tier:'wash', amountLabel:'最终',
-    tagline:'图什么 图个心跳',
+  { name:'白坐了趟过山车', sub:'大起大落 回到原点', emoji:'🎢', tier:'wash', amountLabel:'最终',
+    tagline:'图什么呢 就图个心跳是吗',
     match:(d)=> d.hasSell && Math.abs(d.actualPct) < 20 && (d.highPrice/d.buyPrice) >= 1.5 },
 
-  // === 亏损 (loss) ===
+  // === 亏损 (loss) - 开骂模式 ===
   { name:'主力的亲儿子', sub:'高位接盘 含泪卖出', emoji:'🤝', tier:'loss', amountLabel:'亏了',
-    tagline:'感谢您的贡献',
+    tagline:'机构爱你 爱你的钱',
     match:(d)=> d.hasSell && d.actualPct < -10 && (d.buyPrice/d.highPrice) > 0.85 },
   { name:'天生反指 建议出书', sub:'高买低卖 教科书反向', emoji:'🃏', tier:'loss', amountLabel:'亏了',
-    tagline:'稳定输出 这是天赋',
+    tagline:'你以后买什么告诉群友 大家反着买',
     match:(d)=> d.hasSell && d.actualPct < -10 && (d.buyPrice/d.highPrice) > 0.75 && (d.sellPrice/d.highPrice) < 0.45 },
-  { name:'建 议 改 行', sub:'两个月亏 20%', emoji:'🚪', tier:'loss', amountLabel:'亏了',
-    tagline:'股市不适合每个人',
+  { name:'建议改行', sub:'两个月亏 20%+', emoji:'🚪', tier:'loss', amountLabel:'亏了',
+    tagline:'认真的 干点别的不好吗',
     match:(d)=> d.hasSell && d.holdDays < 60 && d.actualPct < -20 },
-  { name:'亏 钱 还 费 时 间', sub:'拿了好几个月 钱时间双失', emoji:'⏳', tier:'loss', amountLabel:'亏了',
-    tagline:'钱没了 时间也没了',
+  { name:'亏钱还费时间', sub:'拿了好几个月 双重损失', emoji:'⏳', tier:'loss', amountLabel:'亏了',
+    tagline:'钱没了 时间也没了 头发也没了',
     match:(d)=> d.hasSell && d.holdDays > 90 && d.actualPct >= -40 && d.actualPct < -10 },
-  { name:'你的钱已经成为别人的年终奖', sub:'持仓半年以上 巨亏', emoji:'🎁', tier:'loss', amountLabel:'亏了',
-    tagline:'感谢您的"资助"',
+  { name:'你的钱已经成为别人的年终奖', sub:'持仓半年 亏损过半', emoji:'🎁', tier:'loss', amountLabel:'亏了',
+    tagline:'今年公司发不出年终奖？看看你贡献了多少',
     match:(d)=> d.hasSell && d.holdDays > 180 && d.actualPct < -50 },
-  { name:'认知和本金一起亏完了', sub:'还套着呢，浮亏过半', emoji:'💀', tier:'loss', amountLabel:'当前浮亏',
-    tagline:'建议深刻反思',
+  { name:'认知和本金一起亏完了', sub:'还套着呢 浮亏过半', emoji:'💀', tier:'loss', amountLabel:'当前浮亏',
+    tagline:'建议深刻反思 不是市场不行 是你不行',
     match:(d)=> !d.hasSell && d.profitPercent < -40 },
 ];
+
+function populateBgDeco(tier){
+  const decoMap = {
+    legendary: ['👏','🎉','✨','🏆','💫','🥂','👑','💰','🎊','⭐'],
+    missed:    ['😩','💸','🥲','📈','😭','💔','🥹','😞'],
+    wash:      ['😶','🤔','🌫','🪨','😐'],
+    loss:      ['🤡','💀','📉','🪦','😵','💩','🚽','😭'],
+  };
+  const items = decoMap[tier] || decoMap.loss;
+  const N = tier === 'legendary' ? 18 : 12;
+  const positions = [];
+  let html = '';
+  // Distribute around the edges and corners (avoid center where text is)
+  for(let i=0; i<N; i++){
+    const e = items[Math.floor(Math.random()*items.length)];
+    // Edge bias: more likely to be near top/bottom/left/right edges
+    let x, y;
+    const edge = Math.random();
+    if(edge < 0.25)      { x = Math.random()*100; y = Math.random()*15; }       // top
+    else if(edge < 0.5)  { x = Math.random()*100; y = 85 + Math.random()*15; }  // bottom
+    else if(edge < 0.75) { x = Math.random()*15;  y = Math.random()*100; }      // left
+    else                 { x = 85 + Math.random()*15; y = Math.random()*100; }  // right
+    const size = 24 + Math.random()*28;
+    const rot = -30 + Math.random()*60;
+    const delay = (Math.random()*3).toFixed(1);
+    html += `<span style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;font-size:${size.toFixed(0)}px;transform:rotate(${rot.toFixed(0)}deg);animation-delay:${delay}s">${e}</span>`;
+  }
+  document.getElementById('vc-bg-deco').innerHTML = html;
+}
+
+function lookupChineseName(code){
+  if(!code) return '';
+  const c = code.toUpperCase();
+  // Search MARKET_CONFIG (curated list with Chinese names) first
+  for(const cfg of Object.values(MARKET_CONFIG)){
+    const found = cfg.stocks.find(s=>s.code.toUpperCase()===c);
+    if(found && found.name && /[一-龥]/.test(found.name)) return found.name;
+  }
+  // Then search FULL_STOCKS
+  for(const list of [FULL_STOCKS.sh, FULL_STOCKS.sz, FULL_STOCKS.bse, FULL_STOCKS.hk, FULL_STOCKS.us]){
+    if(!list) continue;
+    const found = list.find(s=>s.code.toUpperCase()===c);
+    if(found && found.name && /[一-龥]/.test(found.name)) return found.name;
+  }
+  return '';
+}
 
 function matchPersonality(d){
   for(const p of PERSONALITY_LABELS){
@@ -2038,6 +2108,8 @@ function openShareCard(){
 
   // Apply tier theme
   document.getElementById('share-card').setAttribute('data-tier', p.tier);
+  // Populate per-tier background decoration
+  populateBgDeco(p.tier);
 
   // Hero
   document.getElementById('vc-emoji').textContent=p.emoji;
@@ -2050,9 +2122,10 @@ function openShareCard(){
   document.getElementById('vc-amount').textContent = sign + fC(amt.amount, d.currency);
   document.getElementById('vc-amount-pct').textContent = (amt.pct >= 0 ? '+' : '') + amt.pct.toFixed(2) + '%';
 
-  // Trade info
-  document.getElementById('vc-stock-code').textContent = d.stockCode;
-  document.getElementById('vc-stock-name').textContent = d.stockName || '';
+  // Trade info — prefer Chinese name from FULL_STOCKS or MARKET_CONFIG
+  const cnName = lookupChineseName(d.stockCode);
+  document.getElementById('vc-stock-code').textContent = cnName || d.stockName || d.stockCode;
+  document.getElementById('vc-stock-name').textContent = cnName ? '· ' + d.stockCode : '';
   const fmtYM = (dt) => dt.getFullYear() + '/' + String(dt.getMonth()+1).padStart(2,'0');
   const endDt = d.hasSell ? d.sellDate : new Date();
   document.getElementById('vc-dates').textContent = `${fmtYM(d.buyDate)} → ${fmtYM(endDt)} · 持仓 ${d.holdDays} 天`;
@@ -2120,10 +2193,26 @@ function drawMiniChart(canvas, d, tier){
     let m=Infinity;
     for(let i=0;i<pts.length;i++){const diff=Math.abs(pts[i].date-d.sellDate); if(diff<m){m=diff; sellIdx=i;}}
   }
-  function dot(x,y,col){ ctx.beginPath(); ctx.arc(x,y,4*dpr,0,Math.PI*2); ctx.fillStyle=col; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.5*dpr; ctx.stroke(); }
-  dot(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80');
-  dot(toX(peakIdx), toY(pts[peakIdx].close), '#FFD700');
-  if(sellIdx>=0) dot(toX(sellIdx), toY(pts[sellIdx].close), '#f87171');
+  function dotWithLabel(x, y, col, label, above){
+    // Dot
+    ctx.beginPath(); ctx.arc(x,y,4*dpr,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5*dpr; ctx.stroke();
+    // Label pill
+    ctx.font = `bold ${9*dpr}px 'PingFang SC',sans-serif`;
+    const tw = ctx.measureText(label).width + 8*dpr;
+    const lh = 14*dpr;
+    let lx = Math.max(pad.l, Math.min(W - pad.r - tw, x - tw/2));
+    let ly = above ? Math.max(2*dpr, y - lh - 4*dpr) : Math.min(H - pad.b - lh, y + 6*dpr);
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(lx, ly, tw, lh);
+    ctx.fillStyle = col;
+    ctx.textAlign = 'left';
+    ctx.fillText(label, lx + 4*dpr, ly + 10*dpr);
+  }
+  dotWithLabel(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fN(d.buyPrice, 0), true);
+  dotWithLabel(toX(peakIdx), toY(pts[peakIdx].close), '#FFD700', '★最高 ' + d.currency + fN(d.highPrice, 0), true);
+  if(sellIdx>=0) dotWithLabel(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fN(d.sellPrice, 0), false);
 
   // 2 date labels (start, end)
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
