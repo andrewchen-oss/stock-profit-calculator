@@ -465,6 +465,26 @@
   .result-header .roast { font-size:14px; color:var(--text-dim); margin-top:6px; font-weight:600; }
   .result-header .stock-badge { font-size:14px; font-weight:800; padding:4px 12px; background:linear-gradient(180deg,#FFD700,#FFA500); border:2px solid #8B0000; border-radius:4px; margin-top:6px; display:inline-block; color:#8B0000; }
   .result-header .market-badge { font-size:11px; color:var(--text-muted); margin-left:8px; font-weight:700; }
+  .header-share-btn {
+    align-self:flex-start; flex-shrink:0;
+    background:linear-gradient(180deg,#FFD700,#FFA500);
+    border:3px solid #8B0000; border-radius:8px;
+    padding:8px 14px; cursor:pointer;
+    color:#8B0000; font-weight:900;
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',serif;
+    display:flex; align-items:center; gap:6px;
+    box-shadow:0 4px 0 #8B0000, 0 6px 12px rgba(139,0,0,0.4);
+    transition:all 0.15s;
+    animation:shareGlow 2.5s ease-in-out infinite;
+  }
+  @keyframes shareGlow {
+    0%,100%{box-shadow:0 4px 0 #8B0000, 0 6px 12px rgba(139,0,0,0.4), 0 0 0 rgba(255,215,0,0)}
+    50%{box-shadow:0 4px 0 #8B0000, 0 6px 12px rgba(139,0,0,0.4), 0 0 16px rgba(255,215,0,0.7)}
+  }
+  .header-share-btn:hover { transform:translateY(-2px); }
+  .header-share-btn:active { transform:translateY(2px); box-shadow:0 2px 0 #8B0000; }
+  .header-share-btn .hsb-icon { font-size:18px; }
+  .header-share-btn .hsb-label { font-size:14px; letter-spacing:2px; }
 
   .result-data-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
   .result-data-grid .item { padding:10px 12px; background:rgba(255,215,0,0.15); border:2px solid #B8860B; border-radius:6px; }
@@ -916,6 +936,10 @@
               <div class="roast" id="r-roast">...</div>
               <div><span class="stock-badge" id="r-stock-tag">-</span><span class="market-badge" id="r-market-tag">-</span></div>
             </div>
+            <button class="header-share-btn" onclick="openShareCard()" title="生成分享图">
+              <span class="hsb-icon">📸</span>
+              <span class="hsb-label">分享</span>
+            </button>
           </div>
           <div class="result-data-grid">
             <div class="item"><div class="label">买入价</div><div class="val" id="r-buy-price">-</div></div>
@@ -1038,7 +1062,7 @@
         </div>
         <!-- Footer -->
         <div class="sc-footer">
-          <div class="sf-left">GAME OVER<br>韭菜后悔计算器</div>
+          <div class="sf-left">同 花 损 · 假如那天你没卖<br><span id="sc-date" style="color:#FFD700;font-family:'Noto Sans SC',sans-serif;font-size:10px">--</span></div>
           <div class="sf-right">𝕏 @0xajc · 📕 小红书:陈锦初Andrew<br>你也来算算你错过了多少钱 →</div>
         </div>
       </div>
@@ -1678,7 +1702,7 @@ function drawChart(canvas, d) {
   const prices = pts.map(p => p.close);
   const minP = Math.min(...prices) * 0.98;
   const maxP = Math.max(...prices) * 1.02;
-  const pad = { t: 30*dpr, b: 30*dpr, l: 10*dpr, r: 10*dpr };
+  const pad = { t: 30*dpr, b: 42*dpr, l: 10*dpr, r: 10*dpr };
   const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
 
   const toX = i => pad.l + (i / (pts.length - 1)) * cw;
@@ -1753,6 +1777,26 @@ function drawChart(canvas, d) {
   if (sellIdx >= 0) {
     marker(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fN(d.sellPrice, 0), false);
   }
+
+  // Date axis labels (5 ticks across the bottom)
+  const fmtDate = (ts) => {
+    const dt = new Date(ts);
+    return dt.getFullYear() + '/' + String(dt.getMonth()+1).padStart(2,'0');
+  };
+  const numTicks = Math.min(5, pts.length);
+  ctx.fillStyle = 'rgba(74,28,16,0.7)';
+  ctx.font = `bold ${10*dpr}px 'PingFang SC',sans-serif`;
+  ctx.textAlign = 'center';
+  for (let i = 0; i < numTicks; i++) {
+    const idx = Math.round((pts.length - 1) * i / (numTicks - 1));
+    const x = toX(idx);
+    const dateStr = fmtDate(pts[idx].date);
+    ctx.fillText(dateStr, x, H - pad.b + 18*dpr);
+    // tick mark
+    ctx.strokeStyle = 'rgba(184,134,11,0.4)'; ctx.lineWidth = 1*dpr;
+    ctx.beginPath(); ctx.moveTo(x, H - pad.b); ctx.lineTo(x, H - pad.b + 5*dpr); ctx.stroke();
+  }
+  ctx.textAlign = 'start';
 }
 
 // ===== Share card =====
@@ -1778,6 +1822,9 @@ function openShareCard(){
   document.getElementById('sc-high-date').textContent=d.highDate.toLocaleDateString('zh-CN');
   document.getElementById('sc-qty').textContent=d.quantity.toLocaleString()+'股';
   document.getElementById('sc-hold').textContent=d.holdDays+'天';
+  // Footer date stamp
+  const today=new Date();
+  document.getElementById('sc-date').textContent='生成于 '+today.getFullYear()+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+String(today.getDate()).padStart(2,'0');
 
   const spb=document.getElementById('sc-profit-box');
   spb.className='sc-profit-box '+(d.profit>=0?'gain':'loss');
