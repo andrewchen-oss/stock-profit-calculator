@@ -88,6 +88,37 @@
   .header .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.6; }
   .header .subtitle .hl { color: var(--gold); font-weight: 700; }
 
+  /* Dynamic regret ticker */
+  .dynamic-regret {
+    margin: 10px auto 0; max-width: 720px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(124,92,252,0.05));
+    border: 2px solid rgba(251,191,36,0.3);
+    border-radius: 6px;
+    text-align: center;
+    min-height: 56px;
+    display: flex; flex-direction: column; justify-content: center;
+    font-family: 'Press Start 2P', system-ui, sans-serif;
+    transition: opacity 0.4s ease;
+  }
+  .dynamic-regret.fading { opacity: 0; }
+  .dynamic-regret .dr-loading { color: var(--text-muted); font-size: 12px; }
+  .dynamic-regret .dr-amount {
+    font-size: 22px; font-weight: 800; color: var(--gold);
+    text-shadow: 0 0 12px rgba(251,191,36,0.4);
+    letter-spacing: 1px;
+    font-family: 'Press Start 2P', monospace;
+  }
+  .dynamic-regret .dr-detail {
+    font-size: 10px; color: var(--text-dim); margin-top: 6px;
+    font-family: system-ui, sans-serif; letter-spacing: 0;
+  }
+  .dynamic-regret .dr-detail .stock-name { color: var(--accent); font-weight: 700; }
+  @media (max-width:640px) {
+    .dynamic-regret .dr-amount { font-size: 16px; }
+    .dynamic-regret .dr-detail { font-size: 9px; }
+  }
+
   /* Marquee ticker */
   .marquee-bar {
     overflow: hidden; margin: 12px 0;
@@ -651,8 +682,11 @@
 <div class="page-wrapper">
   <div class="header">
     <span class="banner">🕹️📉💸</span>
-    <h1>要是当初卖了就好了...</h1>
-    <p class="subtitle">看看如果在<span class="hl">历史最高点</span>完美逃顶，你现在应该在马尔代夫而不是在工位</p>
+    <h1>同 花 损</h1>
+    <p class="subtitle">假如那天你没卖<span class="hl" style="margin-left:8px">↓</span></p>
+    <div class="dynamic-regret" id="dynamic-regret">
+      <span class="dr-loading">馆主测算中…</span>
+    </div>
 
     <!-- Fake stock ticker marquee -->
     <div class="marquee-bar">
@@ -1020,6 +1054,138 @@ function initParticles() {
 }
 
 // ===== Marquee ticker =====
+// ===== Dynamic regret ticker (homepage hero) =====
+// "Legendary entry points" — stocks + dates that delivered massive returns if held to today
+const LEGENDARY_HOLDS = [
+  // [symbol, market, label, buyDate]
+  ['600519.SS', 'sh', '茅台', '2014-01-02'],
+  ['600519.SS', 'sh', '茅台', '2008-11-04'],
+  ['000858.SZ', 'sz', '五粮液', '2014-01-02'],
+  ['002594.SZ', 'sz', '比亚迪', '2019-01-02'],
+  ['300750.SZ', 'sz', '宁德时代', '2018-06-12'],
+  ['000333.SZ', 'sz', '美的集团', '2014-01-02'],
+  ['300760.SZ', 'sz', '迈瑞医疗', '2018-10-17'],
+  ['600036.SS', 'sh', '招商银行', '2014-01-02'],
+  ['0700.HK', 'hk', '腾讯', '2010-01-04'],
+  ['0700.HK', 'hk', '腾讯', '2005-01-04'],
+  ['9988.HK', 'hk', '阿里巴巴', '2020-03-23'],
+  ['1810.HK', 'hk', '小米', '2018-07-09'],
+  ['NVDA', 'us', '英伟达', '2016-01-04'],
+  ['NVDA', 'us', '英伟达', '2020-03-23'],
+  ['TSLA', 'us', '特斯拉', '2014-01-02'],
+  ['TSLA', 'us', '特斯拉', '2019-01-02'],
+  ['AAPL', 'us', '苹果', '2010-01-04'],
+  ['AMZN', 'us', '亚马逊', '2010-01-04'],
+  ['MSFT', 'us', '微软', '2014-01-02'],
+  ['META', 'us', 'Meta', '2018-12-24'],
+  ['AMD', 'us', 'AMD', '2016-02-12'],
+];
+
+const REGRET_CACHE_KEY = 'dynamic_regret_v1';
+const REGRET_CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const PRINCIPAL = 10000; // 假设投入 1万
+
+async function fetchPriceAt(symbol, dateStr) {
+  const ts = Math.floor(new Date(dateStr).getTime() / 1000) - 7 * 86400;
+  const r = await fetch(`/api/stock?symbol=${encodeURIComponent(symbol)}&period1=${ts}`);
+  if (!r.ok) return null;
+  const d = await r.json();
+  const result = d?.chart?.result?.[0];
+  if (!result) return null;
+  const timestamp = result.timestamp || [];
+  const close = result.indicators?.quote?.[0]?.close || [];
+  if (!timestamp.length || !close.length) return null;
+  // Find first trade day on or after dateStr
+  const target = new Date(dateStr).getTime() / 1000;
+  let buyPrice = null, buyTs = null;
+  for (let i = 0; i < timestamp.length; i++) {
+    if (timestamp[i] >= target && close[i] != null) {
+      buyPrice = close[i]; buyTs = timestamp[i]; break;
+    }
+  }
+  // Latest valid close
+  let curPrice = null;
+  for (let i = close.length - 1; i >= 0; i--) {
+    if (close[i] != null) { curPrice = close[i]; break; }
+  }
+  if (!buyPrice || !curPrice) return null;
+  return { buyPrice, curPrice, buyTs };
+}
+
+function fmtMoney(n, currency) {
+  const ab = Math.abs(n);
+  let s;
+  if (ab >= 1e8) s = (ab / 1e8).toFixed(2) + '亿';
+  else if (ab >= 1e4) s = (ab / 1e4).toFixed(2) + '万';
+  else s = Math.round(ab).toLocaleString();
+  return currency + s;
+}
+
+async function initRegretTicker() {
+  const el = document.getElementById('dynamic-regret');
+  if (!el) return;
+
+  // Try cache first
+  let entries = [];
+  try {
+    const cached = JSON.parse(localStorage.getItem(REGRET_CACHE_KEY) || 'null');
+    if (cached && cached.t && Date.now() - cached.t < REGRET_CACHE_TTL && cached.entries?.length) {
+      entries = cached.entries;
+    }
+  } catch {}
+
+  if (!entries.length) {
+    // Pick 5 random samples from the legendary list
+    const shuffled = [...LEGENDARY_HOLDS].sort(() => Math.random() - 0.5).slice(0, 5);
+    const results = await Promise.all(shuffled.map(async ([symbol, market, name, date]) => {
+      try {
+        const p = await fetchPriceAt(symbol, date);
+        if (!p) return null;
+        const cfg = MARKET_CONFIG[market];
+        const multiple = p.curPrice / p.buyPrice;
+        const finalValue = PRINCIPAL * multiple;
+        const gain = finalValue - PRINCIPAL;
+        return {
+          name, market, date, symbol,
+          currency: cfg.currency,
+          buyPrice: p.buyPrice, curPrice: p.curPrice,
+          multiple, gain, finalValue,
+        };
+      } catch { return null; }
+    }));
+    entries = results.filter(Boolean).filter(x => x.multiple > 1.5);
+    if (entries.length) {
+      try { localStorage.setItem(REGRET_CACHE_KEY, JSON.stringify({ t: Date.now(), entries })); } catch {}
+    }
+  }
+
+  if (!entries.length) {
+    el.innerHTML = '<span class="dr-loading">数据暂时拉不到，刷新试试</span>';
+    return;
+  }
+
+  // Cycle through entries
+  let idx = 0;
+  function render() {
+    const e = entries[idx];
+    const yr = e.date.slice(0, 4);
+    const gainStr = fmtMoney(e.gain, e.currency);
+    const finalStr = fmtMoney(e.finalValue, e.currency);
+    const principalStr = e.currency === '¥' ? '1万元' : (e.currency === 'HK$' ? '1万港币' : '1万美元');
+    el.classList.add('fading');
+    setTimeout(() => {
+      el.innerHTML = `
+        <div class="dr-amount">+${gainStr}</div>
+        <div class="dr-detail">假如 <span class="stock-name">${e.name}</span> ${yr}年买${principalStr}没卖，今天值 ${finalStr}（${e.multiple.toFixed(1)}倍）</div>
+      `;
+      el.classList.remove('fading');
+    }, 300);
+    idx = (idx + 1) % entries.length;
+  }
+  render();
+  if (entries.length > 1) setInterval(render, 4500);
+}
+
 function initMarquee() {
   const tickers = [
     {s:'AAPL',p:'+2.3%',up:true},{s:'TSLA',p:'-4.1%',up:false},{s:'NVDA',p:'+1.8%',up:true},
@@ -1545,6 +1711,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('buy-quantity').value=100;
   renderStockGrid();renderHistory();initParticles();initMarquee();
   loadFullStocks();
+  initRegretTicker();
 });
 </script>
 </body>
