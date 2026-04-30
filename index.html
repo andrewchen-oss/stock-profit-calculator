@@ -1781,6 +1781,15 @@ function toggleSellDate(){document.getElementById('sell-date-row').classList.tog
 function showError(msg){const e=document.getElementById('error-msg');e.textContent='⚠ '+msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000)}
 function showToast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2500)}
 function fN(n,d=2){return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtPrice(p){
+  // Adaptive decimals so sub-dollar prices don't display as "$0"
+  const ab=Math.abs(p);
+  if(ab===0) return '0';
+  if(ab<1)   return p.toFixed(2);
+  if(ab<10)  return p.toFixed(2);
+  if(ab<100) return p.toFixed(1);
+  return Math.round(p).toLocaleString();
+}
 function fC(a,c){const ab=Math.abs(a);let f;if(ab>=1e8)f=(ab/1e8).toFixed(2)+'亿';else if(ab>=1e4)f=(ab/1e4).toFixed(2)+'万';else f=fN(ab);return(a>=0?'+':'-')+c+f}
 
 // ===== Data fetch =====
@@ -1869,13 +1878,21 @@ async function calculate() {
     const missed=hasSell?peakProfit-actualProfit:peakProfit-curProfit;
 
     // Chart context: adaptive — at least 2 years on each side, or 25% of hold duration (capped at 3yr)
+    // CRITICAL: must always include the peak date, otherwise the chart shows a misleading "local peak"
     const ONE_YR = 365 * 86400 * 1000;
     const holdMs = (hasSell ? sellDate : new Date()).getTime() - buyDate.getTime();
     const ctxBuffer = Math.min(3 * ONE_YR, Math.max(2 * ONE_YR, holdMs * 0.25));
     const ctxStart = new Date(buyDate.getTime() - ctxBuffer);
-    const ctxEnd = hasSell
-      ? new Date(Math.min(sellDate.getTime() + ctxBuffer, Date.now()))
-      : new Date();
+    let ctxEndTs;
+    if(hasSell){
+      ctxEndTs = Math.min(sellDate.getTime() + ctxBuffer, Date.now());
+    } else {
+      ctxEndTs = Date.now();
+    }
+    // Ensure peak date is visible (extend right edge if peak is after current ctxEnd)
+    const peakWithBuffer = hd.getTime() + 60 * 86400 * 1000; // 2 months past peak
+    ctxEndTs = Math.min(Math.max(ctxEndTs, peakWithBuffer), Date.now());
+    const ctxEnd = new Date(ctxEndTs);
     const chartData = dailyData.filter(d => d.date >= ctxStart && d.date <= ctxEnd);
 
     lastResult={stockCode:code,stockName:name,market:cfg.name,currency:cfg.currency,
@@ -1897,9 +1914,11 @@ async function calculate() {
 
 // ===== Result meta =====
 function getMeta(pct, opts){
-  // opts: { actualPct, hasSell } — when present, real losses override the peak-based message
+  // opts: { actualPct, hasSell }
+  // Priority: 1) sold at loss → attack 2) sold at profit → praise based on ACTUAL gain
+  //          3) still holding → use unrealized peak %
   let emoji,title,roast,qp;
-  // Real loss attack mode (sold at a loss) — overrides the peak-gain framing
+  // 1. Sold at loss → attack
   if(opts && opts.hasSell && typeof opts.actualPct === 'number' && opts.actualPct < 0){
     const ap = opts.actualPct;
     if(ap < -50)      { emoji='💀'; title='血亏出局'; roast='不是市场不行，是你不行'; qp='loss'; }
@@ -1909,7 +1928,20 @@ function getMeta(pct, opts){
     const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
     return { emoji, title, roast, quote:q, quotePool:qp };
   }
-  // Peak-gain framing (used when sold at a profit, or never sold)
+  // 2. Sold at profit → praise (use ACTUAL gain, not peak)
+  if(opts && opts.hasSell && typeof opts.actualPct === 'number' && opts.actualPct >= 0){
+    const ap = opts.actualPct;
+    if(ap >= 1000)     { emoji='👑'; title='封神级操作'; roast='巴菲特看了直接拜师'; qp='legendary'; }
+    else if(ap >= 500) { emoji='🚀'; title='您是真的牛'; roast='这操作教科书都不敢这么写'; qp='legendary'; }
+    else if(ap >= 200) { emoji='💎'; title='牛 我直接牛了'; roast='您让股神也黯然失色'; qp='epic'; }
+    else if(ap >= 100) { emoji='🏆'; title='大赚翻倍'; roast='本金翻倍 这一战是真打赢了'; qp='epic'; }
+    else if(ap >= 50)  { emoji='😏'; title='还不错'; roast='够吃几顿海底捞 离自由差亿点点'; qp='good'; }
+    else if(ap >= 10)  { emoji='🥲'; title='勉强糊口'; roast='这涨幅不够手续费+心理咨询费'; qp='meh'; }
+    else               { emoji='🤷'; title='聊胜于无'; roast='赚是赚了 说出去不好意思'; qp='meh'; }
+    const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
+    return { emoji, title, roast, quote:q, quotePool:qp };
+  }
+  // 3. Still holding → unrealized peak framing
   if(pct>2000){emoji='💀';title='封神级踏空';roast='你和财务自由之间只差一个卖出键';qp='legendary'}
   else if(pct>1000){emoji='🚀';title='传说级踏空';roast='十倍股从指缝溜走了';qp='legendary'}
   else if(pct>500){emoji='😱';title='史诗级遗憾';roast='错过一套房的钱，建议抱K线图哭';qp='epic'}
@@ -2161,14 +2193,14 @@ function drawChart(canvas, d) {
   }
 
   // Buy point (green)
-  marker(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fN(d.buyPrice, 0), true);
+  marker(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fmtPrice(d.buyPrice), true);
 
   // Peak point (gold star)
-  marker(toX(peakIdx), toY(pts[peakIdx].close), '#fbbf24', '★最高 ' + d.currency + fN(d.highPrice, 0), true);
+  marker(toX(peakIdx), toY(pts[peakIdx].close), '#fbbf24', '★最高 ' + d.currency + fmtPrice(d.highPrice), true);
 
   // Sell point (red)
   if (sellIdx >= 0) {
-    marker(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fN(d.sellPrice, 0), false);
+    marker(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fmtPrice(d.sellPrice), false);
   }
 
   // Date axis labels (5 ticks across the bottom)
@@ -2212,7 +2244,8 @@ const PERSONALITY_LABELS = [
   // === 踏空 (missed) ===
   { name:'与暴富擦肩而过', sub:'卖完它就翻倍了', emoji:'😩', tier:'missed', amountLabel:'少赚了',
     tagline:'你卖出那一刻 巴菲特都落泪了',
-    match:(d)=> d.hasSell && d.actualPct > 0 && (d.highPrice/d.sellPrice) >= 2 },
+    // Only "擦肩而过" if user's actual gain is modest (<200%) AND peak is multiples higher
+    match:(d)=> d.hasSell && d.actualPct > 0 && d.actualPct < 200 && (d.highPrice/d.sellPrice) >= 2 },
   { name:'天选抄底侠', sub:'真的买在了底部', emoji:'🎯', tier:'missed', amountLabel:'你赚了',
     tagline:'这不是技术 这是命中注定',
     match:(d)=> {
@@ -2494,9 +2527,9 @@ function drawMiniChart(canvas, d, tier){
     ctx.textAlign = 'left';
     ctx.fillText(label, lx + 4*dpr, ly + 10*dpr);
   }
-  dotWithLabel(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fN(d.buyPrice, 0), true);
-  dotWithLabel(toX(peakIdx), toY(pts[peakIdx].close), '#FFD700', '★最高 ' + d.currency + fN(d.highPrice, 0), true);
-  if(sellIdx>=0) dotWithLabel(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fN(d.sellPrice, 0), false);
+  dotWithLabel(toX(buyIdx), toY(pts[buyIdx].close), '#4ade80', '买入 ' + d.currency + fmtPrice(d.buyPrice), true);
+  dotWithLabel(toX(peakIdx), toY(pts[peakIdx].close), '#FFD700', '★最高 ' + d.currency + fmtPrice(d.highPrice), true);
+  if(sellIdx>=0) dotWithLabel(toX(sellIdx), toY(pts[sellIdx].close), '#f87171', '卖出 ' + d.currency + fmtPrice(d.sellPrice), false);
 
   // 2 date labels (start, end)
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
