@@ -488,8 +488,10 @@
 
   .result-data-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
   .result-data-grid .item { padding:10px 12px; background:rgba(255,215,0,0.15); border:2px solid #B8860B; border-radius:6px; }
+  .result-data-grid .item.highlight { background:linear-gradient(135deg, #FFD700, #FFA500); border-color:#8B0000; }
   .result-data-grid .item .label { font-size:11px; color:#8B0000; margin-bottom:3px; font-weight:700; }
-  .result-data-grid .item .val { font-size:14px; font-weight:900; color:var(--text); }
+  .result-data-grid .item .val { font-size:14px; font-weight:900; color:#2A1810; }
+  .result-data-grid .item.highlight .val { color:#8B0000; font-size:16px; }
 
   .profit-box {
     text-align:center; padding:16px; border:3px solid; border-radius:8px;
@@ -519,10 +521,11 @@
   .comp-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(184,134,11,0.3); font-size:13px; }
   .comp-row:last-child { border-bottom:none; }
   .comp-row .cl { color:var(--text-dim); font-weight:600; }
-  .comp-row .cv { font-weight:800; }
-  .comp-row .cv.green { color:var(--color-up); }
-  .comp-row .cv.red { color:var(--color-down); }
-  .comp-row .cv.gold { color:#B8860B; }
+  .comp-row .cv { font-weight:900; }
+  /* On cream card bg we need high-contrast solid colors, not light --color vars */
+  .comp-row .cv.green { color:#0A6B1F; }   /* dark forest green */
+  .comp-row .cv.red { color:#8B0000; }     /* dark blood red */
+  .comp-row .cv.gold { color:#7A5800; }    /* dark amber */
 
   .pain-index { padding:10px 12px; background:rgba(255,215,0,0.15); border:2px solid #B8860B; border-radius:6px; margin-bottom:10px; }
   .pain-index .pain-label { display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; }
@@ -1128,7 +1131,7 @@
           </div>
           <div class="result-data-grid">
             <div class="item"><div class="label">买入价</div><div class="val" id="r-buy-price">-</div></div>
-            <div class="item"><div class="label">历史最高</div><div class="val" style="color:var(--gold)" id="r-high-price">-</div></div>
+            <div class="item highlight"><div class="label">历史最高</div><div class="val" id="r-high-price">-</div></div>
             <div class="item"><div class="label">上车日</div><div class="val" id="r-buy-date">-</div></div>
             <div class="item"><div class="label">巅峰日</div><div class="val" id="r-high-date">-</div></div>
             <div class="item"><div class="label">数量</div><div class="val" id="r-qty">-</div></div>
@@ -1746,8 +1749,20 @@ async function calculate() {
 }
 
 // ===== Result meta =====
-function getMeta(pct){
+function getMeta(pct, opts){
+  // opts: { actualPct, hasSell } — when present, real losses override the peak-based message
   let emoji,title,roast,qp;
+  // Real loss attack mode (sold at a loss) — overrides the peak-gain framing
+  if(opts && opts.hasSell && typeof opts.actualPct === 'number' && opts.actualPct < 0){
+    const ap = opts.actualPct;
+    if(ap < -50)      { emoji='💀'; title='REKT！血亏出局'; roast='不是市场不行，是你不行'; qp='loss'; }
+    else if(ap < -30) { emoji='🪦'; title='REKT！跌妈不认'; roast='这笔交易，建议刻进墓碑'; qp='loss'; }
+    else if(ap < -15) { emoji='🤡'; title='接盘侠认证'; roast='主力含泪点赞，谢谢你的贡献'; qp='loss'; }
+    else              { emoji='😭'; title='含泪割肉'; roast='韭菜的标准动作，熟练度+1'; qp='loss'; }
+    const qs=MEME_QUOTES[qp]; const q=qs[Math.floor(Math.random()*qs.length)];
+    return { emoji, title, roast, quote:q, quotePool:qp };
+  }
+  // Peak-gain framing (used when sold at a profit, or never sold)
   if(pct>2000){emoji='💀';title='GAME OVER x9999';roast='你和财务自由之间只差一个卖出键';qp='legendary'}
   else if(pct>1000){emoji='🚀';title='LEGENDARY MISS!';roast='十倍股从指缝溜走了';qp='legendary'}
   else if(pct>500){emoji='😱';title='EPIC FAIL!';roast='错过一套房的钱，建议抱K线图哭';qp='epic'}
@@ -1765,7 +1780,10 @@ function getMeta(pct){
 // ===== Display results =====
 function displayResults(d){
   document.getElementById('placeholder-panel').style.display='none';
-  const sec=document.getElementById('result-section'),m=getMeta(d.profitPercent);
+  const sec=document.getElementById('result-section');
+  const m=getMeta(d.profitPercent, { actualPct: d.actualPct, hasSell: d.hasSell });
+  // Real loss = sold at a loss; show that as the headline number instead of "peak missed"
+  const isRealLoss = d.hasSell && d.actualProfit < 0;
   if(d.profitPercent>500||d.profitPercent<-30){const f=document.createElement('div');f.className='game-over-flash';document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}
   document.getElementById('r-emoji').textContent=m.emoji;
   document.getElementById('r-title').textContent=m.title;
@@ -1780,9 +1798,19 @@ function displayResults(d){
   document.getElementById('r-hold').textContent=d.holdDays+'天';
   const cb=document.getElementById('comp-box');
   if(d.hasSell){cb.classList.add('show');document.getElementById('c-sell-date').textContent=d.sellDate.toLocaleDateString('zh-CN');document.getElementById('c-sell-price').textContent=d.currency+fN(d.sellPrice);const ae=document.getElementById('c-actual');ae.textContent=fC(d.actualProfit,d.currency);ae.className='cv '+(d.actualProfit>=0?'green':'red');document.getElementById('c-peak').textContent=fC(d.profit,d.currency);document.getElementById('c-missed').textContent=fC(d.missedProfit,d.currency)}else{cb.classList.remove('show')}
-  const pb=document.getElementById('profit-box');pb.className='profit-box '+(d.profit>=0?'gain':'loss');
-  document.getElementById('r-profit').textContent=fC(d.profit,d.currency);
-  document.getElementById('r-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+  const pb=document.getElementById('profit-box');
+  // For genuine losses: show actual loss as the headline; for gains/holds: show peak gain
+  if(isRealLoss){
+    pb.className='profit-box loss';
+    pb.querySelector('.profit-label').textContent='你实际亏了';
+    document.getElementById('r-profit').textContent=fC(d.actualProfit,d.currency);
+    document.getElementById('r-pct').textContent=(d.actualPct>=0?'+':'')+d.actualPct.toFixed(2)+'%';
+  } else {
+    pb.className='profit-box '+(d.profit>=0?'gain':'loss');
+    pb.querySelector('.profit-label').textContent='最高点完美逃顶';
+    document.getElementById('r-profit').textContent=fC(d.profit,d.currency);
+    document.getElementById('r-pct').textContent=(d.profitPercent>=0?'+':'')+d.profitPercent.toFixed(2)+'%';
+  }
   const pp=Math.min(100,Math.max(0,d.profitPercent>0?Math.min(d.profitPercent/10,100):50+Math.min(Math.abs(d.profitPercent)/2,50)));
   const pl=['还行吧','有点可惜','心在滴血','想砸键盘','已卸载APP','准备出家'];
   const pi=Math.min(pl.length-1,Math.floor(pp/(100/pl.length)));
@@ -2067,17 +2095,19 @@ function lookupChineseName(code){
 
 function matchPersonality(d){
   for(const p of PERSONALITY_LABELS){
-    try { if(p.match(d)) return p; } catch(e) {}
+    try { if(p.match(d)) return p; } catch(e) { console.warn('[match]', p.name, e); }
   }
-  // Fallback: pick by tier based on profitPercent
+  // Fallback: pick by tier based on actual outcome
+  const find = (name) => PERSONALITY_LABELS.find(p=>p.name===name) || PERSONALITY_LABELS[PERSONALITY_LABELS.length-1];
   if(d.hasSell){
-    if(d.actualPct >= 50) return PERSONALITY_LABELS.find(p=>p.name==='运气也是实力的一部分');
-    if(d.actualPct > 0) return PERSONALITY_LABELS.find(p=>p.name==='止盈止了个寂寞');
-    return PERSONALITY_LABELS.find(p=>p.name==='亏 钱 还 费 时 间');
+    if(d.actualPct >= 50) return find('运气也是实力的一部分');
+    if(d.actualPct > 0) return find('止盈止了个寂寞');
+    if(d.actualPct < -10) return find('亏钱还费时间');
+    return find('白坐了趟过山车');
   }
   return d.profitPercent >= 0
-    ? PERSONALITY_LABELS.find(p=>p.name==='大师的境界我们不懂')
-    : PERSONALITY_LABELS.find(p=>p.name==='认知和本金一起亏完了');
+    ? find('大师的境界我们不懂')
+    : find('认知和本金一起亏完了');
 }
 
 function pickAmount(d, p){
