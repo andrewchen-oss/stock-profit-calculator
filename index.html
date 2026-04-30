@@ -681,9 +681,15 @@
       linear-gradient(160deg, #4A1B6D 0%, #8B0F8B 40%, #C8102E 75%, #2A0033 100%);
   }
   .vc-card[data-tier="missed"] {
+    /* 夕阳遗憾色 — 不喜庆，带点惆怅 */
     background:
-      radial-gradient(circle at 80% 10%, rgba(255,200,80,0.35) 0%, transparent 55%),
-      linear-gradient(160deg, #FFB347 0%, #FF8C00 35%, #C45E00 75%, #4A2500 100%);
+      radial-gradient(ellipse at 50% 110%, rgba(180,80,80,0.25) 0%, transparent 55%),
+      linear-gradient(170deg,
+        #2D1F2F 0%,
+        #4A3340 30%,
+        #6B3E48 55%,
+        #4A2530 80%,
+        #1A0D14 100%);
   }
   .vc-card[data-tier="wash"] {
     background:
@@ -824,6 +830,18 @@
   .vc-card[data-tier="wash"] .vc-amount { color:#E5E7EB; }
   .vc-card[data-tier="wash"] .vc-amount-pct,
   .vc-card[data-tier="wash"] .vc-amount-label { color:#D1D5DB; }
+  /* missed: 暗金（不那么 in-your-face），配合夕阳红主调 */
+  .vc-card[data-tier="missed"] .vc-amount {
+    color:#E8B45C;
+    text-shadow:
+      -1px -1px 0 #6B3E1F, 1px -1px 0 #6B3E1F,
+      -1px 1px 0 #4A2515, 1px 1px 0 #4A2515,
+      2px 2px 0 #2A1208,
+      0 0 16px rgba(232,180,92,0.5),
+      0 6px 12px rgba(0,0,0,0.6);
+  }
+  .vc-card[data-tier="missed"] .vc-amount-pct,
+  .vc-card[data-tier="missed"] .vc-amount-label { color:#E8B45C; }
 
   /* TRADE INFO */
   .vc-trade-info { text-align:center; padding:6px 0 12px; }
@@ -1813,10 +1831,16 @@ async function calculate() {
 
   try{
     const{dailyData,name}=await fetchStockData(code,currentMarket,buyDate);
-    if(!dailyData.length)throw new Error('没数据');
+    if(!dailyData.length)throw new Error('这只票暂时拉不到数据');
     let buyDayData=null;
     for(const d of dailyData){if(d.date>=buyDate){buyDayData=d;break}}
-    if(!buyDayData)throw new Error('日期超范围');
+    if(!buyDayData)throw new Error('选的日期太晚了 没有这之后的数据');
+    // Pre-IPO check: if first available data is way after buyDate, the stock wasn't listed yet
+    const buyGapDays = (buyDayData.date - buyDate) / 86400000;
+    if(buyGapDays > 30){
+      const ipoStr = buyDayData.date.toLocaleDateString('zh-CN');
+      throw new Error(`这只票 ${ipoStr} 才上市 你输的日期太早了`);
+    }
     const buyPrice=manualPrice||buyDayData.close;
     if(buyMode==='amount'){quantity=Math.floor(buyAmount/buyPrice);if(quantity<=0)throw new Error('钱不够买1股')}
     // Use closing price (not intraday high) to match what mainstream charts show (Google/Yahoo etc.)
@@ -1824,7 +1848,19 @@ async function calculate() {
     for(const d of dailyData){if(d.date>=buyDate&&d.close>hp){hp=d.close;hd=d.date}}
     if(!hd)throw new Error('找不到最高价');
     let sellPrice=null,sellDate=null,actualProfit=null,actualPct=null;
-    if(hasSell){const sd=new Date(sellDateStr);let sdd=null;for(const d of dailyData){if(d.date>=sd){sdd=d;break}}if(!sdd)sdd=dailyData[dailyData.length-1];sellDate=sdd.date;sellPrice=sellPriceManual||sdd.close;actualProfit=(sellPrice-buyPrice)*quantity;actualPct=(sellPrice-buyPrice)/buyPrice*100}
+    if(hasSell){
+      const sd=new Date(sellDateStr);
+      // Sanity check: sell date must be on/after buy date
+      if(sd < buyDayData.date){
+        throw new Error('卖出日期不能早于买入日期');
+      }
+      let sdd=null;
+      for(const d of dailyData){if(d.date>=sd){sdd=d;break}}
+      if(!sdd)sdd=dailyData[dailyData.length-1];
+      // Sell-date pre-IPO sanity (can happen if sd is before any data — shouldn't reach here, defensive)
+      sellDate=sdd.date;sellPrice=sellPriceManual||sdd.close;
+      actualProfit=(sellPrice-buyPrice)*quantity;actualPct=(sellPrice-buyPrice)/buyPrice*100;
+    }
     const cfg=MARKET_CONFIG[currentMarket];
     const peakProfit=(hp-buyPrice)*quantity,peakPct=(hp-buyPrice)/buyPrice*100;
     const holdDays=Math.floor((hd-buyDate)/(1000*60*60*24));
@@ -2088,12 +2124,17 @@ function drawChart(canvas, d) {
   for (let i = 0; i < pts.length; i++) { i === 0 ? ctx.moveTo(toX(i), toY(pts[i].close)) : ctx.lineTo(toX(i), toY(pts[i].close)); }
   ctx.strokeStyle = grad; ctx.lineWidth = 2 * dpr; ctx.stroke();
 
-  // Find key points in sampled data
-  let buyIdx = 0, peakIdx = 0, sellIdx = -1;
-  let peakP = 0;
+  // Find key points: buy = first sample on/after buyDate (chart now includes pre-buy context)
+  let buyIdx = 0;
   for (let i = 0; i < pts.length; i++) {
+    if (pts[i].date >= d.buyDate) { buyIdx = i; break; }
+  }
+  // Peak only counts AFTER the buy date (not in the pre-buy context window)
+  let peakIdx = buyIdx, peakP = 0;
+  for (let i = buyIdx; i < pts.length; i++) {
     if (pts[i].close > peakP) { peakP = pts[i].close; peakIdx = i; }
   }
+  let sellIdx = -1;
   if (d.hasSell && d.sellDate) {
     let minDiff = Infinity;
     for (let i = 0; i < pts.length; i++) {
@@ -2248,7 +2289,7 @@ function tickerEmoji(code){
 function populateBgDeco(tier, tickerEmojiChar){
   const decoMap = {
     legendary: ['👏','🎉','✨','🏆','💫','🥂','👑','💰','🎊','⭐'],
-    missed:    ['😩','💸','🥲','📈','😭','💔','🥹','😞'],
+    missed:    ['🥲','😞','💔','🍂','🌧️','😪','😔','💧'], // 遗憾、惆怅
     wash:      ['😶','🤔','🌫','🪨','😐'],
     loss:      ['🤡','💀','📉','🪦','😵','💩','🚽','😭'],
   };
@@ -2426,9 +2467,12 @@ function drawMiniChart(canvas, d, tier){
   for(let i=0;i<pts.length;i++){i===0 ? ctx.moveTo(toX(i),toY(pts[i].close)) : ctx.lineTo(toX(i),toY(pts[i].close));}
   ctx.strokeStyle = tierColor.line; ctx.lineWidth = 2*dpr; ctx.stroke();
 
-  // dots: buy/peak/sell
-  let buyIdx=0, peakIdx=0, sellIdx=-1, peakP=0;
-  for(let i=0;i<pts.length;i++){ if(pts[i].close>peakP){peakP=pts[i].close; peakIdx=i;} }
+  // dots: buy = first sample on/after buyDate; peak = max AFTER buyIdx; sell = closest match
+  let buyIdx = 0;
+  for(let i=0;i<pts.length;i++){ if(pts[i].date >= d.buyDate){ buyIdx = i; break; } }
+  let peakIdx = buyIdx, peakP = 0;
+  for(let i=buyIdx;i<pts.length;i++){ if(pts[i].close>peakP){peakP=pts[i].close; peakIdx=i;} }
+  let sellIdx=-1;
   if(d.hasSell && d.sellDate){
     let m=Infinity;
     for(let i=0;i<pts.length;i++){const diff=Math.abs(pts[i].date-d.sellDate); if(diff<m){m=diff; sellIdx=i;}}
