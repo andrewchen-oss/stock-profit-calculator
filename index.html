@@ -731,25 +731,26 @@
     color:#fff; padding:24px 22px;
     box-shadow:0 16px 48px rgba(0,0,0,0.6);
     transition:background 0.3s;
-    /* default tier = loss */
-    background: linear-gradient(160deg, #1a0a0a 0%, #4a0a0a 35%, #2a0505 70%, #0a0202 100%);
+    /* default tier = loss (绿油油的韭菜地) */
+    background: linear-gradient(160deg, #021a02 0%, #064e3b 35%, #14532d 70%, #022c22 100%);
   }
-  /* Tier themes */
+  /* Tier themes — A股红涨绿跌：盈利红、亏损绿 */
   .vc-card[data-tier="legendary"] {
+    /* 红红火火 暴富色 */
     background:
-      radial-gradient(circle at 20% 0%, rgba(255,215,0,0.5) 0%, transparent 50%),
-      linear-gradient(160deg, #4A1B6D 0%, #8B0F8B 40%, #C8102E 75%, #2A0033 100%);
+      radial-gradient(circle at 20% 0%, rgba(255,215,0,0.55) 0%, transparent 50%),
+      linear-gradient(160deg, #4A0000 0%, #8B0000 35%, #C8102E 65%, #2A0000 100%);
   }
   .vc-card[data-tier="missed"] {
-    /* 夕阳遗憾色 — 不喜庆，带点惆怅 */
+    /* 夕阳遗憾色 — 赚了但没赚够，带点惆怅 */
     background:
       radial-gradient(ellipse at 50% 110%, rgba(180,80,80,0.25) 0%, transparent 55%),
       linear-gradient(170deg,
-        #2D1F2F 0%,
-        #4A3340 30%,
-        #6B3E48 55%,
-        #4A2530 80%,
-        #1A0D14 100%);
+        #2F1F1F 0%,
+        #4A3033 30%,
+        #6B3848 55%,
+        #4A1F25 80%,
+        #1A0A0D 100%);
   }
   .vc-card[data-tier="wash"] {
     background:
@@ -757,9 +758,10 @@
       linear-gradient(160deg, #2D3E50 0%, #4A5568 50%, #1A202C 100%);
   }
   .vc-card[data-tier="loss"] {
+    /* 绿油油 韭菜割完色 */
     background:
-      radial-gradient(circle at 70% 80%, rgba(220,20,60,0.3) 0%, transparent 60%),
-      linear-gradient(160deg, #1a0202 0%, #4A0000 35%, #8B0000 60%, #200000 100%);
+      radial-gradient(circle at 70% 80%, rgba(34,197,94,0.32) 0%, transparent 60%),
+      linear-gradient(160deg, #021a0d 0%, #064e3b 35%, #15803d 60%, #022c14 100%);
   }
 
   .vc-top-stripe {
@@ -875,18 +877,54 @@
     margin-top:6px; letter-spacing:1px;
     text-shadow:0 2px 4px rgba(0,0,0,0.5);
   }
-  /* Tier-specific amount color */
-  .vc-card[data-tier="loss"] .vc-amount {
-    color:#FF6B6B;
+  .vc-amount-secondary {
+    margin-top:14px; padding-top:12px;
+    border-top:2px dashed rgba(255,215,0,0.45);
+    font-weight:800; letter-spacing:1px;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .vc-amount-secondary .vas-label {
+    font-size:12px; color:rgba(255,255,255,0.85);
+    letter-spacing:2px;
+    text-shadow:0 1px 2px rgba(0,0,0,0.6);
+  }
+  .vc-amount-secondary .vas-amount {
+    color:#FFD700; font-weight:900; font-size:26px;
+    font-family:'ZCOOL QingKe HuangYou','Noto Sans SC',monospace;
+    letter-spacing:1px; line-height:1.1;
     text-shadow:
-      -1px -1px 0 #8B0000, 1px -1px 0 #8B0000,
-      -1px 1px 0 #4A0000, 1px 1px 0 #4A0000,
-      2px 2px 0 #200000,
-      0 0 18px rgba(255,107,107,0.7),
+      -1px -1px 0 #8B4500, 1px -1px 0 #8B4500,
+      -1px 1px 0 #4A2500, 1px 1px 0 #4A2500,
+      0 0 14px rgba(255,215,0,0.6),
+      0 4px 8px rgba(0,0,0,0.5);
+  }
+  .vc-amount-secondary .vas-pct {
+    font-size:13px; color:#FFD700; font-weight:800;
+    opacity:0.9; letter-spacing:1px;
+    text-shadow:0 2px 4px rgba(0,0,0,0.6);
+  }
+  /* Tier-specific amount color — A股配色：亏损用绿色 */
+  .vc-card[data-tier="loss"] .vc-amount {
+    color:#4ade80;
+    text-shadow:
+      -1px -1px 0 #14532d, 1px -1px 0 #14532d,
+      -1px 1px 0 #064e3b, 1px 1px 0 #064e3b,
+      2px 2px 0 #022c14,
+      0 0 18px rgba(74,222,128,0.7),
       0 6px 12px rgba(0,0,0,0.6);
   }
   .vc-card[data-tier="loss"] .vc-amount-pct,
-  .vc-card[data-tier="loss"] .vc-amount-label { color:#FF6B6B; }
+  .vc-card[data-tier="loss"] .vc-amount-label { color:#4ade80; }
+  /* legendary 盈利红 */
+  .vc-card[data-tier="legendary"] .vc-amount {
+    color:#FFD700;
+    text-shadow:
+      -1px -1px 0 #FFA500, 1px -1px 0 #FFA500,
+      -1px 1px 0 #8B4500, 1px 1px 0 #8B4500,
+      2px 2px 0 #4A2500,
+      0 0 22px rgba(255,215,0,0.85),
+      0 6px 12px rgba(0,0,0,0.6);
+  }
   .vc-card[data-tier="wash"] .vc-amount { color:#E5E7EB; }
   .vc-card[data-tier="wash"] .vc-amount-pct,
   .vc-card[data-tier="wash"] .vc-amount-label { color:#D1D5DB; }
@@ -1391,6 +1429,11 @@
         <div class="vc-amount-label" id="vc-amount-label">少 赚 了</div>
         <div class="vc-amount" id="vc-amount">+$0</div>
         <div class="vc-amount-pct" id="vc-amount-pct">+0%</div>
+        <div class="vc-amount-secondary" id="vc-amount-secondary" style="display:none">
+          <span class="vas-label" id="vas-label">完美逃顶本能赚 🚀</span>
+          <span class="vas-amount" id="vas-amount">+¥0</span>
+          <span class="vas-pct" id="vas-pct">+0%</span>
+        </div>
       </div>
 
       <!-- Stock + dates -->
@@ -2430,10 +2473,10 @@ function tickerEmoji(code){
 
 function populateBgDeco(tier, tickerEmojiChar){
   const decoMap = {
-    legendary: ['👏','🎉','✨','🏆','💫','🥂','👑','💰','🎊','⭐'],
+    legendary: ['🧧','🎉','✨','🏆','💫','🥂','👑','💰','🎊','⭐','🐂','🚀'],
     missed:    ['🥲','😞','💔','🍂','🌧️','😪','😔','💧'], // 遗憾、惆怅
     wash:      ['😶','🤔','🌫','🪨','😐'],
-    loss:      ['🤡','💀','📉','🪦','😵','💩','🚽','😭'],
+    loss:      ['🤡','🥬','🔪','📉','🪦','😵','💩','🚽','😭','🐂','🥬','🔪'], // 韭菜+镰刀
   };
   const items = decoMap[tier] || decoMap.loss;
   const N = tier === 'legendary' ? 16 : 10;
@@ -2538,9 +2581,30 @@ function openShareCard(){
 
   // Amount
   document.getElementById('vc-amount-label').textContent=p.amountLabel;
-  const sign = amt.amount >= 0 ? '+' : '';
-  document.getElementById('vc-amount').textContent = sign + fC(amt.amount, d.currency);
+  document.getElementById('vc-amount').textContent = fC(amt.amount, d.currency);
   document.getElementById('vc-amount-pct').textContent = (amt.pct >= 0 ? '+' : '') + amt.pct.toFixed(2) + '%';
+
+  // Secondary "完美逃顶本能赚" — 强烈对比 让你看清错过了什么
+  const sec = document.getElementById('vc-amount-secondary');
+  const secLabel = document.getElementById('vas-label');
+  const secAmt = document.getElementById('vas-amount');
+  const secPct = document.getElementById('vas-pct');
+  if(p.tier === 'legendary'){
+    // 已经赚到了 不用再扎心
+    sec.style.display = 'none';
+  } else if(p.tier === 'missed'){
+    // 已经赚了一点 但和山顶比差太多 — 主显示是少赚 副显示是实际只赚了
+    sec.style.display = '';
+    secLabel.textContent = '你实际只赚了 🥲';
+    secAmt.textContent = fC(d.actualProfit, d.currency);
+    secPct.textContent = (d.actualPct >= 0 ? '+' : '') + d.actualPct.toFixed(2) + '%';
+  } else {
+    // loss / wash — 主显示是亏损/平 副显示是本可赚
+    sec.style.display = '';
+    secLabel.textContent = '完美逃顶本能赚 🚀';
+    secAmt.textContent = fC(d.profit, d.currency);
+    secPct.textContent = '+' + d.profitPercent.toFixed(2) + '%';
+  }
 
   // Trade info — show Chinese name (big) + ticker pill (small)
   const displayName = lookupChineseName(d.stockCode) || d.stockName || d.stockCode;
@@ -2588,12 +2652,12 @@ function drawMiniChart(canvas, d, tier){
   const toX = i => pad.l + (i/(pts.length-1))*w;
   const toY = p => pad.t + (1 - (p-minP)/(maxP-minP))*h;
 
-  // tier-based colors
+  // tier-based colors — A股红涨绿跌
   const tierColor = {
     legendary:{line:'#FFD700', fill:'rgba(255,215,0,0.25)'},
     missed:{line:'#FFB347', fill:'rgba(255,179,71,0.25)'},
     wash:{line:'#9CA3AF', fill:'rgba(156,163,175,0.2)'},
-    loss:{line:'#FF6B6B', fill:'rgba(255,107,107,0.25)'},
+    loss:{line:'#4ade80', fill:'rgba(74,222,128,0.25)'},
   }[tier] || {line:'#FFD700', fill:'rgba(255,215,0,0.25)'};
 
   // area
@@ -2668,8 +2732,10 @@ async function downloadShareImage(){
 function copyShareText(){
   if(!lastResult)return;
   const d=lastResult; const p=matchPersonality(d); const amt=pickAmount(d, p);
-  const sign = amt.amount >= 0 ? '+' : '';
-  let t=`【${p.name}】${p.sub}\n\n📊 ${d.stockCode} ${d.stockName||''} (${d.market})\n💰 ${p.amountLabel}：${sign}${fC(amt.amount,d.currency)} (${(amt.pct>=0?'+':'')+amt.pct.toFixed(2)}%)\n`;
+  let t=`【${p.name}】${p.sub}\n\n📊 ${d.stockCode} ${d.stockName||''} (${d.market})\n💰 ${p.amountLabel}：${fC(amt.amount,d.currency)} (${(amt.pct>=0?'+':'')+amt.pct.toFixed(2)}%)\n`;
+  if(p.tier !== 'legendary'){
+    t+=`🚀 完美逃顶本能赚：${fC(d.profit,d.currency)} (+${d.profitPercent.toFixed(2)}%)\n`;
+  }
   if(d.hasSell)t+=`\n你的卖出价：${d.currency}${fN(d.sellPrice)}\n最高点价：${d.currency}${fN(d.highPrice)}\n少赚了：${fC(d.missedProfit,d.currency)}\n`;
   t+=`\n${p.tagline}\n\n— 同花损 · 假如那天你没卖 —\n来测测你是哪种韭菜 👇\n𝕏 @0xajc | 📕 小红书:陈锦初Andrew`;
   navigator.clipboard.writeText(t).then(()=>showToast('文案已复制！')).catch(()=>showToast('复制失败'));
