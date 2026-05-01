@@ -772,10 +772,40 @@
     z-index:3;
   }
 
+  /* Meme image background — full cover, sits below content + tint overlay */
+  .vc-bg-meme {
+    position:absolute; inset:0; z-index:0;
+    background-size:cover; background-position:center;
+    pointer-events:none;
+  }
+  /* Tier-colored tint over the meme — keep meme prominent (low alpha) but
+     darken top/bottom so text stays readable */
+  .vc-bg-tint {
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+  }
+  .vc-card[data-tier="loss"] .vc-bg-tint {
+    background:
+      linear-gradient(180deg, rgba(2,26,13,0.75) 0%, rgba(6,78,59,0.15) 25%, rgba(6,78,59,0.15) 70%, rgba(2,44,20,0.85) 100%),
+      linear-gradient(180deg, rgba(20,83,45,0.25) 0%, rgba(20,83,45,0.25) 100%);
+  }
+  .vc-card[data-tier="legendary"] .vc-bg-tint {
+    background:
+      linear-gradient(180deg, rgba(74,0,0,0.75) 0%, rgba(139,0,0,0.15) 25%, rgba(139,0,0,0.15) 70%, rgba(42,0,0,0.85) 100%),
+      linear-gradient(180deg, rgba(200,16,46,0.18) 0%, rgba(200,16,46,0.18) 100%);
+  }
+  .vc-card[data-tier="missed"] .vc-bg-tint {
+    background:
+      linear-gradient(180deg, rgba(45,31,31,0.78) 0%, rgba(74,48,51,0.2) 25%, rgba(74,48,51,0.2) 70%, rgba(26,10,13,0.85) 100%);
+  }
+  .vc-card[data-tier="wash"] .vc-bg-tint {
+    background:
+      linear-gradient(180deg, rgba(26,32,44,0.78) 0%, rgba(74,85,104,0.2) 25%, rgba(74,85,104,0.2) 70%, rgba(26,32,44,0.85) 100%);
+  }
   /* Per-tier decoration: floating background emojis */
   .vc-bg-deco {
-    position:absolute; inset:0; pointer-events:none; z-index:0;
+    position:absolute; inset:0; pointer-events:none; z-index:2;
     overflow:hidden;
+    opacity:0.6;
   }
   .vc-bg-deco span {
     position:absolute; opacity:0.18;
@@ -794,7 +824,7 @@
   .vc-card > .vc-amount-box,
   .vc-card > .vc-trade-info,
   .vc-card > .vc-chart-box,
-  .vc-card > .vc-footer { position:relative; z-index:2; }
+  .vc-card > .vc-footer { position:relative; z-index:3; }
 
   /* HEADER */
   .vc-header {
@@ -1406,6 +1436,10 @@
     <div class="vc-card" id="share-card" data-tier="loss">
       <!-- decorative top stripe -->
       <div class="vc-top-stripe"></div>
+      <!-- meme background (filled per-tier in JS) -->
+      <div class="vc-bg-meme" id="vc-bg-meme"></div>
+      <!-- tier-color tint over meme -->
+      <div class="vc-bg-tint"></div>
       <!-- background decoration (filled per-tier in JS) -->
       <div class="vc-bg-deco" id="vc-bg-deco"></div>
       <!-- Header: brand block (left) + tagline (right) -->
@@ -1469,6 +1503,48 @@
 <script>
 let currentMarket='us', buyMode='shares', selectedStock='', lastResult=null;
 let calculationHistory = JSON.parse(localStorage.getItem('stock-calc-history-v5')||'[]');
+
+// Tier → meme bg image pool. tier 内随机抽一张
+const TIER_MEMES = {
+  legendary: [
+    'memes/legendary/01-leo-cheers.jpg',
+    'memes/legendary/02-laughing-leo.png',
+    'memes/legendary/03-success-kid.jpg',
+    'memes/legendary/04-roll-safe.jpg',
+    'memes/legendary/05-megamind-peek.png',
+  ],
+  missed: [
+    'memes/missed/01-hide-pain-harold.jpg',
+    'memes/missed/02-sad-pablo.jpg',
+    'memes/missed/03-disappointed.jpg',
+    'memes/missed/04-squidward-window.jpg',
+    'memes/missed/05-grant-grave.png',
+  ],
+  wash: [
+    'memes/wash/01-this-is-fine.jpg',
+    'memes/wash/02-sleeping-shaq.jpg',
+    'memes/wash/03-inhaling-seagull.jpg',
+    'memes/wash/04-ancient-aliens.jpg',
+  ],
+  loss: [
+    'memes/loss/01-bike-fall.jpg',
+    'memes/loss/02-clown-makeup.jpg',
+    'memes/loss/03-disaster-girl.jpg',
+    'memes/loss/04-grim-reaper.jpg',
+    'memes/loss/05-captain-now.jpg',
+  ],
+};
+function pickMeme(tier){
+  const pool = TIER_MEMES[tier] || [];
+  if(!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+// Preload memes so html2canvas doesn't capture a blank image on first open
+(function preloadMemes(){
+  for(const arr of Object.values(TIER_MEMES)){
+    for(const src of arr){ const i = new Image(); i.src = src; }
+  }
+})();
 
 // Meme background images
 // CSS gradient backgrounds for share card (no external dependencies)
@@ -2554,6 +2630,10 @@ function openShareCard(){
 
   // Apply tier theme
   document.getElementById('share-card').setAttribute('data-tier', p.tier);
+  // Random meme bg from this tier's pool
+  const memeEl = document.getElementById('vc-bg-meme');
+  const memeSrc = pickMeme(p.tier);
+  memeEl.style.backgroundImage = memeSrc ? `url('${memeSrc}')` : '';
   // Populate per-tier background decoration + ticker watermark
   populateBgDeco(p.tier, tickerEmoji(d.stockCode));
 
